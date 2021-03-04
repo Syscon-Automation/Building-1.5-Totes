@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_EquipCntrl" Id="{62ae5572-d208-4362-be3e-69239aacd7e6}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+=====================================================================
+	Copyright ©  Syscon Automation.  All Rights Reserved.
+	Version 1 Release 1 2019
+	Version 1 Release 2 2020 - Added Initialization for Equipment Label and Index
+=====================================================================
+ 
+This FB monitors Start, Interlock and State inputs and controls the output for a motor or other piece of equipment
+It is configurable. Choose to use the Start conditions, run interlocks, or horn output
+The time the horn sounds and the delay after the horn is sounded are also configurable
+
+*)
+FUNCTION_BLOCK FB_EquipCntrl
+VAR_IN_OUT
+	CFG_EquipIndex		: DINT;	// Index used for local Equipment status array
+	Sts_EquipState		: ST_StateCntrlSts;		// State Status
+END_VAR
+VAR_INPUT
+	In_IntlksOK			: BOOL;		// Input for All Interlocks are Good to Run
+	In_StartCondsOK		: BOOL;		// Input for All Start Conditions Are Good Run
+	In_SimActive		: BOOL;		// Simulation active bit to stop output and send status ignoring feedback (1= Simulation)
+	In_ManHrnTrig		: BOOL;		// Manual bit to sound horn for the horn time/duration 
+	In_EquipFaults		: BOOL;		// Shutdown Fault input
+	In_Init				: BOOL; 
+
+	CFG_UseStrtCnd		: BOOL;		// Bit to use Start conditions (1=use Start conditions)	
+	CFG_UseIntrlks		: BOOL;		// Bit to use Interlocks (1=use interlocks)
+	CFG_UseHrnDly		: BOOL;		// use horn delay before setting equip/motor output
+	CFG_HrnTime			: TIME;		// Time (or duration) for Horn to sound
+	CFG_HrnWaitTime		: TIME;		// Time to delay after horn has sounded
+	CFG_EquipLabel		: STRING[5];	// Label used to identify the equipment
+	CFG_EquipDefState	: E_StateCntrl;	// Default State of Equipment
+	
+	// State Control
+	o_EquipStatePB		: ST_StateCntrlPB;		// Hmi push butons to change states
+	p_EquipStatePB		: ST_StateCntrlPB;		// programming to change states
+	P_EquipReqRun		: BOOL;		// Input to start output if in auto and conditions are met
+		
+END_VAR
+VAR_OUTPUT
+	Out_EquipRun			: BOOL;	// Output for equipment control (1=Run )
+	Out_EquipRunInv			: BOOL;	// Inverse of equipment control output
+	Out_Horn				: BOOL;	// Output for warning horn or beacon if configured (1=Horn/Beacon ON)
+	Sts_EquipIntlksOK		: BOOL;	// Interlock status
+	Sts_EquipStartCondOK	: BOOL;	// Start Conditions status 
+END_VAR
+VAR
+	// State Control
+	fbStateCntrl			: FB_StateCntrl;
+
+	StartCondPass			: BOOL;
+	InterlocksPass			: BOOL;
+	RunApproved				: BOOL;
+	SoundHornTon			: TON;
+	HrnWaitTon				: TON;
+	Horn_Rtrig				: R_TRIG;
+	Horn_Ftrig				: F_TRIG;
+	Horn_Required			: BOOL;
+	HornWaitActive			: BOOL;
+	HornSoundComplete		: BOOL;
+	HornWaitRequired		: BOOL;
+	HornDelaysCompleted		: BOOL;
+	HornDelaysPass			: BOOL;
+	HornOnlyRtrig			: R_TRIG;
+	StateStartingRtrig		: R_TRIG;
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//===Interlocks
+// Check if Conditions are met
+InterlocksPass := (In_IntlksOK AND CFG_UseIntrlks AND (Sts_EquipState.StsAuto)) OR (NOT CFG_UseIntrlks) OR (Sts_EquipState.StsMan);
+
+//===State Control
+fbStateCntrl(
+	CFG_EquipIndex := CFG_EquipIndex,
+	CFG_EquipLabel := CFG_EquipLabel,
+	o_StatePB:= o_EquipStatePB, 
+	p_StatePB:= p_EquipStatePB, 
+	P_ReqRun:= P_EquipReqRun, 
+	IN_Fault:= In_EquipFaults, 
+	IN_Init:= In_Init, 
+	CfgDefState:= CFG_EquipDefState, 
+	Sts_StateCntrl := Sts_EquipState);
+	
+// Check for State Start Up Transition
+StateStartingRtrig(CLK:=Sts_EquipState.StateRunOK);
+
+//Set eguipment approved to Run
+// If it needs to start look at start conditions
+IF NOT RunApproved THEN		
+	StartCondPass := (In_StartCondsOK AND StateStartingRtrig.Q AND CFG_UseStrtCnd AND (Sts_EquipState.StsAuto)) OR (NOT CFG_UseStrtCnd) OR (Sts_EquipState.StsMan);
+	RunApproved := StartCondPass AND InterlocksPass AND Sts_EquipState.StateRunOK;
+// If currently running just look at shutdown conditions
+ELSE		
+	RunApproved := InterlocksPass AND Sts_EquipState.StateRunOK;
+END_IF
+
+// Set up rising trigger for horn
+Horn_Rtrig(CLK:=(RunApproved AND CFG_UseHrnDly));
+IF Horn_Rtrig.Q THEN
+	Horn_Required := TRUE;
+	HornWaitRequired :=TRUE;
+END_IF
+
+HornOnlyRtrig(CLK:=In_ManHrnTrig);
+IF HornOnlyRtrig.Q THEN
+	Horn_Required := TRUE;
+END_IF
+	
+// Horn timers
+SoundHornTon(IN:= Horn_Required , PT:=CFG_HrnTime);
+IF SoundHornTon.Q THEN
+	Horn_Required:= FALSE;
+	IF HornWaitRequired THEN
+		HornWaitActive:= TRUE;	
+	END_IF	
+END_IF
+
+HrnWaitTon(IN:=HornWaitActive, PT:=CFG_HrnWaitTime);
+IF HrnWaitTon.Q THEN
+	HornWaitActive := FALSE;
+	HornWaitRequired := FALSE;
+	HornDelaysCompleted := TRUE;	
+END_IF
+
+// Set up falling trigger to reset horn bits
+Horn_Ftrig(CLK:= RunApproved);
+IF Horn_Ftrig.Q THEN
+	Horn_Required := FALSE;
+	HornWaitRequired := FALSE;
+	HornWaitActive:= FALSE;
+	HornDelaysCompleted := FALSE;
+END_IF
+
+// Set Horn delays
+HornDelaysPass := (HornDelaysCompleted AND CFG_UseHrnDly) OR (NOT CFG_UseHrnDly); 
+
+//Set Equipment Output
+Out_Horn := Horn_Required;
+Out_EquipRun := RunApproved AND HornDelaysPass AND (NOT In_SimActive);
+Out_EquipRunInv := NOT Out_EquipRun;
+
+//Set relevant equipment status
+Sts_EquipIntlksOK := In_IntlksOK;
+Sts_EquipStartCondOK := In_StartCondsOK;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_EquipCntrl">
+      <LineId Id="1139" Count="5" />
+      <LineId Id="1481" Count="0" />
+      <LineId Id="1483" Count="0" />
+      <LineId Id="1482" Count="0" />
+      <LineId Id="1145" Count="6" />
+      <LineId Id="1160" Count="24" />
+      <LineId Id="1186" Count="33" />
+      <LineId Id="1221" Count="0" />
+      <LineId Id="983" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

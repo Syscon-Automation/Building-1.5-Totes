@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="SystemCntrl_Example" Id="{e6077f2f-1c34-4704-9668-ea779496ef37}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SystemCntrl_Example
+VAR
+	dummy_Reset			:	BOOL;
+	dummy_Auto			:	BOOL;
+	dummy_Stop			:	BOOL;
+	Cnvyr_Reset AT %Q*:	BOOL;		// Bit to send to all conveyors to reset faults, safeties and etc
+	Cnvyr_Start AT %Q*:	BOOL;		// Bit to send to all conveyors to transition to AUTO
+	Cnvyr_Stop AT %Q*:	BOOL;		// Bit to send to all conveyors to Stop/transition to manual and stop
+
+	SysStateCntrlSts		: 	ST_EquipmentStatus;	// System State/Control/Status Data
+	SysState				:	FB_SystemCntrl;
+	SysStateCntrl_StatePB		:	ST_StateCntrlPB;
+	SysIntlksAllOk AT %Q*	:	BOOL;	// Bit to show that System interlocks are OK	
+	
+	SysEventsArry: ARRAY [0..15] OF BOOL;
+	SysEventsAllOk AT %Q*: BOOL;	// Bit to show that Syetem events are all OK If system events are needed use event manager FB tie to here
+
+	
+END_VAR
+
+VAR PERSISTENT
+	{attribute 'OPC.UA.DA' := '1'}
+	cfgSysStateIntlksArry: ARRAY [0..15] OF ST_CfgEvents;
+	{attribute 'OPC.UA.DA' := '1'}
+	cfgSysStateEvntsArry: ARRAY [0..15] OF ST_CfgEvents;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Only the Reset function is required in the SystemCntrl Function Block
+SysStateCntrl_StatePB.ResetPB := dummy_Reset; 	// All I/O used for a reset, e.g. HMI, push buttons
+SysStateCntrl_StatePB.AutoPB := dummy_Auto; 	// All I/O used for a Start, e.g. HMI, push buttons
+SysStateCntrl_StatePB.StopPB := dummy_Stop;		// All I/O used for a Stop, e.g. HMI, push buttons
+
+// Set up System Interlocks
+(*
+SysState.In_SystemIntlks.0 := GVL_IO.SystemAirPressure;
+*)
+
+// Setup the InterlockArray since persistent data items cannot by initilaized the same
+// Index 0
+(*
+cfgSysStateIntlksArry[0].Description := 'System Air Pressure';
+cfgSysStateIntlksArry[0].DeviceLabel := 'PS22121';
+cfgSysStateIntlksArry[0].OKState := TRUE;
+*)
+
+// Set up System Events
+(*
+SysState.In_SystemEvents.0 := SystemSafety.Safety_PanelEstop;
+SysState.In_SystemEvents.1 := SystemSafety.Safety_SortArea_PC;
+SysState.In_SystemEvents.2 := SystemSafety.Safety_OCRArea_PC;
+SysState.In_SystemEvents.3 := SystemSafety.OCR_State.OCREstopOK;
+SysState.In_SystemEvents.4 := SystemSafety.OCR_State.OCRDoorOpenOK;
+*)
+// Setup the EventArray since persistent data items cannot by initilaized the same
+// Index 0
+cfgSysStateEvntsArry[0].Description := 'Panel E-Stop';
+cfgSysStateEvntsArry[0].DeviceLabel := 'PB1';
+cfgSysStateEvntsArry[0].OKState := TRUE;
+cfgSysStateEvntsArry[0].StopCode := E_StopCodes.SystemStop;
+// Index 1
+cfgSysStateEvntsArry[1].Description := 'Sort Area Pull Cord';
+cfgSysStateEvntsArry[1].DeviceLabel := 'PC1-2';
+cfgSysStateEvntsArry[1].OKState := TRUE;
+cfgSysStateEvntsArry[1].StopCode := E_StopCodes.SystemStop;
+// Index 2
+cfgSysStateEvntsArry[2].Description := 'OCR Area Pull Cord';
+cfgSysStateEvntsArry[2].DeviceLabel := 'PC3-4';
+cfgSysStateEvntsArry[2].OKState := TRUE;
+cfgSysStateEvntsArry[2].StopCode := E_StopCodes.SystemStop;
+// Index 3
+cfgSysStateEvntsArry[3].Description := 'OCR E-Stop';
+cfgSysStateEvntsArry[3].DeviceLabel := 'OCRE-Stop';
+cfgSysStateEvntsArry[3].OKState := TRUE;
+cfgSysStateEvntsArry[3].StopCode := E_StopCodes.SystemStop;
+// Index 4
+cfgSysStateEvntsArry[4].Description := 'OCR Doop Open';
+cfgSysStateEvntsArry[4].DeviceLabel := 'OCRDoor';
+cfgSysStateEvntsArry[4].OKState := TRUE;
+cfgSysStateEvntsArry[4].StopCode := E_StopCodes.SystemStop;
+
+// Function Call
+SysState(
+	In_p_EquipStatePB:= SysStateCntrl_StatePB, 
+	Cfg_EquipLabel := 'Equip Desc',
+	Cfg_EquipIntlksArry:= cfgSysStateIntlksArry,
+	Cfg_EquipEvntsArry:= cfgSysStateEvntsArry, 
+	Sts_EquipState := SysStateCntrlSts,
+);
+
+SysIntlksAllOk := SysState.Sts_All_Intlks_OK;
+SysEventsAllOk :=  NOT SysState.Sts_FaultActive;
+
+Cnvyr_Reset := SysState.Out_Reset;
+Cnvyr_Start  := SysState.Out_Auto;
+Cnvyr_Stop  := SysState.Out_Stop;]]></ST>
+    </Implementation>
+    <LineIds Name="SystemCntrl_Example">
+      <LineId Id="6" Count="1" />
+      <LineId Id="166" Count="1" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="20" Count="2" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="28" Count="34" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="63" Count="7" />
+      <LineId Id="170" Count="2" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

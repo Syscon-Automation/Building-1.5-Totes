@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="MergeExample" Id="{1686cf88-766d-43c4-833d-9f022878b22a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MergeExample
+VAR CONSTANT
+	// Change this to Match the number of inlets to ther merge, and create one constant per merge
+	MERGEINLETCOUNT				:	DINT := 2;
+END_VAR
+
+VAR PERSISTENT
+	// This array is used by the HMI to configure each merge inlet
+	//	The items in this array can also be configured in the execution portion of the code, as shown in this example
+	MergeTestInletCfgArray		:	ARRAY[1..MERGEINLETCOUNT] OF ST_MergeInletCfg;
+	// This array allows the processing order of the inlets to be customized
+	MergeTestProcessingOrder	:	ARRAY[1..MERGEINLETCOUNT] OF INT;
+END_VAR
+
+VAR
+	// The ignition faceplate expexts the data items associated with this merge to all begin with the name assigned to the FB_MergeX instance
+	MergeTest					:	FB_Merge2;
+	MergeTestInletArray			:	ARRAY[1..MERGEINLETCOUNT] OF ST_MergeInlet;
+	MergeTestInletStsArry		:	ARRAY[1..MERGEINLETCOUNT] OF ST_MergeInletSts;
+	MergeTestWakeTrigArry		:	ARRAY[1..5] OF BOOL;
+	MergeTestSts				:	ST_MergeSts;
+
+	// These data items exist for testing purposes only
+	MergeTestState				:	E_StateCntrl;
+	MergeTestTakeAwayMtrFdbk	:	BOOL;
+	SimActive					:	BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Set-up the Merge Inlets
+// Merge Inlet 1 Configuration
+//	These items can also be configured in the Ignition Faceplate
+//	The time items are REAL data types and are multipled by 1000 so they can have a resolution of 1 ms if desired
+//	The MergeName is a 20 character string
+//	The Use items are booleans and the ON state indicates they will be processed
+MergeTestInletCfgArray[1].Cfg_ClearRunOutTime := 10;
+MergeTestInletCfgArray[1].Cfg_HighTriggerTime := 1;
+MergeTestInletCfgArray[1].Cfg_HiHiClearTime := 20;
+MergeTestInletCfgArray[1].Cfg_HiHiTriggerTime := 5;
+MergeTestInletCfgArray[1].Cfg_MrgReqPrdctWaitTime := 5;
+MergeTestInletCfgArray[1].Cfg_ReleaseCount := 10;
+MergeTestInletCfgArray[1].Cfg_ReleaseCountWaitTime := 2;
+MergeTestInletCfgArray[1].Cfg_MergeName := 'Dock Door 1';
+MergeTestInletCfgArray[1].Cfg_UseHighWaterPE := FALSE;
+MergeTestInletCfgArray[1].Cfg_UseHiHiWaterPE := FALSE;
+MergeTestInletCfgArray[1].Cfg_UseMtrFdBck := FALSE;
+
+// This statement assigns the Persistent Data items to the MergeInletArray configuration item
+//	It allows the configuration items to be persistent, without making the whole array be persistent
+MergeTestInletArray[1].Cfg := MergeTestInletCfgArray[1];
+// Controls the simulation state of the merge inlet
+MergeTestInletArray[1].Ctrl.SimActive := SimActive;
+
+// Merge Inlet 2
+MergeTestInletCfgArray[2].Cfg_ClearRunOutTime := 10;
+MergeTestInletCfgArray[2].Cfg_HighTriggerTime := 1;
+MergeTestInletCfgArray[2].Cfg_HiHiClearTime := 20;
+MergeTestInletCfgArray[2].Cfg_HiHiTriggerTime := 5;
+MergeTestInletCfgArray[2].Cfg_MergeName := 'Dock Door 2';
+MergeTestInletCfgArray[2].Cfg_MrgReqPrdctWaitTime := 5;
+MergeTestInletCfgArray[2].Cfg_ReleaseCount := 10;
+MergeTestInletCfgArray[2].Cfg_ReleaseCountWaitTime := 2;
+MergeTestInletCfgArray[2].Cfg_UseHighWaterPE := FALSE;
+MergeTestInletCfgArray[2].Cfg_UseHiHiWaterPE := FALSE;
+MergeTestInletCfgArray[2].Cfg_UseMtrFdBck := FALSE;
+
+MergeTestInletArray[2].Cfg := MergeTestInletCfgArray[2];
+MergeTestInletArray[2].Ctrl.SimActive := SimActive;
+
+// Execute the Merge Logic
+MergeTest(In_MergeState := MergeTestState
+			, In_MergeInletArry := MergeTestInletArray
+			, In_MergeProcessOrder := MergeTestProcessingOrder
+			, In_MergeTakeAwayMtrFdbk := MergeTestTakeAwayMtrFdbk
+			, In_SimActive := SimActive
+			, In_Init := GVL_IO.INIT
+			, In_MergeWakeTrigArry := MergeTestWakeTrigArry
+			, Cfg_ClearTakeAwayTime := 10
+			, Cfg_MergeName := 'Test'
+			, Sts_MergeSts => MergeTestSts
+			, Sts_MergeInletStsArry => MergeTestInletStsArry);
+]]></ST>
+    </Implementation>
+    <LineIds Name="MergeExample">
+      <LineId Id="33" Count="1" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="35" Count="3" />
+      <LineId Id="40" Count="2" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="43" Count="2" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="48" Count="30" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

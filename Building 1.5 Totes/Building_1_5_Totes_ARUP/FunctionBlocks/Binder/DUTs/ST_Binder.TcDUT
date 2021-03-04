@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_Binder" Id="{1914bf23-7c15-4bb4-872a-03f65b6603e9}">
+    <Declaration><![CDATA[TYPE ST_Binder :
+{attribute 'OPC.UA.DA' := '1'}
+STRUCT
+	State		:	ST_BinderState;		// State of the Binder
+	FromBinder	:	ST_FromBinder;		// Data Recevied from the Binder
+	ToBinder	:	ST_ToBinder;		// Data Sent to the Binder
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

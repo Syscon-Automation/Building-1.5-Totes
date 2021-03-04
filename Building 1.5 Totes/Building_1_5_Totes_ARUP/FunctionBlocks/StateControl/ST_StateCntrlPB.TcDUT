@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_StateCntrlPB" Id="{0d73025d-0301-4ae3-950c-10c0a3137f13}">
+    <Declaration><![CDATA[TYPE ST_StateCntrlPB :
+STRUCT
+	OfflinePB:		BOOL;	// State control, take related equipment offline		
+	AutoPB:			BOOL;	// State control, put related equipment into Automatic operation mode
+	ManPB:			BOOL;	// State control, put related equipment into Maunual operation mode
+	StopPB: 		BOOL;	// State control, Stop equipment, in manual, execute stop command, in auto, move equipment to manual and stop equipment
+	ResetPB:		BOOL;	// State control, Reset any faults/warnings associated with the equipment
+	ManMotorRunPB:	BOOL;	// State control, manually run motor 
+	ManExtendPB:	BOOL;	// State control, manually execute actuator extend
+	ManRetractPB:	BOOL;	// State control, manually execute actuator retract
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

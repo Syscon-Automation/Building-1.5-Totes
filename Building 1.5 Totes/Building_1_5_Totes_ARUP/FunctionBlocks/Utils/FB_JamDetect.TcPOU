@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_JamDetect" Id="{25129f8a-700b-45bd-98e0-3a5feef9be4d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_JamDetect
+VAR_INPUT
+	In_PE:	BOOL;		// Photo Eye Input
+	In_Status:	BOOL;		// Status to determine if Timer should run (like running status or State) (1=Watch for Jams)
+	CFG_PEOKState:	BOOL;		// Photo OK State ( State of Photo Eye for OK or Not blocked State State (1 or 0))
+	JamDetTime: TIME;		// Time to wait before sending Jam detected Output
+END_VAR
+VAR_OUTPUT
+	JamDetected:	BOOL;		// Out for Jam detected
+END_VAR
+VAR
+	PhotoEyeBlocked: BOOL;
+	JamTimer: TON;
+	JamWatchEnable: BOOL;
+	PE_ClearTrig: F_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[PhotoEyeBlocked := In_PE XOR CFG_PEOKState;
+JamWatchEnable := In_Status AND PhotoEyeBlocked;
+
+JamTimer(IN:= JamWatchEnable, PT:= JamDetTime , Q=>  , ET=> );
+
+IF JamTimer.Q THEN
+	JamDetected := TRUE;
+END_IF
+
+PE_ClearTrig(CLK:= PhotoEyeBlocked);
+
+IF PE_ClearTrig.Q AND JamDetected THEN
+	JamDetected := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_JamDetect">
+      <LineId Id="9" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="50" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_UpdateLog" Id="{49a89fef-0b4a-49bc-9337-3f6930e5f4c1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_UpdateLog
+VAR CONSTANT
+	sizeofLog : INT := 100;
+END_VAR
+VAR_INPUT
+	Status : E_StatusCode;
+	ItemID : DINT;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	StatusDescriptions :  ARRAY[0..100] OF WSTRING;
+	StatusLog : ARRAY[0..sizeofLog] OF ST_LogMsg;
+	GetTime : GETSYSTEMTIME;
+	PLCTime : T_FILETIME;
+	Time_String : STRING(24);
+	LogIndex : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*	No_Status				:= 0,
+	OK						:= 1,
+	Stopped					:= 2,
+	Faulted					:= 3,	
+	UnknownError	 		:= 9,	*)
+StatusDescriptions[E_StatusCode.No_Status] 				:= "No_Status - This is the default status";
+StatusDescriptions[E_StatusCode.OK] 						:= "OK - The system is OK";
+StatusDescriptions[E_StatusCode.Stopped] 					:= "Stopped - The system is stopped";
+StatusDescriptions[E_StatusCode.Faulted]					:= "Faulted - The system is faulted";
+StatusDescriptions[E_StatusCode.UnknownError] 				:= "UnknownError - There is an unknown error with the system";
+
+(*	NotInSorter				:= 20,	
+	UpdateRequested			:= 21,
+	QueryNeeded				:= 22,
+	UpdateNeeded 			:= 23,
+	UpdateReceived 			:= 24,
+	ReqNotReceived			:= 25,
+	ItemNotUpdated			:= 26,
+	UnidentifiedItem		:= 27,
+	ItemNotFound			:= 28,
+	Sorter_UnknownError 	:= 29,
+	Assign_Accepted			:= 30,
+	Assign_Full				:= 31,
+	Assign_NotFound			:= 32,
+	Assign_NotInducted		:= 33, *)
+StatusDescriptions[E_StatusCode.NotInSorter] 				:= "NotInSorter - This item is Not in the Sorter";
+StatusDescriptions[E_StatusCode.UpdateRequested] 			:= "UpdateRequested - This item has requested an update";
+StatusDescriptions[E_StatusCode.QueryNeeded] 				:= "QueryNeeded - This item requires an query";
+StatusDescriptions[E_StatusCode.UpdateNeeded] 				:= "UpdateNeeded - This item requires an update";
+StatusDescriptions[E_StatusCode.UpdateReceived] 			:= "UpdateReceived - This item received an update";
+StatusDescriptions[E_StatusCode.ReqNotReceived]			:= "ReqNotReceived - This item never received an update. Make the buffer bigger?";
+StatusDescriptions[E_StatusCode.ItemNotUpdated] 			:= "ItemNotUpdated - Item left sorter before receiving information update";
+StatusDescriptions[E_StatusCode.UnidentifiedItem] 			:= "UnidentifiedItem - There might be an item in the sorter that is not identified";
+StatusDescriptions[E_StatusCode.ItemNotFound] 				:= "ItenNotFound - Item not found on the Sorter";
+StatusDescriptions[E_StatusCode.Sorter_UnknownError] 		:= "Sorter_UnknownError - Something happened to an item while in the sorter";
+StatusDescriptions[E_StatusCode.Assign_Accepted] 			:= "Assign_Accepted - Destination Assignment Accepted";
+StatusDescriptions[E_StatusCode.Assign_Full] 				:= "Assign_Full - Destination Assignment Unavailable, full, offline, or faulted";
+StatusDescriptions[E_StatusCode.Assign_NotFound] 			:= "Assign_NotFound - Assignment Failed, Item not Found";
+StatusDescriptions[E_StatusCode.Assign_NotInducted] 		:= "Assign_NotInducted - Item not inducted before new item detected";
+
+(*	In_Sorter 				:= 41,
+	Diverting 				:= 42,
+	Divert_Success 			:= 43,
+	Divert_Full				:= 44,
+	Divert_Offline			:= 45,
+	Divert_Missed 			:= 46,
+	Divert_Failed 			:= 47,
+	Divert_NotInducted		:= 48,
+	Divert_UnknownError 	:= 49, *)
+StatusDescriptions[E_StatusCode.In_Sorter] 				:= "In_Sorter - This item is in the sorter";
+StatusDescriptions[E_StatusCode.Diverting] 				:= "Diverting - This item is diverting";
+StatusDescriptions[E_StatusCode.Divert_Success] 			:= "Divert_Success - This item successfully diverted";
+StatusDescriptions[E_StatusCode.Divert_Full] 				:= "Divert_Full - Assigned Divert Lane Full";
+StatusDescriptions[E_StatusCode.Divert_Offline] 			:= "Divert_Offline - Assigned Divert Lane Offline";
+StatusDescriptions[E_StatusCode.Divert_Missed] 			:= "Divert_Missed - This item missed its divert";
+StatusDescriptions[E_StatusCode.Divert_Recirculated] 			:= "Divert_Recirculated - This item was Recirculated";
+StatusDescriptions[E_StatusCode.Divert_NotInducted] 		:= "Divert_NotInducted - Item not inducted before new item detected";
+StatusDescriptions[E_StatusCode.Divert_UnknownError] 		:= "Divert_UnknownError - Something happened to this item while diverting";
+
+(*	In_Transfer 			:= 61,
+	Transferring 			:= 62,
+	Tranfer_Success	 		:= 63,
+	Transfer_Missed 		:= 64,
+	Transfer_Failed 		:= 65,	
+	Transfer_UnknownError 	:= 69 *)
+StatusDescriptions[E_StatusCode.In_Transfer] 				:= "In_Transfer - This item is in the transfer area";
+StatusDescriptions[E_StatusCode.Transferring] 				:= "Transferring - This item is transferring";
+StatusDescriptions[E_StatusCode.Tranfer_Success] 			:= "Tranfer_Success - This item successfully transferred";
+StatusDescriptions[E_StatusCode.Transfer_Missed] 			:= "Transfer_Missed - This item missed its transfer";
+StatusDescriptions[E_StatusCode.Transfer_Failed] 			:= "Transfer_Failed - This item failed to transfer";
+StatusDescriptions[E_StatusCode.Transfer_UnknownError] 	:= "Transfer_UnknownError - Something happened to this item while transferring";
+
+
+FOR LogIndex := sizeofLog TO 1 BY -1 DO
+		StatusLog[Logindex] := StatusLog[LogIndex-1];
+END_FOR
+
+GetTime(timeLoDW=>PLCTime.dwLowDateTime, timeHiDW=>PLCTime.dwHighDateTime);
+
+StatusLog[0].DateandTime := SystemTIME_TO_STRING(FILETIME_TO_SYSTEMTIME(PLCTime));
+StatusLog[0].ItemID := ItemID;
+StatusLog[0].Status := Status;
+StatusLog[0].StatusDescription := StatusDescriptions[Status];
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_UpdateLog">
+      <LineId Id="259" Count="82" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

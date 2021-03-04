@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_AlrtStrtDelay" Id="{8000349b-def6-41a1-b005-84149405a050}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+Function block to sound an Alert or Horn while delaying the start up of a piece of equipment
+Can be controlled by a start and stop pulse In_StrtPulse/In_StpPulse Or by a holding the run variable In_Run TRUE.
+The delay times are configured by CFG_AlertTime and CFG_WaitTime
+The delay can be bypassed by In_BypssDelay.
+If the run signal is True or the Start Pulse is triggered the Alert is sounded for the Alert time.
+After Alert time is elapsed the alert is set to False and the wait time is then started
+at the completion of the wait time the output is set to TRUE and the Out_Pulse is held true for one scan
+If the In_BypssDelay input is true then the output is set to true imediately with the run signal or start pulse.
+The alert can be fired manually (without affecting the delays) at anytime using the In_ManTstTrig input.
+*)
+FUNCTION_BLOCK FB_AlrtStrtDelay
+VAR_INPUT
+	In_Run:	BOOL;				// Run signal that has to be held on to operate delay
+	In_StrtPulse :	BOOL;		// Pulse or Triger to Start Delay
+	In_StpPulse :	BOOL;		// Pulse or Triger to Stop Delay
+	CFG_AlertTime:	TIME;		// Time (or duration) for the alert or Horn to sound
+	CFG_WaitTime:	TIME;		// Time to delay after alert or horn has sounded
+	CFG_PulseTime:	TIME;		// Time to pulse the output signal
+	In_ManTstTrig:	BOOL;		// Manual bit to alert or sound horn for the time/duration 
+	In_BypssDelay:	BOOL;		// Input to disable and bypass alert or horn delay
+END_VAR
+VAR_OUTPUT
+	Out:	BOOL;		// Output that is delayed by the horn timers.  Latched On while Run is True Or if RUN is FALSE then until Stop Pulse.
+	Out_Pulse:	BOOL;		// Output that is delayed by the horn timers.  Pulsed for one scan
+	Out_Timed:	BOOL;		// Output that is delayed by the horn timers.  Pulsed for configurable amount of time
+	Out_Alert:	BOOL;		// Output for the ALert or Horn
+	Sts_DelayActive:	BOOL; // Status output to show when output is actively being delayed
+END_VAR
+VAR
+	AlertRequired: BOOL := FALSE;
+	WaitRequired: BOOL := FALSE;
+	AlertTon: TON;
+	WaitActive: BOOL := FALSE;
+	WaitTon: TON;
+	DelayCompleted: BOOL := FALSE;
+	DelayComplete: BOOL := FALSE;
+	StartTrig: R_TRIG;
+	ManTrig: R_TRIG;
+	StopTrig: F_TRIG;
+	OutTrig: R_TRIG;
+	OutTrigTOF: TOF; // Pulse the Start Trigger for a set period of time
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Start Alert or Horn
+StartTrig(CLK:= In_Run OR In_StrtPulse AND NOT In_BypssDelay);
+IF StartTrig.Q THEN
+	AlertRequired := TRUE;
+	WaitRequired :=TRUE;
+	Sts_DelayActive := TRUE;
+END_IF
+
+ManTrig(CLK:= In_ManTstTrig);
+IF ManTrig.Q THEN
+	AlertRequired := TRUE;
+	WaitRequired :=FALSE;
+END_IF
+
+// Sound horn for timer
+AlertTon(IN:= AlertRequired , PT:=CFG_AlertTime);
+
+IF AlertTon.Q THEN
+	AlertRequired:= FALSE;
+	IF WaitRequired THEN
+		WaitActive:= TRUE;
+		DelayComplete := FALSE;	
+	ELSE
+		WaitActive := FALSE;
+		WaitRequired := FALSE;
+		Sts_DelayActive := FALSE;
+		DelayComplete := TRUE;	
+	END_IF	
+END_IF
+
+WaitTon(IN:=WaitActive, PT:=CFG_WaitTime);
+IF WaitTon.Q THEN
+	WaitActive := FALSE;
+	WaitRequired := FALSE;
+	Sts_DelayActive := FALSE;
+	DelayComplete := TRUE;
+END_IF
+
+// Reset on stop
+StopTrig(CLK:= In_Run OR In_StpPulse);
+IF StopTrig.Q THEN
+	AlertRequired:= FALSE;
+	WaitRequired := FALSE;
+	WaitActive := FALSE;
+	Sts_DelayActive := FALSE;
+	DelayComplete := FALSE;
+END_IF
+		
+//Set Output
+Out_Alert := AlertRequired;
+Out := DelayComplete OR (In_BypssDelay AND In_Run);
+OutTrig(CLK:= OUT, Q=> Out_Pulse);
+
+// Timed Output
+OutTrigTOF(IN := OutTrig.Q, PT := CFG_PulseTime);
+Out_Timed := OutTrigTOF.Q;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_AlrtStrtDelay">
+      <LineId Id="461" Count="54" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_EventSts" Id="{8c862fae-c0e8-4dbd-8e17-78311be6c665}">
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_EventSts :
+STRUCT
+	Description:	STRING(30);		// The Text Description of the Interlock/Event assigned to the corresponding Input
+	DeviceLabel:	STRING(15);		// The Text Description or Label of the Interlock/Event Device assigned to the corresponding Input
+	Status:	BOOL;		// Event status 
+	StatusTxt: STRING(10);
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

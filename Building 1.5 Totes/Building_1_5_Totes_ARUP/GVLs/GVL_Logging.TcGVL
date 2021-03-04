@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <GVL Name="GVL_Logging" Id="{21c578c0-5373-4478-a2a3-aab1d8780efe}">
+    <Declaration><![CDATA[// Comment out attribute to allow direct access to this variable
+// {attribute 'qualified_only'} 
+VAR_GLOBAL PERSISTENT
+	nMessageLogEnable:			UDINT;		// 32 separate log events to enable
+	nBarcodeLogEnable:			UDINT;		// 32 separate log events to enable
+	nServerLogEnable:			UDINT;		// 32 separate log events to enable, default to enabled, turn off 
+	nItemBufferLogEnable:		UDINT;		// 32 separate log events to enable	
+	nDivertLogEnable:			UDINT;		// 32 separate log events to enable	
+	nSorterLogEnable:			UDINT;		// 32 separate log events to enable	
+	nSortBufferLogEnable:		UDINT;		// 32 separate log events to enable	
+END_VAR
+
+VAR_GLOBAL CONSTANT
+	// To enable a specific log, turn ON the bit associate with that log type in the Enable UDINT 
+	// The constants below correspond to the bit number within the UDINT
+
+	// Use E_MessageIds as constants for message logging
+	// Barcode Logging
+	TRIGGER_PE		:	INT := 0;
+	TRIGGER			:	INT := 1;
+	BCR_S2140_01_LOG	:	INT := 2;
+	BCR_S2141_01_LOG	:	INT := 3;
+	BCR_S2150_01_LOG	:	INT := 4;
+	BCR_S3080_01_LOG	:	INT := 5;
+
+	// Barcode Logging
+	BUFFER_LOG	:	INT := 0;	
+	// Item Buffer Logging
+	ARRIVALS		:	INT := 0;
+	TRANSPORT		: 	INT := 1;
+	UPDATE			: 	INT := 2;
+	// nDivertLogEnable constants
+	// Increase for additional Diverts
+	DIVERT_DECISION	:	INT := 0;
+	DIVERT1			:	INT := 1;
+	DIVERT2			:	INT := 2;
+	DIVERT3			:	INT := 3;
+	DIVERT4			:	INT := 4;
+	DIVERT5			:	INT := 5;
+	DIVERT6			:	INT := 6;
+	DIVERT7			:	INT := 7;
+	DIVERT8			:	INT := 8;
+	CONFIRM1		:	INT := 16;
+	CONFIRM2		:	INT := 17;
+	CONFIRM3		:	INT := 18;
+	CONFIRM4		:	INT := 19;
+	CONFIRM5		:	INT := 20;
+	CONFIRM6		:	INT := 21;
+	CONFIRM7		:	INT := 22;
+	CONFIRM8		:	INT := 23;
+	// nSorterLogEnable constants
+	SORTER_INDUCT		:	INT	:= 0;
+	SORTER_INDUCT_PE	:	INT	:= 1;
+	SORTER_DIVERTS		:	INT	:= 2;
+	SORTER_CONFIRMS		:	INT	:= 3;
+	SORTER_DUMP			:	INT	:= 4;
+	SORTER_TEMPID		:	INT	:= 5;
+	SORTER_HEIGHT_PE	:	INT := 6;
+	// Sorter buffer constants
+	BUFFER_ARRIVAL			:	INT := 0;
+	BUFFER_MISSINDUCT		: 	INT := 1;
+	BUFFER_TEMPINDUCT		:	INT := 2;
+	BUFFER_INDUCT			:	INT := 3;
+	BUFFER_LATEINDUCT		:	INT := 4;
+	BUFFER_REPLACEINDUCT	:	INT := 5;
+	BUFFER_UPDATEINDUCT		:	INT := 6;
+	BUFFER_UPDATEDEST		:	INT := 7;
+	BUFFER_DUMP				:	INT := 8;
+	BUFFER_UNASSIGNED		:	INT := 9;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

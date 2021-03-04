@@ -1,0 +1,249 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_StateCntrl" Id="{22994d4b-abc4-4889-a4cb-26a64ffc9967}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_StateCntrl
+(* ==================================================================
+	Copyright ©  Syscon Automation.  All Rights Reserved.
+	Based on Syscon ConveyorStatus V2 release 1
+	Version 1 Release 1 2019
+	Version 1 Release 2 2020 - Added Initialization for Equipment Label and Index
+	Version 1 Release 3 2020 - Modified for Updated ST_StateCntrlPB and ST_StateCntrlSts structures
+=====================================================================
+	This function block will control any object’s state based on inputs. 
+		The E inputs will change the state anytime they are activated
+		The O inputs are conditional based on the current state (eventually these should also be tied to login status) 
+		Outputs the current State with troubleshooting status outputs.  
+		See Syscon FB Description for more details
+---------------------------------------------------------------------
+*)
+VAR_IN_OUT
+	CFG_EquipIndex: 	DINT;				// Index used for local Equipment status array
+	Sts_StateCntrl:		ST_StateCntrlSts;	// State Status
+END_VAR
+VAR_INPUT
+	o_StatePB:			ST_StateCntrlPB;	// HMI/manual push buttons to change states
+	p_StatePB:			ST_StateCntrlPB;	// programming to change states
+	P_ReqRun:			BOOL;				// Input to allow output if in auto and conditions are met
+	IN_Fault:			BOOL;				// Fault input
+	IN_Init:			BOOL;				// initialization input
+	CfgDefState:		E_StateCntrl;
+	CFG_EquipLabel:		STRING[5];			// Label used to identify the equipment
+END_VAR
+
+VAR_OUTPUT
+	Auto: 				BOOL;
+	Manual: 			BOOL;
+	Faulted: 			BOOL;
+//	Sts_StateCntrl:	ST_StateCntrlSts;
+END_VAR
+
+VAR
+	Warning_ftrig: 		F_TRIG;
+	CrntStateold: 		E_StateCntrl;
+	sTempLabel: 		STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Set Up State on Initialization
+IF IN_Init THEN
+	Sts_StateCntrl.CrntState := CfgDefState;
+	(*
+		Increment the CFG_EquipIndex
+		If the value is different than the currently stored value, update the local index
+	*)
+	IF Sts_StateCntrl.Index = 0 THEN
+		CFG_EquipIndex := CFG_EquipIndex + 1;
+		Sts_StateCntrl.Index := CFG_EquipIndex;
+	END_IF
+	
+	//	Test the CFG_EquipLabel for a value
+	IF CFG_EquipLabel = '' THEN
+		sTempLabel := F_PaddNumber(CFG_EquipIndex, 4, '0',0);
+		CFG_EquipLabel := CONCAT('E',sTempLabel);
+	END_IF
+	// Assign the Equipment Label value to the Status Label item
+	Sts_StateCntrl.Label := CFG_EquipLabel;
+ELSE
+	// Track State Change
+	IF Sts_StateCntrl.StateChanged THEN
+		Sts_StateCntrl.LstState := CrntStateold;
+		CrntStateold := Sts_StateCntrl.CrntState;
+		Sts_StateCntrl.StateChanged := FALSE;
+	END_IF
+	
+	//Clear One Scan Received Notices
+	IF Sts_StateCntrl.Received.OfflinePB THEN Sts_StateCntrl.Received.OfflinePB := FALSE; END_IF
+	IF Sts_StateCntrl.Received.AutoPB THEN Sts_StateCntrl.Received.AutoPB := FALSE; END_IF
+	IF Sts_StateCntrl.Received.ManPB THEN Sts_StateCntrl.Received.ManPB := FALSE; END_IF
+	IF Sts_StateCntrl.Received.StopPB THEN Sts_StateCntrl.Received.StopPB := FALSE; END_IF
+	IF Sts_StateCntrl.Received.ResetPB THEN Sts_StateCntrl.Received.ResetPB := FALSE; END_IF
+	IF Sts_StateCntrl.Received.ManMotorRunPB THEN Sts_StateCntrl.Received.ManMotorRunPB := FALSE; END_IF
+	IF Sts_StateCntrl.Received.ManExtendPB THEN Sts_StateCntrl.Received.ManExtendPB := FALSE; END_IF
+	IF Sts_StateCntrl.Received.ManRetractPB THEN Sts_StateCntrl.Received.ManRetractPB := FALSE; END_IF
+	IF Sts_StateCntrl.RcvdFault THEN Sts_StateCntrl.RcvdFault := FALSE; END_IF
+	
+	
+	// Choose logic based on current state
+	CASE Sts_StateCntrl.CrntState OF
+		//Offline  
+		E_StateCntrl.stOffline:
+			Sts_StateCntrl.CrntStateTxt := 'Offline';
+			Sts_StateCntrl.StateRunOK := FALSE;
+			
+			IF o_StatePB.ManPB THEN
+				Sts_StateCntrl.Received.ManPB := TRUE; 
+				Sts_StateCntrl.CrntState := E_StateCntrl.stManual;	
+			END_IF
+				
+		// Auto, transition to manual/faulted are the only allowable state transitions 
+		E_StateCntrl.stAuto:
+			Sts_StateCntrl.CrntStateTxt := 'Auto';
+			IF IN_Fault THEN
+				Sts_StateCntrl.RcvdFault := TRUE;
+				Sts_StateCntrl.CrntState := E_StateCntrl.stFaulted;
+			ELSIF o_StatePB.ManPB 
+			   OR p_StatePB.ManPB 
+			   OR o_StatePB.StopPB 
+			   OR p_StatePB.StopPB 
+			   THEN
+				IF o_StatePB.ManPB 
+				   OR p_StatePB.ManPB
+				   THEN
+					Sts_StateCntrl.Received.ManPB := TRUE; 
+				END_IF
+				IF o_StatePB.StopPB 
+				   OR p_StatePB.StopPB
+				   THEN
+					Sts_StateCntrl.Received.StopPB := TRUE; 
+				END_IF
+				Sts_StateCntrl.StateRunOK := FALSE;
+				Sts_StateCntrl.CrntState := E_StateCntrl.stManual;				
+			END_IF
+			
+			IF P_ReqRun AND (Sts_StateCntrl.CrntState = E_StateCntrl.stAuto )THEN
+				Sts_StateCntrl.StateRunOK := TRUE;
+			ELSE 
+				Sts_StateCntrl.StateRunOK := FALSE;
+			END_IF
+			
+		//Manual,transition to auto/offline/faulted are the only allowable state transitions
+		E_StateCntrl.stManual:
+		Sts_StateCntrl.CrntStateTxt := 'Manual';
+			IF IN_Fault THEN
+				Sts_StateCntrl.RcvdFault := TRUE;
+				Sts_StateCntrl.CrntState := E_StateCntrl.stFaulted;
+			ELSIF o_StatePB.OfflinePB OR p_StatePB.OfflinePB THEN
+				Sts_StateCntrl.Received.OfflinePB := TRUE; 
+				Sts_StateCntrl.CrntState := E_StateCntrl.stOffline;
+			ELSIF o_StatePB.AutoPB OR p_StatePB.AutoPB  THEN 
+				Sts_StateCntrl.Received.AutoPB := TRUE;
+				Sts_StateCntrl.CrntState := E_StateCntrl.stAuto;					
+			END_IF
+			
+			IF o_StatePB.StopPB THEN
+				Sts_StateCntrl.Received.StopPB :=TRUE;
+				Sts_StateCntrl.StateRunOK := FALSE;
+			ELSIF o_StatePB.ManMotorRunPB
+			   OR o_StatePB.ManExtendPB
+			   OR o_StatePB.ManRetractPB
+			   THEN
+				// Motor Run
+				IF o_StatePB.ManMotorRunPB
+				   THEN
+						Sts_StateCntrl.Received.ManMotorRunPB := TRUE;
+				END_IF
+				// Solenoid Extend
+				IF o_StatePB.ManExtendPB
+				   THEN
+						Sts_StateCntrl.Received.ManExtendPB := TRUE;
+				END_IF
+				// Solenoid Retract
+				IF o_StatePB.ManRetractPB
+				   THEN
+						Sts_StateCntrl.Received.ManRetractPB := TRUE;
+				END_IF
+				Sts_StateCntrl.StateRunOK := TRUE;
+			END_IF
+			
+		// Faulted - Can initiate a reset or transition to Offline
+		E_StateCntrl.stFaulted:
+			Sts_StateCntrl.CrntStateTxt := 'Faulted';
+			Sts_StateCntrl.StateRunOK := FALSE;
+			
+			IF o_StatePB.ResetPB OR p_StatePB.ResetPB THEN
+				Sts_StateCntrl.Received.ResetPB := TRUE;
+				Sts_StateCntrl.CrntState := CfgDefState;
+			ELSIF o_StatePB.OfflinePB THEN
+				Sts_StateCntrl.Received.ResetPB := TRUE; 
+				Sts_StateCntrl.CrntState := E_StateCntrl.stOffline;
+			END_IF
+	END_CASE
+	
+			
+	// Watch If State Changed
+	IF CrntStateold <> Sts_StateCntrl.CrntState AND NOT Sts_StateCntrl.StateChanged THEN
+		Sts_StateCntrl.StateChanged := TRUE;
+	END_IF
+	
+	//Show Testing Outputs
+	Sts_StateCntrl.StsOffline := Sts_StateCntrl.CrntState = E_StateCntrl.stOffline;
+	Sts_StateCntrl.StsAuto := Sts_StateCntrl.CrntState = E_StateCntrl.stAuto;
+	Sts_StateCntrl.StsMan := Sts_StateCntrl.CrntState = E_StateCntrl.stManual;
+	Sts_StateCntrl.StsFaulted := Sts_StateCntrl.CrntState = E_StateCntrl.stFaulted;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_StateCntrl">
+      <LineId Id="2253" Count="0" />
+      <LineId Id="2459" Count="0" />
+      <LineId Id="2255" Count="0" />
+      <LineId Id="2601" Count="8" />
+      <LineId Id="2611" Count="5" />
+      <LineId Id="2600" Count="0" />
+      <LineId Id="2256" Count="11" />
+      <LineId Id="2718" Count="0" />
+      <LineId Id="2269" Count="1" />
+      <LineId Id="2738" Count="1" />
+      <LineId Id="2676" Count="0" />
+      <LineId Id="2272" Count="5" />
+      <LineId Id="2526" Count="0" />
+      <LineId Id="2492" Count="1" />
+      <LineId Id="2280" Count="0" />
+      <LineId Id="2285" Count="3" />
+      <LineId Id="2290" Count="1" />
+      <LineId Id="2527" Count="0" />
+      <LineId Id="2292" Count="2" />
+      <LineId Id="2301" Count="0" />
+      <LineId Id="2658" Count="0" />
+      <LineId Id="2665" Count="1" />
+      <LineId Id="2659" Count="0" />
+      <LineId Id="2662" Count="0" />
+      <LineId Id="2667" Count="0" />
+      <LineId Id="2672" Count="0" />
+      <LineId Id="2668" Count="0" />
+      <LineId Id="2664" Count="0" />
+      <LineId Id="2491" Count="0" />
+      <LineId Id="2673" Count="2" />
+      <LineId Id="2671" Count="0" />
+      <LineId Id="2669" Count="0" />
+      <LineId Id="2303" Count="0" />
+      <LineId Id="2307" Count="9" />
+      <LineId Id="2528" Count="0" />
+      <LineId Id="2317" Count="5" />
+      <LineId Id="2326" Count="8" />
+      <LineId Id="2720" Count="1" />
+      <LineId Id="2719" Count="0" />
+      <LineId Id="2735" Count="0" />
+      <LineId Id="2722" Count="0" />
+      <LineId Id="2725" Count="1" />
+      <LineId Id="2724" Count="0" />
+      <LineId Id="2736" Count="0" />
+      <LineId Id="2727" Count="3" />
+      <LineId Id="2737" Count="0" />
+      <LineId Id="2731" Count="3" />
+      <LineId Id="2336" Count="4" />
+      <LineId Id="2529" Count="0" />
+      <LineId Id="2341" Count="7" />
+      <LineId Id="2352" Count="14" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

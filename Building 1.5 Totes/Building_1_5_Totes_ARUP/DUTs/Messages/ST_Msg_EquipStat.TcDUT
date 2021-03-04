@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_Msg_EquipStat" Id="{14632fb1-0a8c-4171-a65d-689223480335}">
+    <Declaration><![CDATA[TYPE ST_Msg_EquipStat :
+STRUCT
+	DeviceID:	STRING(5);
+	Status:	INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

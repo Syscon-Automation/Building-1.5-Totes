@@ -1,0 +1,361 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="Photoeyes" Id="{c8d506e3-bd7f-462d-8ae8-6a3b1568d47d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Photoeyes
+VAR
+	DebounceOnTime:	TIME := T#500MS;     // Default Value
+	DebounceOffTime:	TIME := T#500MS;     // Default Value
+	JamDetectTime:	TIME := T#5S;     // Default Value
+//----------------------------------------Photoeyes-----------------------------------------	
+PE_11241   : FB_PhotoEye;  //P2140 FULL PEPHOTOEYE
+PE_10081   : FB_PhotoEye;  //S2140-01 TRIGGER PE & PINSTOP CLEARPHOTOEYE
+PE_10091   : FB_PhotoEye;  //P2140 EXIT PEPHOTOEYE
+PE_10151   : FB_PhotoEye;  //P2140 JAM PEPHOTOEYE
+PE_10291   : FB_PhotoEye;  //P2135 EXIT PEPHOTOEYE
+PE_10302   : FB_PhotoEye;  //S2141-01 TRIGGER PEPHOTOEYE
+PE_11191   : FB_PhotoEye;  //P2140 SINGULATION GRIPPER PEPHOTOEYE
+PE_11221   : FB_PhotoEye;  //P2140 SINGULATION GRIPPER PEPHOTOEYE
+PE_12091   : FB_PhotoEye;  //P3085 EXIT PEPHOTOEYE
+PE_12121   : FB_PhotoEye;  //P2130 FIRE DOOR PEPHOTOEYE
+PE_12171   : FB_PhotoEye;  //P2130 DISCHARGE PEPHOTOEYE
+PE_12181   : FB_PhotoEye;  //P3095 EXIT PEPHOTOEYE
+PE_12271   : FB_PhotoEye;  //P3090 EXIT PEPHOTOEYE
+PE_2101   : FB_PhotoEye;  //P2150 SINGULATION GRIPPER PEPHOTOEYE
+PE_2131   : FB_PhotoEye;  //P2150 INDUCT PE SORTER PHOTOEYE
+PE_2201   : FB_PhotoEye;  //P2146 FULL PEPHOTOEYE
+PE_2231   : FB_PhotoEye;  //P2145 EXIT PEPHOTOEYE
+PE_2301   : FB_PhotoEye;  //S2151 TRIGGER PEPHOTOEYE
+PE_2331   : FB_PhotoEye;  //P2151 SINGULATION GRIPPER PEPHOTOEYE
+PE_3111   : FB_PhotoEye;  //P2150-02 TRANSFER COMPLETED PEPHOTOEYE
+PE_3231   : FB_PhotoEye;  //P2150-01 TRANSFER COMPLETED PEPHOTOEYE
+PE_4091   : FB_PhotoEye;  //P2150-04 TRANSFER COMPLETED PEPHOTOEYE
+PE_4161   : FB_PhotoEye;  //P2150 SORTER DISCHARGE PEPHOTOEYE
+PE_4201   : FB_PhotoEye;  //P2150-03 TRANSFER COMPLETED PEPHOTOEYE
+PE_8131   : FB_PhotoEye;  //P2141 FULL PEPHOTOEYE
+PE_8141   : FB_PhotoEye;  //P2142 EXIT PEPHOTOEYE
+PE_8161   : FB_PhotoEye;  //P2143 EXIT PEPHOTOEYE
+PE_9141   : FB_PhotoEye;  //P3080 EXIT PEPHOTOEYE
+PE_9161   : FB_PhotoEye;  //S3080-01 TRIGGER PEPHOTOEYE
+PE_9191   : FB_PhotoEye;  //P3080 EXIT PEPHOTOEYE
+PE_9221   : FB_PhotoEye;  //P3080 HEIGHT CHECK PEPHOTOEYE
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//P2140 FULL PE
+PE_11241(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//S2140-01 TRIGGER PE & PINSTOP CLEAR
+PE_10081(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2140 EXIT PE
+PE_10091(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2140 JAM PE
+PE_10151(
+   In_Status:= Conveyors.P2140_Status.Sts_IsRunning,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2135 EXIT PE
+PE_10291(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//S2141-01 TRIGGER PE
+PE_10302(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2140 SINGULATION GRIPPER PE
+PE_11191(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2140 SINGULATION GRIPPER PE
+PE_11221(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P3085 EXIT PE
+PE_12091(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2130 FIRE DOOR PE
+PE_12121(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2130 DISCHARGE PE
+PE_12171(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P3095 EXIT PE
+PE_12181(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P3090 EXIT PE
+PE_12271(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150 SINGULATION GRIPPER PE
+PE_2101(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150 INDUCT PE SORTER 
+PE_2131(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2146 FULL PE
+PE_2201(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2145 EXIT PE
+PE_2231(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//S2151 TRIGGER PE
+PE_2301(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2151 SINGULATION GRIPPER PE
+PE_2331(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-02 TRANSFER COMPLETED PE
+PE_3111(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-01 TRANSFER COMPLETED PE
+PE_3231(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-04 TRANSFER COMPLETED PE
+PE_4091(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150 SORTER DISCHARGE PE
+PE_4161(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-03 TRANSFER COMPLETED PE
+PE_4201(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2141 FULL PE
+PE_8131(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2142 EXIT PE
+PE_8141(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2143 EXIT PE
+PE_8161(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P3080 EXIT PE
+PE_9141(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//S3080-01 TRIGGER PE
+PE_9161(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P3080 EXIT PE
+PE_9191(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P3080 HEIGHT CHECK PE
+PE_9221(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="Photoeyes">
+      <LineId Id="40" Count="309" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

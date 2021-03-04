@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Crc="159140301" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{73d6bb41-ce6e-4107-83c1-d7b3e7ad5099}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>TwinCAT3SafePlcProject</RootNamespace>
+    <AssemblyName>TwinCAT3SafePlcProject</AssemblyName>
+    <FileUpgradeFlags />
+    <UpgradeBackupLocation />
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetSystem>EL6900</TargetSystem>
+    <ProgrammingLanguage>Graphical Editor</ProgrammingLanguage>
+    <Worker>jr.landeen</Worker>
+    <IntProjName>SPA Safety</IntProjName>
+    <IsNewCreated>false</IsNewCreated>
+    <SPlcProjVersion>1.4.0.0</SPlcProjVersion>
+    <NextSdsId>29</NextSdsId>
+    <Name>Building 1.5 Totes Saftey</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>false</DebugSymbols>
+    <OutputPath>bin\Release\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="EStopSafeGroup\Alias Devices\Remote_PullCord2150_OK.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\CommErr.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\PLC-14461 %28EL2904%29.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\SRIO-1151 %28EP1908%29.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\SRIO-7151 %28EP1908%29.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\FBErr.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\OtherErr.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\PanelEStop_OK.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\Remote_PullCord2142_OK.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\Remote_PullCord3080_OK.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\Reset.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\PLC-8431 %28EL1918%29.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\Safety_OK.sds" />
+    <None Include="EStopSafeGroup\EStopSafeGroup.sal" />
+    <None Include="EStopSafeGroup\EStopSafeGroup.sal.diagram">
+      <DependentUpon>EStopSafeGroup\EStopSafeGroup.sal</DependentUpon>
+      <Visible>false</Visible>
+    </None>
+    <None Include="TargetSystemConfig.xml">
+      <Visible>false</Visible>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="EStopSafeGroup" />
+    <Folder Include="EStopSafeGroup\Alias Devices" />
+    <None Include="EStopSafeGroup\Alias Devices\ErrorAcknowledgement.sds" />
+    <None Include="EStopSafeGroup\Alias Devices\Run.sds" />
+  </ItemGroup>
+  <ProjectExtensions />
+</Project>

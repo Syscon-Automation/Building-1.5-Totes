@@ -1,0 +1,620 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="Sorter" Id="{efb4f521-b93c-401a-8a07-5bbe9c018238}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Sorter
+VAR
+	nSorterClearIdx				: DINT;
+	bSimulate					: BOOL := FALSE;	// Indicates when runing a simulation
+	BlankItem					: ST_Item := (ID := ''
+												, UniqueID := 0
+												, Destination := 0
+												, Status := E_StatusCode.No_Status
+												, ExtStatus := E_StatusCode.No_Status
+												, DeviceID := ''
+												, MessageType := E_MessageIds.NoMessage_00);
+//----------------------------------------P2140--------------------------------------------------------------	
+	st_ToInduct_P2140					: ST_ItemTemporary;	// This is the next item to be inducted onto the sorter
+	st_Inducting_P2140				: ST_ItemTemporary;	// This is the next item to be inducted onto the sorter
+	st_InductUpdate_P2140				: ST_ItemTemporary;	// This is to update an item already being inducted
+	{attribute 'OPC.UA.DA' := '1'}
+	st_Sorter_P2140					: ST_Sorter;
+	{attribute 'OPC.UA.DA' := '1'}
+	aSorterDiverts_P2140 				: ARRAY[DIVERTMIN_P2140..NUMBEROFDIVERTS_P2140] OF ST_Divert;
+
+	st_SorterEncoder_P2140 			: ST_Encoder;
+	fb_SorterEncoder_P2140 			: FB_ProcessEncoder;
+	{attribute 'OPC.UA.DA' := '1'}
+	ENC_Raw_P2140	AT %I*:	UINT;	// Raw Encoder Value
+	tEncoderOK_P2140			: TON;
+	nLastEncoderCount_P2140	: UDINT;
+
+	{attribute 'OPC.UA.DA' := '1'}
+	fb_SortMetrics_P2140				: FB_Metrics;
+
+	In_DefaultDestination_P2140 AT %I*	: DINT;	// Input default destination update from Host messaging(MsgControl.RECEIVE)
+
+	fb_CommissionSorterDiverts_P2140	: FB_DivertCommission;
+	rInductPE_P2140					: R_TRIG; 	// Capture the Rising edge of the Induct PE
+	fInductPE_P2140					: F_TRIG; 	// Capture the Falling edge of the Induct PE
+
+	rDischargePE_P2140				: R_TRIG; 	// Capture the Rising edge of the Discharge PE
+	fDischargePE_P2140				: F_TRIG; 	// Capture the Falling edge of the Discharge PE
+
+	st_TempItem_P2140					: ST_ItemTemporary;	// Store temporary Item info until BCR data is received
+
+	DivertToCommission_P2140			: UINT := 0;	// Non-zero value will send all items to this divert
+
+	sMessage			: STRING;
+
+	ClearSorterArray	: BOOL;
+//----------------------------------------P2150--------------------------------------------------------------	
+	st_ToInduct_P2150					: ST_ItemTemporary;	// This is the next item to be inducted onto the sorter
+	st_Inducting_P2150				: ST_ItemTemporary;	// This is the next item to be inducted onto the sorter
+	st_InductUpdate_P2150				: ST_ItemTemporary;	// This is to update an item already being inducted
+	{attribute 'OPC.UA.DA' := '1'}
+	st_Sorter_P2150					: ST_Sorter;
+	{attribute 'OPC.UA.DA' := '1'}
+	aSorterDiverts_P2150 				: ARRAY[DIVERTMIN_P2150..NUMBEROFDIVERTS_P2150] OF ST_Divert;
+
+	st_SorterEncoder_P2150 			: ST_Encoder;
+	fb_SorterEncoder_P2150 			: FB_ProcessEncoder;
+	{attribute 'OPC.UA.DA' := '1'}
+	ENC_Raw_P2150	AT %I*:	UINT;	// Raw Encoder Value
+	tEncoderOK_P2150			: TON;
+	nLastEncoderCount_P2150	: UDINT;
+
+	{attribute 'OPC.UA.DA' := '1'}
+	fb_SortMetrics_P2150				: FB_Metrics;
+
+	In_DefaultDestination_P2150 AT %I*	: DINT;	// Input default destination update from Host messaging(MsgControl.RECEIVE)
+
+	fb_CommissionSorterDiverts_P2150	: FB_DivertCommission;
+	rInductPE_P2150					: R_TRIG; 	// Capture the Rising edge of the Induct PE
+	fInductPE_P2150					: F_TRIG; 	// Capture the Falling edge of the Induct PE
+
+	rDischargePE_P2150				: R_TRIG; 	// Capture the Rising edge of the Discharge PE
+	fDischargePE_P2150				: F_TRIG; 	// Capture the Falling edge of the Discharge PE
+
+	st_TempItem_P2150					: ST_ItemTemporary;	// Store temporary Item info until BCR data is received
+
+	DivertToCommission_P2150			: UINT := 0;	// Non-zero value will send all items to this divert
+
+	//--------------------------------------Divert Config------------------------------------------
+	Dummy : BOOL;
+	Divert_RTRIG	:	ARRAY[1..16] OF R_TRIG;
+	Divert_FTRIG	:	ARRAY[1..16] OF F_TRIG;
+	
+
+END_VAR
+
+VAR PERSISTENT
+//----------------------------------------P2140--------------------------------------------------------------		
+	aSorterItems_P2140 				: ARRAY[SORTERENCODERMIN_P2140..SORTERENCODERMAX_P2140] OF ST_Item;	// Persist the Items to Sort array
+	{attribute 'OPC.UA.DA' := '1'}
+	st_SorterCfg_P2140				: ST_SorterConfig; 	// Persist Sorter configuration
+	{attribute 'OPC.UA.DA' := '1'}
+	st_DivertCfgs_P2140 				: ARRAY[DIVERTMIN_P2140..NUMBEROFDIVERTS_P2140] OF ST_DivertCfg; 	// Persist Sorter Configuration
+//----------------------------------------P2150--------------------------------------------------------------		
+	aSorterItems_P2150 				: ARRAY[SORTERENCODERMIN_P2150..SORTERENCODERMAX_P2150] OF ST_Item;	// Persist the Items to Sort array
+	{attribute 'OPC.UA.DA' := '1'}
+	st_SorterCfg_P2150				: ST_SorterConfig; 	// Persist Sorter configuration
+	{attribute 'OPC.UA.DA' := '1'}
+	st_DivertCfgs_P2150 				: ARRAY[DIVERTMIN_P2150..NUMBEROFDIVERTS_P2150] OF ST_DivertCfg; 	// Persist Sorter Configuration
+END_VAR
+
+VAR CONSTANT
+//----------------------------------------P2140--------------------------------------------------------------	
+	SORTERMASKSIZE_P2140				: UINT := 11;		// Number of bits to mask into the Encoder Count, will define the size of the SORTERENCODERMAX value
+	{attribute 'OPC.UA.DA' := '1'}
+	NUMBEROFDIVERTS_P2140				: DINT := 2;
+	DIVERTMIN_P2140					: DINT := 1;
+	{attribute 'OPC.UA.DA' := '1'}
+	SORTERENCODERMAX_P2140			: UDINT := ((LREAL_TO_UDINT(EXPT(2,SORTERMASKSIZE_P2140)))-1); // Calculated size based on the bitmask 
+	{attribute 'OPC.UA.DA' := '1'}
+	SORTERENCODERMIN_P2140			: UDINT := 0;
+//----------------------------------------P2150--------------------------------------------------------------	
+	SORTERMASKSIZE_P2150				: UINT := 11;		// Number of bits to mask into the Encoder Count, will define the size of the SORTERENCODERMAX value
+	{attribute 'OPC.UA.DA' := '1'}
+	NUMBEROFDIVERTS_P2150				: DINT := 5;
+	DIVERTMIN_P2150					: DINT := 1;
+	{attribute 'OPC.UA.DA' := '1'}
+	SORTERENCODERMAX_P2150			: UDINT := ((LREAL_TO_UDINT(EXPT(2,SORTERMASKSIZE_P2150)))-1); // Calculated size based on the bitmask 
+	{attribute 'OPC.UA.DA' := '1'}
+	SORTERENCODERMIN_P2150			: UDINT := 0;
+	
+	DIVERT1:	INT := 0;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Sorter clear when the system is restarted or downloaded (INIT=TRUE for first scan)
+IF (GVL_IO.INIT AND NOT st_SorterCfg_P2140.RetainOnRestart) OR ClearSorterArray THEN
+	FOR nSorterClearIdx := UDINT_TO_DINT(SORTERENCODERMIN_P2140) TO UDINT_TO_DINT(SORTERENCODERMAX_P2140) BY 1 DO
+		IF nSorterLogEnable.SORTER_DUMP THEN
+			IF aSorterItems_P2140[nSorterClearIdx].ID <> '' THEN
+				IF .nSorterLogEnable.SORTER_DUMP THEN
+					sMessage := CONCAT(' Item: ', aSorterItems_P2140[nSorterClearIdx].ID);
+					sMessage := CONCAT(sMessage,' Index: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(nSorterClearIdx));
+					// Write to the Error List
+					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+						, msgFmtStr := 'Array Dump Info: %s'
+						, strArg := sMessage);
+				END_IF
+			END_IF
+		END_IF
+		aSorterItems_P2140[nSorterClearIdx] := BlankItem;
+	END_FOR
+	ClearSorterArray := FALSE;
+END_IF
+
+// Setup and process the Sorter Encoder
+st_SorterEncoder_P2140.EncoderRawCount := ENC_Raw_P2140;
+st_SorterEncoder_P2140.BitMaskSize := SORTERMASKSIZE_P2140;
+fb_SorterEncoder_P2140(Encoder := st_SorterEncoder_P2140, Simulate := bSimulate);
+
+fb_CommissionSorterDiverts_P2140(
+			InductTrigger := Photoeyes.PE_10081.Out,
+			ReferenceValue := st_SorterEncoder_P2140.CurrentCount, 
+			DischargeTrigger := Photoeyes.PE_10091.Out_OffFltrd,
+			TestTime := T#10S, Diverts := aSorterDiverts_P2140);
+
+// Provide a "hard-coded" default destination.
+IF st_SorterCfg_P2140.DefaultDestination <= 0 THEN
+	st_SorterCfg_P2140.DefaultDestination := 1;
+END_IF						
+
+// Name of the sorter equipment
+//st_SorterCfg.Name := Conveyors.cfgP8005Label;
+st_SorterCfg_P2140.DivertCount := NUMBEROFDIVERTS_P2140;
+IF DivertToCommission_P2140 > 0 THEN
+	st_SorterCfg_P2140.DefaultDestination := DivertToCommission_P2140;
+END_IF
+st_Sorter_P2140.EncoderCounts := st_SorterEncoder_P2140.CurrentCount;
+st_Sorter_P2140.InductPE := PhotoEyes.PE_10081.Out_OnFltrd;
+st_Sorter_P2140.DischargePE := Photoeyes.PE_10091.Out_OnFltrd;
+
+// Test the Encoder
+tEncoderOK_P2140.IN := (Conveyors.P2140_Status.Sts_IsRunning AND (st_Sorter_P2140.EncoderCounts = nLastEncoderCount_P2140));
+tEncoderOK_P2140(PT:=T#1S);
+
+// OK when Q is not on, but the alarm is reversed
+  GVL_IO.ENC_9091_OK := tEncoderOK_P2140.Q;
+
+// Publish the sorter name
+  GVL_IO.Sorter_P2140Name := st_SorterCfg_P2140.Name;
+
+// Sorter
+(*
+	ProcessBuffers processes all associated buffers (Sorter/Divert/Arrival/Transport/Update)
+	Items arriving at the sorter are detected and processed in this function block then deliverd to the SorterProgram
+	Items inducted into sorter produce TransportResponse messages in this function block
+	Items diverted off the sorter produce TransportComplete messages in this function block
+*)
+ProcessBuffers_P2140(st_NextToInduct := st_ToInduct_P2140
+				, st_TempInductItem := st_TempItem_P2140
+				, st_UpdateItem := st_Inducting_P2140
+				, st_Sorter := st_Sorter_P2140
+				, aDiverts := aSorterDiverts_P2140
+				, aItems := aSorterItems_P2140
+				, DivertToCommission := DivertToCommission_P2140);
+
+// Capture rising and falling edge Triggers of the configured Sorter PE (Induct/Discharge)
+rInductPE_P2140(CLK:= st_Sorter_P2140.InductPE, Q =>);
+fInductPE_P2140(CLK:= st_Sorter_P2140.InductPE, Q =>);
+rDischargePE_P2140(CLK:= st_Sorter_P2140.DischargePE, Q =>);
+fDischargePE_P2140(CLK:= st_Sorter_P2140.DischargePE, Q =>);
+
+// Prepare a dummy record for items that arrive before BCR data is received
+// On the rising edge of the Induct PE
+IF rInductPE_P2140.Q THEN
+	IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Induct PE Blocked : %s'
+			, strArg := BOOL_TO_STRING(st_Sorter_P2140.InductPE)); 
+	END_IF
+	// Test for a UniqueID, which indicates that a Barcode has been received
+	IF st_ToInduct_P2140.Item.UniqueID = 0 THEN
+		// Capture and create relevant info
+		st_TempItem_P2140.Counts := st_Sorter_P2140.EncoderCounts;
+		st_TempItem_P2140.Item.UniqueID :=  UDINT_TO_DINT(st_Sorter_P2140.EncoderCounts);
+		st_TempItem_P2140.Item.ID :=  CONCAT('T-', UDINT_TO_STRING(st_Sorter_P2140.EncoderCounts));
+		st_TempItem_P2140.Item.Destination := st_SorterCfg_P2140.DefaultDestination;
+		st_TempItem_P2140.Item.Status := E_StatusCode.UnidentifiedItem;
+		IF .nSorterLogEnable.SORTER_TEMPID THEN
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Temp ID Assigned : %s'
+				, strArg := st_TempItem_P2140.Item.ID);
+		END_IF
+	END_IF	
+END_IF
+
+// Clear the dummy record when the PE clears
+// Items can only be inducted when the BCR info is received before or while the induct PE is blocked
+IF fInductPE_P2140.Q THEN
+	IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Induct PE Blocked : %s'
+			, strArg := BOOL_TO_STRING(st_Sorter_P2140.InductPE));
+	END_IF
+	// Clear the record
+	st_TempItem_P2140.Counts := 0;
+	st_TempItem_P2140.Item :=  BlankItem;
+END_IF
+
+(*
+	SorterProgram is a separate Program
+	Config portion of the st_sorter is separate to allow it be be persistent.
+*)
+st_sorter_P2140.Config := st_sorterCfg_P2140;
+Sorter_P2140(st_Sorter := st_Sorter_P2140
+		, In_ItemToInduct := st_ToInduct_P2140.Item
+		, In_InductingItem := st_Inducting_P2140.Item
+		, aItems := aSorterItems_P2140
+		, aDiverts := aSorterDiverts_P2140
+		, st_tempItem := st_TempItem_P2140);
+//--------------------------------------Divert Config------------------------------------------
+(*
+	Initialize Diverts here. 
+	Tie variables commented IO to physical IO address
+*)
+
+//Divert #1
+aSorterDiverts_P2140[1].Config := st_DivertCfgs_P2140[1];
+aSorterDiverts_P2140[1].ConfirmPE := Photoeyes.PE_10091.Out; 			
+aSorterDiverts_P2140[1].FullPE := Photoeyes.PE_10091.Out;   			
+
+//Divert #2
+aSorterDiverts_P2140[2].Config := st_DivertCfgs_P2140[2];
+aSorterDiverts_P2140[2].ConfirmPE := Photoeyes.PE_10302.Out; 		
+aSorterDiverts_P2140[2].FullPE := Photoeyes.PE_10302.Out;   		
+
+ 
+// Logging
+// Divert 1
+Divert_RTRIG[1](CLK := aSorterDiverts_P2140[1].Output1);
+IF Divert_RTRIG[1].q THEN
+	IF .nDivertLogEnable.DIVERT1 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2140[1].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2140[1].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 1 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+Divert_FTRIG[1](CLK := aSorterDiverts_P2140[1].Output1);
+IF Divert_FTRIG[1].q THEN
+	IF .nDivertLogEnable.DIVERT1 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2140[1].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2140[1].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 1 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+// Divert 2
+Divert_RTRIG[2](CLK := aSorterDiverts_P2140[2].Output1);
+IF Divert_RTRIG[2].q THEN
+	IF .nDivertLogEnable.DIVERT2 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2140[2].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2140[2].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 2 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+Divert_FTRIG[2](CLK := aSorterDiverts_P2140[2].Output1);
+IF Divert_FTRIG[2].q THEN
+	IF .nDivertLogEnable.DIVERT2 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2140[2].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2140[2].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 2 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+
+//--------------------------------------Divert Config------------------------------------------		
+// Log the diverts
+Log_Diverts_P2140();
+
+//--------------------------------------Sorter P2150------------------------------------------	
+
+// Sorter clear when the system is restarted or downloaded (INIT=TRUE for first scan)
+IF (GVL_IO.INIT AND NOT st_SorterCfg_P2150.RetainOnRestart) OR ClearSorterArray THEN
+	FOR nSorterClearIdx := UDINT_TO_DINT(SORTERENCODERMIN_P2150) TO UDINT_TO_DINT(SORTERENCODERMAX_P2150) BY 1 DO
+		IF nSorterLogEnable.SORTER_DUMP THEN
+			IF aSorterItems_P2150[nSorterClearIdx].ID <> '' THEN
+				IF .nSorterLogEnable.SORTER_DUMP THEN
+					sMessage := CONCAT(' Item: ', aSorterItems_P2150[nSorterClearIdx].ID);
+					sMessage := CONCAT(sMessage,' Index: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(nSorterClearIdx));
+					// Write to the Error List
+					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+						, msgFmtStr := 'Array Dump Info: %s'
+						, strArg := sMessage);
+				END_IF
+			END_IF
+		END_IF
+		aSorterItems_P2150[nSorterClearIdx] := BlankItem;
+	END_FOR
+	ClearSorterArray := FALSE;
+END_IF
+
+// Setup and process the Sorter Encoder
+st_SorterEncoder_P2150.EncoderRawCount := ENC_Raw_P2150;
+st_SorterEncoder_P2150.BitMaskSize := SORTERMASKSIZE_P2150;
+fb_SorterEncoder_P2150(Encoder := st_SorterEncoder_P2150, Simulate := bSimulate);
+
+fb_CommissionSorterDiverts_P2150(
+			InductTrigger := Photoeyes.PE_2131.Out,
+			ReferenceValue := st_SorterEncoder_P2150.CurrentCount, 
+			DischargeTrigger := Photoeyes.PE_4161.Out_OffFltrd,
+			TestTime := T#10S, Diverts := aSorterDiverts_P2150);
+
+// Provide a "hard-coded" default destination.
+IF st_SorterCfg_P2150.DefaultDestination <= 0 THEN
+	st_SorterCfg_P2150.DefaultDestination := 5;
+END_IF						
+
+// Name of the sorter equipment
+//st_SorterCfg.Name := Conveyors.cfgP8005Label;
+st_SorterCfg_P2150.DivertCount := NUMBEROFDIVERTS_P2150;
+IF DivertToCommission_P2150 > 0 THEN
+	st_SorterCfg_P2150.DefaultDestination := DivertToCommission_P2150;
+END_IF
+st_Sorter_P2150.EncoderCounts := st_SorterEncoder_P2150.CurrentCount;
+st_Sorter_P2150.InductPE := PhotoEyes.PE_2131.Out_OnFltrd;
+st_Sorter_P2150.DischargePE := Photoeyes.PE_4161.Out_OnFltrd;
+
+// Test the Encoder
+tEncoderOK_P2150.IN := (Conveyors.P2150_Status.Sts_IsRunning AND (st_Sorter_P2150.EncoderCounts = nLastEncoderCount_P2150));
+tEncoderOK_P2150(PT:=T#1S);
+
+// OK when Q is not on, but the alarm is reversed
+  GVL_IO.ENC_9031_OK := tEncoderOK_P2150.Q;
+
+// Publish the sorter name
+  GVL_IO.Sorter_P2150Name := st_SorterCfg_P2150.Name;
+
+// Sorter
+(*
+	ProcessBuffers processes all associated buffers (Sorter/Divert/Arrival/Transport/Update)
+	Items arriving at the sorter are detected and processed in this function block then deliverd to the SorterProgram
+	Items inducted into sorter produce TransportResponse messages in this function block
+	Items diverted off the sorter produce TransportComplete messages in this function block
+*)
+ProcessBuffers_P2150(st_NextToInduct := st_ToInduct_P2150
+				, st_TempInductItem := st_TempItem_P2150
+				, st_UpdateItem := st_Inducting_P2150
+				, st_Sorter := st_Sorter_P2150
+				, aDiverts := aSorterDiverts_P2150
+				, aItems := aSorterItems_P2150
+				, DivertToCommission := DivertToCommission_P2150);
+
+// Capture rising and falling edge Triggers of the configured Sorter PE (Induct/Discharge)
+rInductPE_P2150(CLK:= st_Sorter_P2150.InductPE, Q =>);
+fInductPE_P2150(CLK:= st_Sorter_P2150.InductPE, Q =>);
+rDischargePE_P2150(CLK:= st_Sorter_P2150.DischargePE, Q =>);
+fDischargePE_P2150(CLK:= st_Sorter_P2150.DischargePE, Q =>);
+
+// Prepare a dummy record for items that arrive before BCR data is received
+// On the rising edge of the Induct PE
+IF rInductPE_P2150.Q THEN
+	IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Induct PE Blocked : %s'
+			, strArg := BOOL_TO_STRING(st_Sorter_P2150.InductPE)); 
+	END_IF
+	// Test for a UniqueID, which indicates that a Barcode has been received
+	IF st_ToInduct_P2150.Item.UniqueID = 0 THEN
+		// Capture and create relevant info
+		st_TempItem_P2150.Counts := st_Sorter_P2150.EncoderCounts;
+		st_TempItem_P2150.Item.UniqueID :=  UDINT_TO_DINT(st_Sorter_P2150.EncoderCounts);
+		st_TempItem_P2150.Item.ID :=  CONCAT('T-', UDINT_TO_STRING(st_Sorter_P2150.EncoderCounts));
+		st_TempItem_P2150.Item.Destination := st_SorterCfg_P2150.DefaultDestination;
+		st_TempItem_P2150.Item.Status := E_StatusCode.UnidentifiedItem;
+		IF .nSorterLogEnable.SORTER_TEMPID THEN
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Temp ID Assigned : %s'
+				, strArg := st_TempItem_P2150.Item.ID);
+		END_IF
+	END_IF	
+END_IF
+
+// Clear the dummy record when the PE clears
+// Items can only be inducted when the BCR info is received before or while the induct PE is blocked
+IF fInductPE_P2150.Q THEN
+	IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Induct PE Blocked : %s'
+			, strArg := BOOL_TO_STRING(st_Sorter_P2150.InductPE));
+	END_IF
+	// Clear the record
+	st_TempItem_P2150.Counts := 0;
+	st_TempItem_P2150.Item :=  BlankItem;
+END_IF
+
+(*
+	SorterProgram is a separate Program
+	Config portion of the st_sorter is separate to allow it be be persistent.
+*)
+st_sorter_P2150.Config := st_sorterCfg_P2150;
+Sorter_P2140(st_Sorter := st_Sorter_P2150
+		, In_ItemToInduct := st_ToInduct_P2150.Item
+		, In_InductingItem := st_Inducting_P2150.Item
+		, aItems := aSorterItems_P2140
+		, aDiverts := aSorterDiverts_P2140
+		, st_tempItem := st_TempItem_P2150);
+//--------------------------------------Divert Config------------------------------------------
+(*
+	Initialize Diverts here. 
+	Tie variables commented IO to physical IO address
+*)
+
+//Divert #1
+aSorterDiverts_P2150[1].Config := st_DivertCfgs_P2150[1];
+aSorterDiverts_P2150[1].ConfirmPE := Photoeyes.PE_3231.Out; 			
+aSorterDiverts_P2150[1].FullPE := Photoeyes.PE_3231.Out;   			
+
+//Divert #2
+aSorterDiverts_P2150[2].Config := st_DivertCfgs_P2150[2];
+aSorterDiverts_P2150[2].ConfirmPE := Photoeyes.PE_3111.Out; 		
+aSorterDiverts_P2150[2].FullPE := Photoeyes.PE_3111.Out;   		
+
+//Divert #3 
+aSorterDiverts_P2150[3].Config := st_DivertCfgs_P2150[3];
+aSorterDiverts_P2150[3].ConfirmPE := Photoeyes.PE_4201.Out; 		
+aSorterDiverts_P2150[3].FullPE := Photoeyes.PE_4201.Out;   	
+
+//Divert #4 
+aSorterDiverts_P2150[4].Config := st_DivertCfgs_P2150[4];
+aSorterDiverts_P2150[4].ConfirmPE := Photoeyes.PE_4091.Out; 		
+aSorterDiverts_P2150[4].FullPE := Photoeyes.PE_4091.Out; 
+
+//Divert #5
+aSorterDiverts_P2150[5].Config := st_DivertCfgs_P2150[5];
+aSorterDiverts_P2150[5].ConfirmPE := Photoeyes.PE_4161.Out; 		
+aSorterDiverts_P2150[5].FullPE := Photoeyes.PE_4161.Out; 	
+
+// Logging
+// Divert 1
+Divert_RTRIG[1](CLK := aSorterDiverts_P2150[1].Output1);
+IF Divert_RTRIG[1].q THEN
+	IF .nDivertLogEnable.DIVERT1 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[1].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[1].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 1 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+Divert_FTRIG[1](CLK := aSorterDiverts_P2150[1].Output1);
+IF Divert_FTRIG[1].q THEN
+	IF .nDivertLogEnable.DIVERT1 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[1].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[1].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 1 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+// Divert 2
+Divert_RTRIG[2](CLK := aSorterDiverts_P2150[2].Output1);
+IF Divert_RTRIG[2].q THEN
+	IF .nDivertLogEnable.DIVERT2 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[2].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[2].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 2 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+Divert_FTRIG[2](CLK := aSorterDiverts_P2150[2].Output1);
+IF Divert_FTRIG[2].q THEN
+	IF .nDivertLogEnable.DIVERT2 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[2].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[2].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 2 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+// Divert 3
+Divert_RTRIG[3](CLK := aSorterDiverts_P2150[3].Output1);
+IF Divert_RTRIG[3].q THEN
+	IF .nDivertLogEnable.DIVERT3 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[3].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[3].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 3 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+Divert_FTRIG[3](CLK := aSorterDiverts_P2150[3].Output1);
+IF Divert_FTRIG[3].q THEN
+	IF .nDivertLogEnable.DIVERT3 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[3].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[3].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 3 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+			
+// Divert 4
+Divert_RTRIG[4](CLK := aSorterDiverts_P2150[4].Output1);
+IF Divert_RTRIG[4].q THEN
+	IF .nDivertLogEnable.DIVERT3 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[4].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[4].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 4 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+Divert_FTRIG[4](CLK := aSorterDiverts_P2150[4].Output1);
+IF Divert_FTRIG[4].q THEN
+	IF .nDivertLogEnable.DIVERT3 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[4].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[4].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 4 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+
+// Divert 5
+Divert_RTRIG[5](CLK := aSorterDiverts_P2150[5].Output1);
+IF Divert_RTRIG[5].q THEN
+	IF .nDivertLogEnable.DIVERT3 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[5].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[5].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 4 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+Divert_FTRIG[5](CLK := aSorterDiverts_P2150[5].Output1);
+IF Divert_FTRIG[5].q THEN
+	IF .nDivertLogEnable.DIVERT3 THEN
+		sMessage := CONCAT(BOOL_TO_STRING(aSorterDiverts_P2150[5].Output1),' Item: ');
+		sMessage := CONCAT(sMessage,aSorterDiverts_P2150[5].Item.ID);
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert 5 Extend : %s'
+			, strArg := sMessage);
+	END_IF
+END_IF 	
+//--------------------------------------Divert Config------------------------------------------		
+// Log the diverts
+Log_Diverts_P2140();
+]]></ST>
+    </Implementation>
+    <LineIds Name="Sorter">
+      <LineId Id="593" Count="143" />
+      <LineId Id="750" Count="0" />
+      <LineId Id="752" Count="46" />
+      <LineId Id="869" Count="3" />
+      <LineId Id="1206" Count="1" />
+      <LineId Id="926" Count="279" />
+      <LineId Id="925" Count="0" />
+      <LineId Id="99" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

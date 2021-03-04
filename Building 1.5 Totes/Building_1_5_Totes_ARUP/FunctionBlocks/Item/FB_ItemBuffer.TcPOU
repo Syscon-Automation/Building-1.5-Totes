@@ -1,0 +1,563 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_ItemBuffer" Id="{b8942154-cef3-4093-8710-a07ad33b0cef}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ItemBuffer
+VAR_IN_OUT
+	st_BufferData	:	ST_ItemBuffer;	// Buffer Type
+END_VAR
+VAR_INPUT
+	st_BufferFdbkIn : ST_ItemBufferFdbk;	//	Buffer Feedback
+END_VAR
+VAR_OUTPUT
+	// Output the In and Out pointer to allow testing of the 
+	st_BufferFdbkOut : ST_ItemBufferFdbk;	//	Buffer Feedback
+END_VAR
+VAR
+	nOutPointer		:	UDINT;				// OutPointer use to detect items in the buffer
+	nBufferSizeTemp : 	UDINT;				// Calculate buffer size from Byte count
+	nBufferSize : 	UDINT;					// Buffer Size in total elements
+	st_Blank	:	ST_Item :=  (ID := '',
+									UniqueID := 0,
+									Destination := 0,
+									Status := E_StatusCode.No_Status,
+									DeviceID := '');
+	nInit				: UDINT;					// Used to initialize the Array on Start-up
+	nItemExtSize		: UDINT;				// Size of ST_ItemExt in Bytes
+	bInitDone			: BOOL := FALSE;			// Set if Init occurred outside of FB_init
+	bMaster				: BOOL := TRUE;			// Master = TRUE if this FB instance adds items to the buffer
+	bLogEntries			: BOOL := FALSE;
+	sBufferName			: STRING;				// Name of the Buffer for Logging Purposes
+END_VAR
+
+VAR CONSTANT
+	nBITCOUNT: UINT := 32;	// Number of Bits in each Array Element
+	nBYTECOUNT : UINT := 4;	// Number of Bytes in each array element
+	nUDINTBYTECOUNT : UINT := 4;	// Number of Bytes in a UDINT data type
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// This will run if FB_init did not detect a valid reference and initialize the Structure
+IF NOT bInitDone THEN
+(*
+	// Get the Data Item In Bytes
+	nBufferSizeTemp := TO_UDINT(SIZEOF(st_BufferData));
+	// Reduce the byte count by the In and Out pointer byte count
+	nBufferSizeTemp := nBufferSizeTemp - (nUDINTBYTECOUNT);
+	// Get the size of the ST_ItemExt Data type
+	nItemExtSize := TO_UDINT(SIZEOF(st_Blank));
+	// Get the total number of bytes in the Array, by dividing the remaining nBufferSize by the nItemExtSize
+	nBufferSize := nBufferSizeTemp/nItemExtSize;
+*)
+	nBufferSize := GetBufferSize();
+	// Clear the buffer for the master
+	// Set the OutPointer for a reader/consumer
+	IF bMaster THEN
+		// Clear the Buffer on Start-up because we don't know what is and is not in process
+		clear();
+	ELSE
+		// If this is consumer, just start at the latest data point
+		nOutPointer := st_BufferData.nInPointer;
+	END_IF
+(*
+	FOR nInit := 0 TO (nBufferSize - 1) DO
+		st_BufferData.aBufferData[nInit] := st_Blank;
+	END_FOR 
+	// Clear the Buffer In and Out pointers
+	st_BufferData.nInPointer := 0;
+	nOutPointer := 0;
+	// Indicate that initialization occurred outside of FB_Init
+	bInitDone := TRUE;
+	// The master controls the buffer contents, when the buffer is clear, turn on the bClear bit
+	IF bMaster THEN
+		st_BufferData.bClear := TRUE;
+	END_IF
+	// Turn on the Buffer Empty signal regardless of Master status.
+	// In system where there is no inter-plc communication, there will be no need for a non-master
+	// function blocks 
+	st_BufferFdbkOut.bEmpty := TRUE;
+*)
+	bInitDone := TRUE;
+END_IF
+
+// If this is the master and the feedback indicates that the consumer function blocks are empty
+// clear the request
+IF bMaster THEN
+	IF st_BufferFdbkIn.bEmpty THEN
+		st_BufferData.bClear := FALSE;
+	END_IF
+ELSE
+	// If this is a consumer function block
+	// Clear the buffer, even though this is all read from the master
+	// the OutPointer is set to zero in the Clear method
+	IF st_BufferData.bClear THEN
+		Clear();
+	ELSE
+		st_BufferFdbkOut.bEmpty := FALSE;
+	END_IF	
+END_IF
+
+]]></ST>
+    </Implementation>
+    <Method Name="AddItem" Id="{917e7bed-0bb9-43f1-993a-bd5979c2cdc0}">
+      <Declaration><![CDATA[METHOD PUBLIC AddItem : ST_Item
+VAR_INPUT
+	st_ItemToAdd	:	ST_Item;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+IF __ISVALIDREF(st_BufferData) THEN
+	// Increment the In Pointer using the F_CaclculateIndex
+	st_BufferData.nInPointer := F_CalculateIndex(Offset := 1,InitialValue := st_BufferData.nInPointer, BufferSize := nBufferSize);
+	// Add the Item to the Buffer
+	st_BufferData.aBufferData[st_BufferData.nInPointer] := st_ItemToAdd;
+	IF bLogEntries THEN
+		logItem(bIn := TRUE
+				, st_ItemToLog := st_ItemToAdd
+				, nIndex := st_BufferData.nInPointer);
+	END_IF
+END_IF
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="BufferSize" Id="{d66955f3-9f49-4f19-8330-5e6e487047cd}">
+      <Declaration><![CDATA[PROPERTY PUBLIC BufferSize : UDINT]]></Declaration>
+      <Get Name="Get" Id="{a1b3ed98-69ce-4636-bebb-547412379ebd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BufferSize := nBufferSize;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Clear" Id="{51778ba0-d78a-4262-b617-a9567c889200}">
+      <Declaration><![CDATA[METHOD PUBLIC Clear
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+IF __ISVALIDREF(st_BufferData) THEN
+	FOR nInit := 0 TO (nBufferSize - 1) DO
+		st_BufferData.aBufferData[nInit] := st_Blank;
+	END_FOR 
+	// Clear the Buffer In and Out pointers
+	st_BufferData.nInPointer := 0;
+	nOutPointer := 0;
+	// The master controls the buffer contents, when the buffer is clear, turn on the bClear bit
+	IF bMaster THEN
+		st_BufferData.bClear := TRUE;
+	END_IF
+	// Turn on the Buffer Empty signal regardless of Master status.
+	// In system where there is no inter-plc communication, there will be no need for a non-master
+	// function blocks 
+	st_BufferFdbkOut.bEmpty := TRUE;
+END_IF
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{a42ee925-d6a0-42c6-a732-4a94780d0a60}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// ALWAYS ReInit the arrays
+bInitDone := FALSE;
+// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+IF __ISVALIDREF(st_BufferData) THEN
+(*
+	// Get the Data Item In Bytes
+	nBufferSizeTemp := TO_UDINT(SIZEOF(st_BufferData));
+	// Reduce the byte count by the In and Out pointer byte count
+	nBufferSizeTemp := nBufferSizeTemp - (nUDINTBYTECOUNT);
+	// Get the size of the ST_ItemExt Data type
+	nItemExtSize := TO_UDINT(SIZEOF(st_Blank));
+	// Get the total number of bytes in the Array, by dividing the remaining nBufferSize by the nItemExtSize
+	nBufferSize := nBufferSizeTemp/nItemExtSize;
+*)
+	nBufferSize := GetBufferSize();
+	// Clear the Buffer on Start-up because we don't know what is and is not in process
+	clear();
+(*
+	FOR nInit := 0 TO (nBufferSize - 1) DO
+		st_BufferData.aBufferData[nInit] := st_Blank;
+	END_FOR 
+	// Clear the Buffer In and Out pointers
+	st_BufferData.nInPointer := 0;
+	nOutPointer := 0;
+	// The master controls the buffer contents, when the buffer is clear, turn on the bClear bit
+	IF bMaster THEN
+		st_BufferData.bClear := TRUE;
+	END_IF
+	// Turn on the Buffer Empty signal regardless of Master status.
+	// In system where there is no inter-plc communication, there will be no need for a non-master
+	// function blocks 
+	st_BufferFdbkOut.bEmpty := TRUE;
+*)
+END_IF
+
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetBufferSize" Id="{08d15760-f938-42e6-a937-905222c4b75e}">
+      <Declaration><![CDATA[METHOD PRIVATE GetBufferSize : UDINT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+IF __ISVALIDREF(st_BufferData) THEN
+	// Get the Data Item In Bytes
+	nBufferSizeTemp := TO_UDINT(SIZEOF(st_BufferData));
+	// Reduce the byte count by the In and Out pointer byte count
+	nBufferSizeTemp := nBufferSizeTemp - (nUDINTBYTECOUNT);
+	// Get the size of the ST_ItemExt Data type
+	nItemExtSize := TO_UDINT(SIZEOF(st_Blank));
+	// Get the total number of bytes in the Array, by dividing the remaining nBufferSize by the nItemExtSize
+	nBufferSize := nBufferSizeTemp/nItemExtSize;
+	GetBufferSize := nBufferSize;
+END_IF
+
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="LogEntries" Id="{3cfed669-eaaf-474c-a9b3-dcdc14d13313}">
+      <Declaration><![CDATA[PROPERTY PUBLIC LogEntries : BOOL]]></Declaration>
+      <Get Name="Get" Id="{7c61944d-e3ba-44d7-a5d7-ea328f9bf42f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LogEntries := bLogEntries;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{eda7b105-8bb1-414e-a529-6b89fd5817c2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bLogEntries	 := LogEntries;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="LogItem" Id="{0bd46e52-cff5-4362-a3ba-2cd396931de3}">
+      <Declaration><![CDATA[METHOD PRIVATE LogItem
+VAR_INPUT
+	bIn					: BOOL;
+	st_ItemToLog		: ST_Item;
+	nIndex				: UDINT;
+END_VAR
+
+VAR
+	sTempField			: STRING;
+	sTempLogData		: STRING(255);
+	nStatus			: INT;
+	Out_ReadString		: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*
+	ID : STRING := '';		// Bar Code 	
+	UniqueID : DINT := 0;		// Generic ID for tracking
+	Destination : DINT := 0;
+	Length : DINT := 0;
+	Status : E_StatusCode := E_StatusCode.No_Status;
+	CapturedInMetrics : BOOL;
+	DeviceID:	STRING(5);	// Device ID associated with this record
+	MessageType:	E_MessageIds;	// Message Type associated with this record
+*)
+// Prefix with the Direction 
+IF bIn THEN
+	sTempLogData := '>> ';
+ELSE
+	sTempLogData := '<< ';
+END_IF
+
+// Buffer Name
+sTempField := CONCAT(sBufferName , ' ');
+sTempLogData := CONCAT(sTempLogData, sTempField);
+
+// Index
+sTempField := CONCAT(UDINT_TO_STRING(nIndex), ' ');
+sTempLogData := CONCAT(sTempLogData, sTempField);
+
+// ID
+sTempField := CONCAT(st_ItemToLog.ID, ' ');
+sTempLogData := CONCAT(sTempLogData, sTempField);
+
+// Unique ID
+sTempField := CONCAT(DINT_TO_STRING(st_ItemToLog.UniqueID), ' ');
+sTempLogData := CONCAT(sTempLogData, sTempField);
+
+// Destination
+sTempField := CONCAT(DINT_TO_STRING(st_ItemToLog.Destination), ' ');
+sTempLogData := CONCAT(sTempLogData, sTempField);
+
+// Status
+nStatus := st_ItemToLog.Status;
+sTempField := CONCAT(INT_TO_STRING(nStatus), ' ');
+sTempLogData := CONCAT(sTempLogData, sTempField);
+
+// DeviceID
+sTempField := CONCAT(st_ItemToLog.DeviceID, ' ');
+sTempLogData := CONCAT(sTempLogData, sTempField);
+
+// MessageType
+nStatus := st_ItemToLog.MessageType;
+sTempLogData := CONCAT(sTempLogData, INT_TO_STRING(nStatus));
+
+ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+		, msgFmtStr := '%s'
+		, strArg := sTempLogData);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Master" Id="{3834c791-234a-495e-9a46-796affa0e843}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Master : BOOL]]></Declaration>
+      <Get Name="Get" Id="{17cf0c40-7825-4744-b9b5-7f38af05dad8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Master := bMaster;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{b2d9eb16-c70c-4462-8554-445088e93846}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bMaster := Master;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Name" Id="{bf5c2c02-54db-4975-9df0-817514aa9163}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Name : STRING]]></Declaration>
+      <Get Name="Get" Id="{d99369eb-f872-434e-b39e-edd6e23db12a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name := sBufferName;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{fb1e3497-c904-418b-854c-df2a1b591eec}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[sBufferName := Name;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="OutPointer" Id="{441edbb5-2d4b-48f8-947d-205a5ece9226}">
+      <Declaration><![CDATA[PROPERTY PUBLIC OutPointer : UDINT]]></Declaration>
+      <Get Name="Get" Id="{4e317439-bc28-475d-abe2-e7edf3f0681e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OutPointer := nOutPointer;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="RemoveItem" Id="{b25608c3-430c-4095-b642-b2f6ccbc1c7e}">
+      <Declaration><![CDATA[METHOD PUBLIC RemoveItem : ST_Item
+VAR_OUTPUT
+	st_ItemToReturn	:	ST_Item;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+IF __ISVALIDREF(st_BufferData) THEN
+	// Allow items out of the buffer only when not being commanded to clear the buffer
+	IF NOT st_BufferData.bClear THEN
+		// Increment the In Pointer using the F_CaclculateIndex
+		nOutPointer := F_CalculateIndex(Offset := 1,InitialValue := nOutPointer, BufferSize := nBufferSize);
+		// Add the Item to the Buffer
+		st_ItemToReturn := st_BufferData.aBufferData[nOutPointer];
+		IF bLogEntries THEN
+			logItem(bIn := FALSE
+					, st_ItemToLog := st_ItemToReturn
+					, nIndex := nOutPointer);
+		END_IF
+	END_IF
+END_IF
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_ItemBuffer">
+      <LineId Id="176" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="145" Count="3" />
+      <LineId Id="274" Count="1" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="285" Count="0" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="127" Count="7" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="258" Count="1" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="265" Count="2" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="286" Count="1" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="252" Count="1" />
+      <LineId Id="288" Count="2" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="268" Count="1" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="209" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.AddItem">
+      <LineId Id="21" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="27" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.BufferSize.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.Clear">
+      <LineId Id="6" Count="3" />
+      <LineId Id="16" Count="5" />
+      <LineId Id="32" Count="7" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.FB_init">
+      <LineId Id="76" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="10" Count="7" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="19" Count="5" />
+      <LineId Id="56" Count="7" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.GetBufferSize">
+      <LineId Id="14" Count="3" />
+      <LineId Id="6" Count="7" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="18" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.LogEntries.Get">
+      <LineId Id="5" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.LogEntries.Set">
+      <LineId Id="5" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.LogItem">
+      <LineId Id="25" Count="0" />
+      <LineId Id="19" Count="5" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="86" Count="3" />
+      <LineId Id="68" Count="3" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="49" Count="3" />
+      <LineId Id="54" Count="2" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="57" Count="7" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="8" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.Master.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.Master.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.Name.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.Name.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.OutPointer.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ItemBuffer.RemoveItem">
+      <LineId Id="6" Count="3" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="10" Count="3" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="30" Count="2" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_EAP_Pub_Variable" Id="{a8625ea2-c604-458b-8a6a-622da2114391}">
+    <Declaration><![CDATA[TYPE ST_EAP_Pub_Variable :
+STRUCT
+	Name				: 	STRING;		// Name of the Variable
+	VarState	AT %I*	:	UINT;		// VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK
+	VarID 		AT %Q*	:	UINT;		// Changeable ID of the variable
+	VarCtrl		AT %Q*	:	UINT;		// VarCtrl.0 = Disable publishing
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

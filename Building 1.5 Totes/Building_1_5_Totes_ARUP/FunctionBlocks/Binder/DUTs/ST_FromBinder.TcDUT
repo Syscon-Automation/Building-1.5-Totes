@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_FromBinder" Id="{c5efe947-f8b0-46ef-9d8a-7b50135458fa}">
+    <Declaration><![CDATA[TYPE ST_FromBinder :
+STRUCT
+	ProcessingComplete :BOOL;
+	Online: BOOL;
+	RackProcessing : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

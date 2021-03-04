@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_BinderPusher" Id="{6a873fad-6014-4a24-971a-686c578f5f2a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_BinderPusher
+VAR_INPUT
+	PE_Pusher: BOOL;
+	PushTime:	TIME;
+END_VAR
+VAR_OUTPUT
+	Out_Pusher_Ext:	BOOL;
+	Out_Pusher_Ret:	BOOL;
+	PushingActive: BOOL;
+END_VAR
+VAR
+	fPusher: F_TRIG;
+	
+	tonPusherArm: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fPusher(CLK:= PE_Pusher);
+
+IF fPusher.Q THEN
+	Out_Pusher_Ext := TRUE;
+	Out_Pusher_Ret := FALSE;
+	PushingActive := TRUE;
+END_IF
+
+tonPusherArm(IN:=PushingActive , PT:= PushTime);
+
+IF tonPusherArm.Q  THEN
+	Out_Pusher_Ext := FALSE;
+	Out_Pusher_Ret := TRUE;
+	PushingActive := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_BinderPusher">
+      <LineId Id="113" Count="13" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

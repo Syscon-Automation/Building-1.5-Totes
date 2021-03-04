@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <GVL Name="GVL_EquipArrays" Id="{58e11c02-9b81-4241-a2cb-8209c0b8af45}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	nEquipIndex : DINT := 0;	// Index used to Assign the Equipment Index for System Status Reporting
+	nEquip_Count AT %Q* : DINT; //Count of Equipment to Process in System PLC
+	aEquipStatusArray_Out AT %Q* : ARRAY[1..cEQUIP_COUNT_MAX] OF ST_StateCntrlSts; //Array of Equipment Status Outbound
+	aEquipStatusArray_In AT %I* : ARRAY[1..cEQUIP_COUNT_MAX] OF ST_StateCntrlSts; //Array of Equipment Status Inbound
+	
+	// System Equipment
+	nSystemEquip_Count : DINT; //Count of Equipment to Process in System PLC
+	aSystemEquipStatusArray : ARRAY[1..cEQUIP_COUNT_MAX] OF ST_StateCntrlSts; //Array of Equipment Status Current
+	aSystemEquipStatusArray_Last : ARRAY[1..cEQUIP_COUNT_MAX] OF ST_StateCntrlSts; //Array of Equipment Status Last State
+END_VAR
+
+VAR_GLOBAL CONSTANT
+	cEQUIP_COUNT_MAX : DINT := 10;	//Adjust when adding equipment to monitor
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

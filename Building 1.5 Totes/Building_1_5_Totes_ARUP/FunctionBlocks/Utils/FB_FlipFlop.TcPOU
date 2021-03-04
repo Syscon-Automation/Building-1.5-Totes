@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_FlipFlop" Id="{13ad2053-9582-4d13-a614-b4835229463d}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+Function Block to create a flip flop output based on a single input trigger.
+Each transition of In from Low to High will chnage Out output state to change
+*)
+FUNCTION_BLOCK FB_FlipFlop
+
+VAR_INPUT
+	In:	BOOL;
+END_VAR
+VAR_OUTPUT
+	Out:	BOOL;
+END_VAR
+VAR
+
+	In_rtrig: R_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Input Trigger
+In_rtrig(CLK:=In);
+
+// Cpntroll Output
+IF In_rtrig.Q AND NOT Out THEN
+	Out := TRUE;
+ELSIF In_rtrig.Q AND Out THEN
+	Out := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_FlipFlop">
+      <LineId Id="9" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

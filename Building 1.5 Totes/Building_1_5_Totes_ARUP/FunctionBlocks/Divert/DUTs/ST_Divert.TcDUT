@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_Divert" Id="{99ca5dd3-5878-4182-bc72-87520792e063}">
+    <Declaration><![CDATA[TYPE ST_Divert :
+{attribute 'OPC.UA.DA' := '1'}
+STRUCT
+	Config			: ST_DivertCfg;		// Configuration Variables
+
+	Full 			: BOOL;				//Diverter full photo eye is blocked
+	Jammed 			: BOOL;				//Jammed photo eye is blocked
+	Faulted 		: BOOL;				//Returned faulted status
+	Status 			: E_StatusCode := E_StatusCode.Divert_Idle; 	//Status Code, initialized to Idle
+
+	ConfirmPE	   	: BOOL;				//Physical input address of photo eye
+	FullPE		   	: BOOL;				//Physical input address of photo eye
+	JamPE		   	: BOOL;				//Physical input address of photo eye 
+	Output1	 		: BOOL;				//Physical output address of diverter
+	Output2	  		: BOOL;				//Physical output address of diverter
+	
+	Output1Flag		: DINT;				//Indicates what the encoder count is when output is energized
+	
+	FullTime		: TIME;				//Time that full PE has to be high before the lane is considered full     
+	FullTimer		: TON; 				//Timer that is used for checking how long the full PE is on
+	
+	Item			: ST_Item;			// Currently Diverting Item
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

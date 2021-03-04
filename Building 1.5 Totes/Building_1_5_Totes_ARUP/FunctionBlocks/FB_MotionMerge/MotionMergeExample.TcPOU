@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="MotionMergeExample" Id="{61412566-61ac-49ff-95e5-521eace37afb}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MotionMergeExample
+VAR
+	bSimulate					: BOOL := FALSE;	// Indicates when runing a simulation
+	Merge_1				: FB_MotionMerge;
+	Merge_1MergeItemArry: ARRAY[MERGEARRAYSIZE_MIN..MERGEARRAYSIZE_MAX] OF ST_MotionMergeItem; // Array for the total items on conveyor
+	st_MergeEncoder		: ST_Encoder;
+	fb_MergeEncoder		: FB_ProcessEncoder;
+	ENC_Raw				:	UINT;
+END_VAR
+
+VAR PERSISTENT
+	{attribute 'OPC.UA.DA' := '1'}
+	Merge_1_Config				: ST_MotionMergeConfig; 
+END_VAR
+
+VAR CONSTANT
+	MERGEMASKSIZE		: UINT := 16;	// Number of bits to mask into the Encoder Count, will define the size of the SORTERENCODERMAX value
+	MERGEARRAYSIZE_MAX	: INT := 50;  // Number of items that are proccesed on conveyor at one time
+	MERGEARRAYSIZE_MIN	: INT := 1;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Setup and process the Merge Encoder
+st_MergeEncoder.EncoderRawCount := ENC_Raw;
+st_MergeEncoder.BitMaskSize := MERGEMASKSIZE;
+fb_MergeEncoder(Encoder := st_MergeEncoder, Simulate :=bSimulate);
+
+// Run Merge Logic
+Merge_1(
+	InOut_ConveyorArry := Merge_1MergeItemArry,
+//	In_InductPhotoEye := Photoeyes.PE_22141.Out_OffFltrd,
+	In_St_Encoder := st_MergeEncoder,
+//	In_MergeRunning := Conveyors.P8005_VFD.IsRunning,
+//	In_DownstreamClearPhotoEye := Photoeyes.PE_22081.JamDetected,
+	cfg_MotionMerge := Merge_1_Config);
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MotionMergeExample">
+      <LineId Id="6" Count="13" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

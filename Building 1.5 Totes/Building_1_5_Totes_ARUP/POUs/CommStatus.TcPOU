@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="CommStatus" Id="{e95d5f11-0d92-4097-aeba-fc57376b0eed}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM CommStatus
+VAR
+	DebounceOnTime:	TIME := T#500MS;     // Default Value	
+	DebounceOffTime:	TIME := T#1S;     // Default Value
+		
+	RIO1151_CommFault: FB_DigDebnce;	// Remote IO Block 1151 Communication Fault
+	RIO2151_CommFault: FB_DigDebnce;	// Remote IO Block 2151 Communication Fault
+	RIO3171_CommFault: FB_DigDebnce;	// Remote IO Block 3171 Communication Fault
+	RIO4141_CommFault: FB_DigDebnce;	// Remote IO Block 4141 Communication Fault
+	RIO7151_CommFault: FB_DigDebnce;	// Remote IO Block 7151 Communication Fault
+	RIO8171_CommFault: FB_DigDebnce;	// Remote IO Block 8171 Communication Fault
+	RIO9191_CommFault: FB_DigDebnce;	// Remote IO Block 9191 Communication Fault
+	RIO10161_CommFault: FB_DigDebnce;	// Remote IO Block 10161 Communication Fault
+	RIO11171_CommFault: FB_DigDebnce;	// Remote IO Block 11171 Communication Fault
+	RIO12182_CommFault: FB_DigDebnce;	// Remote IO Block 12182 Communication Fault
+	
+	BCR_S2140_01_CommFault: FB_DigDebnce;;		// Bar Code Reader 2140_01 Communication Fault
+	BCR_S2141_01_CommFault: FB_DigDebnce;;		// Bar Code Reader 2141_01 Communication Fault
+	BCR_S2150_01_CommFault: FB_DigDebnce;;		// Bar Code Reader 2150_01 Communication Fault
+	BCR_S3080_01_CommFault: FB_DigDebnce;;		// Bar Code Reader 3080_01 Communication Fault
+	
+	Ethernet_CommFault: FB_DigDebnce;;		// Ethernet Adapter Status Communication Fault
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Remote IO Blocks --------------------
+RIO1151_CommFault(
+	In:= GVL_IO.RIO1151_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+
+RIO2151_CommFault(
+	In:= GVL_IO.RIO2151_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+RIO3171_CommFault(
+	In:= GVL_IO.RIO3171_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+RIO4141_CommFault(
+	In:= GVL_IO.RIO4141_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+RIO7151_CommFault(
+	In:= GVL_IO.RIO7151_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+RIO8171_CommFault(
+	In:= GVL_IO.RIO8171_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+RIO9191_CommFault(
+	In:= GVL_IO.RIO9191_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+RIO10161_CommFault(
+	In:= GVL_IO.RIO10161_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+RIO11171_CommFault(
+	In:= GVL_IO.RIO11171_WcState, 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+
+RIO12182_CommFault(
+	In:= GVL_IO.RIO12182_WcState , 
+	CFG_OKState:= 0, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+
+// Bar Code Readers --------------------	
+BCR_S2140_01_CommFault(
+	In:= BarCodeReaders.BCR_S2140_01.Out_DeviceState = 0, 
+	CFG_OKState:= 1, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+BCR_S2141_01_CommFault(
+	In:= BarCodeReaders.BCR_S2141_01.Out_DeviceState = 0, 
+	CFG_OKState:= 1, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+BCR_S2150_01_CommFault(
+	In:= BarCodeReaders.BCR_S2150_01.Out_DeviceState = 0, 
+	CFG_OKState:= 1, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+BCR_S3080_01_CommFault(
+	In:= BarCodeReaders.BCR_S3080_01.Out_DeviceState = 0, 
+	CFG_OKState:= 1, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+	
+// Ethernet Controller	
+Ethernet_CommFault(
+//	In:= GVL_IO.EthernetAdapter_State = 0, 
+	CFG_OKState:= 1, 
+	CFG_OnDlyTime:= DebounceOnTime, 
+	CFG_OffDlyTime:= DebounceOffTime, 
+	In_Sim:= , 
+	);
+]]></ST>
+    </Implementation>
+    <LineIds Name="CommStatus">
+      <LineId Id="13" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="14" Count="3" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="252" Count="6" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="261" Count="5" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="269" Count="5" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="277" Count="5" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="285" Count="5" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="293" Count="5" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="301" Count="5" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="307" Count="0" />
+      <LineId Id="309" Count="5" />
+      <LineId Id="308" Count="0" />
+      <LineId Id="316" Count="6" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="133" Count="5" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="326" Count="0" />
+      <LineId Id="328" Count="5" />
+      <LineId Id="327" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="336" Count="5" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="342" Count="0" />
+      <LineId Id="344" Count="5" />
+      <LineId Id="343" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="221" Count="5" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="116" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

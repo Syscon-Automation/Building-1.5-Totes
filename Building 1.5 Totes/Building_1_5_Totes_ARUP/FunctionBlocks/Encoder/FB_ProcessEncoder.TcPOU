@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_ProcessEncoder" Id="{8a4209ba-a41c-4712-a4fe-8923dfba4895}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ProcessEncoder
+VAR_IN_OUT
+	Encoder:	ST_Encoder;
+END_VAR
+VAR_INPUT
+	Simulate:	BOOL;	// Return a Simulate count
+	SimPulseInterval: TIME := T#1S; // Time between simulated encoder pulses
+END_VAR
+VAR
+	//Simulation Variables
+	SimEncoderTimer		: TON;	// Timer used to simulate encoder movement
+	sEncoderString		: STRING;	// Current Encoder Count formatted as a string
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+	The Beckhoff encoder card cannot be configured to roll-over at a specfic interval, therefore it must be
+	bitWise AND masked to approximate the size of the sorter array to maintain a 1-1 encoder pulse to sorter array index relationship.
+	The masking is accomplished by calculating (2^n - 1) where (2^n - 1) is greater than the length of the sorter in pulses.
+	The "- 1" flips all the bits to the right of the 2^n value. When this is ANDED with the encoder count, the count effectively
+	"rolls over" when the 2^n value is reached. The encoder count will continue to increase to the maximum value (UINT[65535] UDINT[4294967295],
+	but 0 to (2^n - 1) will be the effective range of the encoder.
+
+	65535 AND 0 [(2^0) - 1] = 0			65535 / 255 [(2^8) - 1] = 255
+	65535 AND 1 [(2^1) - 1] = 1			65535 / 511 [(2^9) - 1] = 511
+	65535 AND 3 [(2^2) - 1] = 3			65535 / 1023 [(2^10) - 1] = 1023
+	65535 AND 7 [(2^3) - 1] = 7			65535 / 2047 [(2^11) - 1] = 2047
+	65535 AND 15 [(2^4) - 1] = 15		65535 / 4095 [(2^12) - 1] = 4095
+	65535 AND 31 [(2^5) - 1] = 31		65535 / 8191 [(2^13) - 1] = 8191
+	65535 AND 63 [(2^6) - 1] = 63		65535 / 16383 [(2^14) - 1] = 16383
+	65535 AND 127 [(2^7) -1] = 127		65535 / 32767 [(2^15) - 1] = 32767
+	                       				65535 / 65535 [(2^16) - 1] = 65535
+
+*)
+
+SimEncoderTimer(IN := Simulate, PT := SimPulseInterval);
+IF Simulate THEN
+	IF SimEncoderTimer.Q THEN
+		Encoder.CurrentCount := Encoder.CurrentCount + 1;
+		IF Encoder.CurrentCount >= LREAL_TO_UDINT(EXPT(2,Encoder.BitMaskSize)) THEN
+			Encoder.CurrentCount := 0;
+		END_IF
+		// Reset the Timer
+		SimEncoderTimer(IN := FALSE, PT := SimPulseInterval);
+	END_IF
+ELSE
+	Encoder.CurrentCount := Encoder.EncoderRawCount AND (LREAL_TO_UDINT(EXPT(2,Encoder.BitMaskSize)) - 1);
+END_IF
+
+// Front and Rear space padding on the current encoder count
+Encoder.EncoderString := CONCAT(' ',UDINT_TO_STRING(Encoder.CurrentCount));
+Encoder.EncoderString := CONCAT(Encoder.EncoderString, ' ');]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ProcessEncoder">
+      <LineId Id="62" Count="6" />
+      <LineId Id="70" Count="13" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="10" Count="4" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

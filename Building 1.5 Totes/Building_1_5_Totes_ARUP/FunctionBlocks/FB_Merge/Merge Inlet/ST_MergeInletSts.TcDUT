@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_MergeInletSts" Id="{008f997e-a676-416b-b585-2fae83f3e3c9}">
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_MergeInletSts :
+STRUCT
+	MergeRequested				:	BOOL;		// Merge has been Requested (1=request Active)
+	Granted						:	BOOL;		// The Granted state of this Inlet
+	MergeComplete				:	BOOL;		// Flag to finish merging
+	HiHiDetected				:	BOOL;		// HiHi Event has been detected and requires control
+	HiHiTimedReleaseActive		:	BOOL;		// Indicates that a HiHi event clearout is in process
+	Out_MergeInletRunActive		:	BOOL;		// Output for Merge inlet run
+	Sts_MergeInletRun			:	BOOL;		// Merge Inlet status Motor is currently running (1=merging or running)
+	MergeRunOutActive			:	BOOL;		// Flag to indicate that the Merge Run Out is active (1=active)
+	CrrntReleaseCount			:	INT;		// The current count of product released
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

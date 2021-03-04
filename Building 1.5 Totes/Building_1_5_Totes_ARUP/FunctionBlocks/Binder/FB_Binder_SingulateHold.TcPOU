@@ -1,0 +1,506 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_Binder_SingulateHold" Id="{efb308b7-cee6-4ebb-b704-a0668858690f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Binder_SingulateHold
+VAR_INPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	In_ResetState				:	BOOL;		// Clear the current functional state of the Binder
+
+	In_Pause					:	BOOL;
+	In_ConveyorRunning			:	BOOL;
+	In_ReturnConveyorClearTime	:	TIME;
+	IN_Binder_Finished			:	BOOL;
+	
+	PE_Grabber					:	BOOL;
+	PE_PinStop_1				:	BOOL;
+	PE_Holder					:	BOOL;
+	PE_BinderExit				:	BOOL;
+	PE_ReturnConveyorOccupied	:	BOOL;  // Photo eye that detects product on rack return conveyor
+	
+	In_Grabber_Auto				:	BOOL;
+	In_SV_GrabberExtend			:	BOOL;
+	In_SV_GrabberRetract		:	BOOL;
+	In_GrabberExtended			:	BOOL;
+	In_GrabberRetracted			:	BOOL;
+
+	In_PinStop_1_Auto			:	BOOL;
+	In_SV_PinStop_1_Extend		:	BOOL;
+	In_SV_PinStop_1_Retract		:	BOOL;
+	In_PinStop_1_Extended		:	BOOL;
+	In_PinStop_1_Retracted		:	BOOL;
+
+	In_PinStop_2_Auto			:	BOOL;
+	In_SV_PinStop_2_Extend		:	BOOL;
+	In_SV_PinStop_2_Retract		:	BOOL;
+	In_PinStop_2_Extended		:	BOOL;
+	In_PinStop_2_Retracted		:	BOOL;
+
+	In_Holder_Auto				:	BOOL;
+	In_SV_HolderExtend			:	BOOL;
+	In_SV_HolderRetract			:	BOOL;
+	In_HolderExtended			:	BOOL;
+	In_HolderRetracted			:	BOOL;
+	
+END_VAR
+VAR_OUTPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Homed					:	BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Ready					:	BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Running					:	BOOL;
+
+	Out_Grabber_Ext				:	BOOL;
+	Out_Grabber_Ret				:	BOOL;
+
+	Out_PinStop_1_Ext			:	BOOL;
+	Out_PinStop_1_Ret			:	BOOL;
+
+	Out_PinStop_2_Ext			:	BOOL;
+	Out_PinStop_2_Ret			:	BOOL;
+
+	Out_Holder_Ext				:	BOOL;
+	Out_Holder_Ret				:	BOOL;
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	Status						:	UINT;		// General Binder singulate and hold status
+	Status_Output				:	UINT;		// Binder singulate pin stop and grabber status
+	
+END_VAR
+VAR	
+	StartUp						:	BOOL := TRUE;
+	rReturnConveyorOccupied		:	R_TRIG;
+	fReturnConveyorExit			:	F_TRIG;
+	tofReleaseConveyorClearTimer:	TOF;
+	rProductFinished			:	R_TRIG;
+	fProductCleared				:	F_TRIG;
+	
+	rProductEntering			:	R_TRIG;
+	fProductEntering			:	F_TRIG;
+	rResetState					:	R_TRIG;
+	
+	tonHomeWait					:	TON := (PT := T#1S);
+	tonReadyWait				:	TON := (PT := T#1S);
+	tonRunningWait				:	TON := (PT := T#5S);
+
+	// Extend and Retract controls
+	Grabber_Extend				:	BOOL;
+	Grabber_Retract				:	BOOL;
+	PinStop_1_Extend			:	BOOL;
+	PinStop_1_Retract			:	BOOL;
+	Holder_Extend				:	BOOL;
+	Holder_Retract				:	BOOL;
+	PinStop_2_Extend			:	BOOL;
+	PinStop_2_Retract			:	BOOL;
+END_VAR
+
+VAR CONSTANT
+	// Output Status
+	GRABBER_OCCUPIED			:	UINT  := 1;
+	PINSTOP_1_OUT				:	UINT  := 2;
+	HOLDER_OCCUPIED				:	UINT  := 3;
+	PINSTOP_2_OUT				:	UINT  := 4;
+	
+	// Singulation Status
+	PAUSED						:	UINT  := 0;
+	PRODUCT_PRESENT				:	UINT  := 1;
+	PRODUCT_ENTERING_BINDER		:	UINT  := 2;
+	PRODUCT_READY_TO_PROCESS	:	UINT  := 3;
+	BINDER_FINISHED				:	UINT  := 4;	
+	PRODUCT_EXITING_BINDER		:	UINT  := 5;
+	RETURN_CONVEYOR_CLEARING	:	UINT  := 6;
+	RETURN_CONVEYOR_BUSY		:	UINT  := 7;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Process the In_ResetState
+rResetState(CLK:=In_ResetState);
+
+IF rResetState.Q THEN
+	// Clear the Status
+	Status := 0;
+	// Revert to the StartUp state
+	StartUp := TRUE;
+	// Revert to the NOT Homed state
+	Out_Homed := FALSE;
+	tonHomeWait(IN := FALSE);
+	// Revert to the NOT Ready state
+	Out_Ready := FALSE;
+	tonReadyWait(IN := FALSE);
+	// Revert to the NOT Running state
+	Out_Running := FALSE;
+	tonRunningWait(IN := FALSE);
+	// Clear the reset request
+	In_ResetState := FALSE;
+END_IF
+
+// Home the 
+IF StartUp  OR NOT Out_Homed OR NOT Out_Ready THEN
+	Status.PAUSED := TRUE;
+	
+	tonHomeWait.IN := NOT Out_Homed;
+	tonHomeWait();
+	IF NOT Out_Homed THEN
+		// Grabber
+		Grabber_Retract := TRUE;
+		Grabber_Extend := FALSE;
+		// PinStop_1
+		PinStop_1_Retract := FALSE;
+		PinStop_1_Extend := TRUE;
+		// Holder
+		Holder_Retract := TRUE;
+		Holder_Extend := FALSE;
+		// PinStop_2
+		PinStop_2_Retract := FALSE;
+		PinStop_2_Extend := TRUE;
+		IF In_GrabberRetracted
+		   AND In_PinStop_1_Extended
+		   AND In_HolderRetracted
+		   AND In_PinStop_2_Extended
+		   THEN
+			Out_Homed := tonHomeWait.Q;
+		END_IF
+	END_IF
+
+	tonReadyWait.IN := NOT Out_Ready AND Out_Homed;
+	tonReadyWait();
+	IF NOT Out_Ready AND Out_Homed THEN
+		// PinStop_1
+		PinStop_1_Retract := FALSE;
+		PinStop_1_Extend := TRUE;
+		// PinStop_2
+		PinStop_2_Retract := FALSE;
+		PinStop_2_Extend := TRUE;
+		IF In_GrabberRetracted
+		   AND In_PinStop_1_Extended
+		   AND In_HolderRetracted
+		   AND In_PinStop_2_Extended
+		   THEN
+			Out_Ready := tonReadyWait.Q;
+		END_IF
+	END_IF
+
+	StartUp := NOT Out_Homed OR NOT Out_Ready;
+	Out_Running := FALSE;
+	
+ELSIF In_Pause OR NOT In_ConveyorRunning THEN
+	// Grabber
+	Grabber_Retract := FALSE;
+	Grabber_Extend := FALSE;
+	// PinStop_1
+	PinStop_1_Retract := FALSE;
+	PinStop_1_Extend := FALSE;
+	// Holder
+	Holder_Retract := FALSE;
+	Holder_Extend := FALSE;
+	// PinStop_2
+	PinStop_2_Retract := FALSE;
+	PinStop_2_Extend := FALSE;
+
+ELSIF NOT Out_Running THEN
+	tonRunningWait.IN := NOT OUT_Running AND Out_Ready AND Out_Homed AND In_ConveyorRunning;
+	tonRunningWait();
+	Out_Running := tonRunningWait.Q;
+ELSIF Out_Running THEN
+	Status.PAUSED := FALSE;
+
+	a_EntryControl();
+		
+	a_ReleaseToBinder();
+	
+	a_HoldProduct();
+	
+	// Watch finished trigger to release product from
+	rProductFinished(CLK:= IN_Binder_Finished);
+	
+	IF rProductFinished.Q THEN
+		Status.BINDER_FINISHED := TRUE;
+	END_IF
+	
+	// Watch release conveyor to make sure it is clear to release from OCR
+	a_WatchReleaseConveyor();
+		
+	a_ReleaseFromBinder();
+	
+	fProductCleared(CLK:= PE_BinderExit AND Status.PRODUCT_EXITING_BINDER);
+	
+	// PinStop_2
+	PinStop_2_Retract := Status.PRODUCT_EXITING_BINDER;
+	PinStop_2_Extend := NOT Status.PRODUCT_EXITING_BINDER;
+	IF fProductCleared.Q THEN
+		Status.PRODUCT_EXITING_BINDER := FALSE;
+//		IF Status.PRODUCT_PRESENT OR PE_PinStop_1 THEN
+//			ReleaseToOCR();
+//		END_IF
+	END_IF
+ELSE
+	// Grabber
+	Grabber_Retract := TRUE;
+	Grabber_Extend := FALSE;
+	// PinStop_1
+	PinStop_1_Retract := FALSE;
+	PinStop_1_Extend := TRUE;
+	// Holder
+	Holder_Retract := TRUE;
+	Holder_Extend := FALSE;
+	// PinStop_2
+	PinStop_2_Retract := FALSE;
+	PinStop_2_Extend := TRUE;
+END_IF
+
+// Activate all the outputs in one place
+Status_Output.GRABBER_OCCUPIED := Grabber(Active := In_Grabber_Auto, Extend:= Grabber_Extend, Retract := Grabber_Retract);
+Status_Output.HOLDER_OCCUPIED := Holder(Active := In_Holder_Auto, Extend:= Holder_Extend, Retract := Holder_Retract);
+Status_Output.PINSTOP_1_OUT := PinStop_1(Active:= In_PinStop_1_Auto, Extend := PinStop_1_Extend, Retract:= PinStop_1_Retract);
+Status_Output.PINSTOP_2_OUT := PinStop_2(Active:= In_PinStop_2_Auto, Extend := PinStop_2_Extend, Retract:= PinStop_2_Retract);
+]]></ST>
+    </Implementation>
+    <Action Name="a_EntryControl" Id="{b6153a69-b005-407d-8f36-664088414d75}">
+      <Implementation>
+        <ST><![CDATA[(* Set PRODUCT_PRESENT when:
+	PE_PinStop_1 is ON
+	OR PRODUCT_ENTERRING_OCR is ON
+*)
+Status.PRODUCT_PRESENT := PE_PinStop_1 OR Status.PRODUCT_ENTERING_BINDER;
+// Retract the Pin stop in response to the Release to the OCR, and the state of the Pin stop PE
+rProductEntering(CLK:= Status.PRODUCT_ENTERING_BINDER);
+IF rProductEntering.Q THEN
+	PinStop_1_Extend := FALSE;
+	PinStop_1_Retract := TRUE;
+END_IF
+fProductEntering(CLK := PE_PinStop_1);
+IF fProductEntering.Q THEN
+	PinStop_1_Extend := TRUE;
+	PinStop_1_Retract := FALSE;
+END_IF
+
+// If the grabber recieves product while Product is physically or logically at Pin Stop 1, then hold it at the grabber
+
+Grabber_Extend := (PE_Grabber AND Status.PRODUCT_PRESENT) OR Status.PRODUCT_ENTERING_BINDER;
+Grabber_Retract := NOT Grabber_Extend;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_HoldProduct" Id="{f7f34756-9003-4e94-a7bc-103a15674af6}">
+      <Implementation>
+        <ST><![CDATA[IF PE_Holder THEN
+	Status.PRODUCT_PRESENT := FALSE;
+	Status.PRODUCT_ENTERING_BINDER := FALSE;
+	IF NOT Status.PRODUCT_EXITING_BINDER THEN
+		Holder_Extend := TRUE;
+		Holder_Retract := FALSE;
+		Status.PRODUCT_READY_TO_PROCESS := TRUE;
+	END_IF
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_ReleaseFromBinder" Id="{464ad001-7474-45eb-8420-e2e9f8a48790}">
+      <Implementation>
+        <ST><![CDATA[IF Status.BINDER_FINISHED AND NOT(Status.RETURN_CONVEYOR_BUSY) THEN
+	Status.PRODUCT_READY_TO_PROCESS := FALSE;
+	Status.PRODUCT_EXITING_BINDER := TRUE;
+	Status.BINDER_FINISHED := FALSE;
+	// Holder
+	Holder_Retract := TRUE;
+	Holder_Extend := FALSE;
+	// PinStop_2
+	PinStop_2_Retract := TRUE;
+	PinStop_2_Extend := FALSE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_ReleaseToBinder" Id="{b5b9b7bd-dae0-4d56-a562-2a8f8e024030}">
+      <Implementation>
+        <ST><![CDATA[IF Status.PRODUCT_PRESENT 
+   AND NOT(Status_Output.HOLDER_OCCUPIED)
+   AND NOT(Status.PRODUCT_ENTERING_BINDER)
+   AND NOT(Status.PRODUCT_EXITING_BINDER)  THEN
+	Status.PRODUCT_ENTERING_BINDER := TRUE;
+END_IF
+
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_WatchReleaseConveyor" Id="{8f78db1d-dcc1-4169-bac1-2ae9440766d7}">
+      <Implementation>
+        <ST><![CDATA[rReturnConveyorOccupied(CLK:= PE_ReturnConveyorOccupied);
+
+IF rReturnConveyorOccupied.Q THEN
+	Status.RETURN_CONVEYOR_CLEARING := TRUE;
+END_IF
+
+fReturnConveyorExit(CLK:= Status.RETURN_CONVEYOR_BUSY AND PE_BinderExit);
+
+IF fReturnConveyorExit.Q THEN
+	Status.RETURN_CONVEYOR_CLEARING := FALSE;
+END_IF
+
+tofReleaseConveyorClearTimer(IN:= Status.RETURN_CONVEYOR_CLEARING, PT:= In_ReturnConveyorClearTime);
+
+Status.RETURN_CONVEYOR_BUSY:= tofReleaseConveyorClearTimer.Q;]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Grabber" Id="{d9a054eb-1be9-4b7e-9b8c-9ea09c084539}">
+      <Declaration><![CDATA[METHOD Grabber : BOOL
+VAR_INPUT
+	Active	: BOOL;	
+	Extend	: BOOL;
+	Retract	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Active THEN
+	IF Extend THEN
+		Out_Grabber_Ext := TRUE;
+		Out_Grabber_Ret := FALSE;
+	ELSIF Retract THEN
+		Out_Grabber_Ext := FALSE;
+		Out_Grabber_Ret := TRUE;
+	ELSE
+		Out_Grabber_Ext := FALSE;
+		Out_Grabber_Ret := FALSE;
+	END_IF
+ELSE
+	Out_Grabber_Ext := FALSE;
+	Out_Grabber_Ret := FALSE;
+END_IF
+
+Grabber := Out_Grabber_Ext OR In_GrabberExtended;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Holder" Id="{303e50bf-e106-45b7-8a06-974f9a213ffc}">
+      <Declaration><![CDATA[METHOD Holder : BOOL
+VAR_INPUT
+	Active	: BOOL;
+	Extend	: BOOL;
+	Retract	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Active THEN
+	IF Extend THEN
+		Out_Holder_Ext := TRUE;
+		Out_Holder_Ret := FALSE;
+	ELSIF Retract THEN
+		Out_Holder_Ext := FALSE;
+		Out_Holder_Ret := TRUE;
+	ELSE
+		Out_Holder_Ext := FALSE;
+		Out_Holder_Ret := FALSE;
+	END_IF
+ELSE
+	Out_Holder_Ext := FALSE;
+	Out_Holder_Ret := FALSE;
+END_IF
+
+Holder := Out_Holder_Ext OR In_HolderExtended;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="PinStop_1" Id="{5370e292-40c3-4625-abad-ba9ca471ba3e}">
+      <Declaration><![CDATA[METHOD PinStop_1 : BOOL
+VAR_INPUT
+	Active	: BOOL;	
+	Extend	: BOOL;
+	Retract	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Active THEN
+	IF Extend THEN
+		Out_PinStop_1_Ext := TRUE;
+		Out_PinStop_1_Ret := FALSE;
+	ELSIF Retract THEN
+		Out_PinStop_1_Ext := FALSE;
+		Out_PinStop_1_Ret := TRUE;
+	ELSE
+		Out_PinStop_1_Ext := FALSE;
+		Out_PinStop_1_Ret := FALSE;
+	END_IF
+ELSE
+	Out_PinStop_1_Ext := FALSE;
+	Out_PinStop_1_Ret := FALSE;
+END_IF
+
+PinStop_1 := Out_PinStop_1_Ext OR In_PinStop_1_Extended;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="PinStop_2" Id="{77bd50ff-5a8a-4ef0-8e5f-e3aadbc06c0a}">
+      <Declaration><![CDATA[METHOD PinStop_2 : BOOL
+VAR_INPUT
+	Active	: BOOL;
+	Extend	: BOOL;
+	Retract	: BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Active THEN
+	IF Extend THEN
+		Out_PinStop_2_Ext := TRUE;
+		Out_PinStop_2_Ret := FALSE;
+	ELSIF Retract THEN
+		Out_PinStop_2_Ext := FALSE;
+		Out_PinStop_2_Ret := TRUE;
+	ELSE
+		Out_PinStop_2_Ext := FALSE;
+		Out_PinStop_2_Ret := FALSE;
+	END_IF
+ELSE
+	Out_PinStop_2_Ext := FALSE;
+	Out_PinStop_2_Ret := FALSE;
+END_IF
+
+PinStop_2 := Out_PinStop_2_Ext OR In_PinStop_2_Extended;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Binder_SingulateHold">
+      <LineId Id="8850" Count="139" />
+      <LineId Id="5308" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.a_EntryControl">
+      <LineId Id="40" Count="19" />
+      <LineId Id="27" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.a_HoldProduct">
+      <LineId Id="37" Count="8" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.a_ReleaseFromBinder">
+      <LineId Id="36" Count="11" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.a_ReleaseToBinder">
+      <LineId Id="24" Count="7" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.a_WatchReleaseConveyor">
+      <LineId Id="72" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.Grabber">
+      <LineId Id="82" Count="3" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="86" Count="9" />
+      <LineId Id="74" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.Holder">
+      <LineId Id="27" Count="0" />
+      <LineId Id="41" Count="9" />
+      <LineId Id="37" Count="3" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.PinStop_1">
+      <LineId Id="68" Count="0" />
+      <LineId Id="83" Count="9" />
+      <LineId Id="78" Count="4" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Binder_SingulateHold.PinStop_2">
+      <LineId Id="72" Count="0" />
+      <LineId Id="87" Count="9" />
+      <LineId Id="82" Count="4" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_MergeInletCtrl" Id="{a8fd0dab-b4a2-4061-b35f-1b81afe9f0b3}">
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_MergeInletCtrl :
+STRUCT
+	PhotoEyeDischarge			:	BOOL;			// Photo Eye at the discharge of the assigned merge location
+	PhotoEyeEntryHigh			:	BOOL;			// Photo Eye at the Full (high water) location of the merge
+	PhotoEyeEntryHiHi			:	BOOL;			// Photo Eye at the Full (hihi water) location of the merge
+	MergeInletMtrFdBck			:	BOOL;			// Current motor feedback for the assigned merge location
+	In_InletState				:	E_StateCntrl;	// The State of the merge take away conveyor
+	In_oMergeRelease			:	BOOL;
+	{attribute 'OPC.UA.DA' := '0'}
+	SimActive					:	BOOL;			// Simulation Bit 
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

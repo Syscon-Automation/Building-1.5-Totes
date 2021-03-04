@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_MergeInlet" Id="{62f567ab-72da-4e16-a25c-b00eb188f06d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MergeInlet
+VAR_INPUT
+	In_MergeSubState		:	E_MergeState;
+	In_TakeAwayMtrSts		:	BOOL;
+	In_MergeInletInput		:	ST_MergeInlet;	
+	In_MergeGranted			:	BOOL;		// Merge request has been accepted and allowed (1=merge allowed)
+	In_MergeWakeTrig		:   BOOL;
+END_VAR
+VAR_OUTPUT
+	Sts_MergeInlet			:	ST_MergeInletSts;
+END_VAR
+VAR
+	MergeEntryHasProduct		: 	BOOL;
+	MergeEntryHighTimer			: 	TON;		// Timer to watch High Photo Eye
+	MergeEntryHiHiTimer			: 	TON;		// Timer to watch HiHi Photo Eye
+	MergeRelPrdctWaitTimer		: 	TON;		// Timer to release product if waiting too long for full mark to be reached
+	
+	InletStateChanged			:	R_TRIG;	
+	LastInletState				: 	E_StateCntrl;
+	InletEnabled				:	BOOL;
+
+	ProductReleaseCountFTrig	: 	F_Trig;
+	ReleaseCountWaitTimer		: 	TON;
+	ClearRunOutTimer			: 	TP;			// Run the timer for this long to clear out the merge
+	fClearRunOut				:	F_TRIG;		// Detect when the ClearRunOut has completed
+	ClearHiHiTimer				: 	TP;			// Run the timer for this long to clear a HiHi condition
+	MergeRequestRTrig			: 	R_TRIG;
+	RunEnable					: 	BOOL;
+	MergePreLoad				: 	BOOL;
+	MergeGrantedFTrig			: 	F_TRIG;
+	ManualModeFTrig				: 	F_TRIG;
+	ManualOperEnable			: 	BOOL;
+	ManModeTrig					: 	R_TRIG;
+	TimerReleaseCountWaitActive	:	BOOL;
+	LastHighTriggerTime			:	REAL;
+	LastHiHiTriggerTime			:	REAL;
+	LastHiHiClearTime			:	REAL;
+	LastMrgReqPrdctWaitTime		:	REAL;
+	LastReleaseCountWaitTime	:	REAL;
+	LastClearRunOutTime			:	REAL;
+
+	nHighTriggerTime			:	UINT;
+	nHiHiTriggerTime			:	UINT;
+	nHiHiClearTime				:	UINT;
+	nMrgReqPrdctWaitTime		:	UINT;
+	nReleaseCountWaitTime		:	UINT;
+	nClearRunOutTime			:	UINT;
+
+	tHighTriggerTime			:	TIME;
+	tHiHiTriggerTime			:	TIME;
+	tHiHiClearTime				:	TIME;
+	tMrgReqPrdctWaitTime		:	TIME;
+	tReleaseCountWaitTime		:	TIME;
+	tClearRunOutTime			:	TIME;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calculate and set the timer values
+// High Water Mark trigger timer
+IF LastHighTriggerTime <> In_MergeInletInput.Cfg.Cfg_HighTriggerTime THEN
+	LastHighTriggerTime := In_MergeInletInput.Cfg.Cfg_HighTriggerTime;
+	nHighTriggerTime := REAL_TO_UINT(LastHighTriggerTime * 1000); 
+	tHighTriggerTime := UINT_TO_TIME(nHighTriggerTime);
+END_IF
+
+// HiHi Water Mark trigger timer
+IF LastHiHiTriggerTime <> In_MergeInletInput.Cfg.Cfg_HiHiTriggerTime THEN
+	LastHiHiTriggerTime := In_MergeInletInput.Cfg.Cfg_HiHiTriggerTime;
+	nHiHiTriggerTime := REAL_TO_UINT(LastHiHiTriggerTime * 1000); 
+	tHiHiTriggerTime := UINT_TO_TIME(nHiHiTriggerTime);
+END_IF
+
+// HiHi Water Mark clear timer
+IF LastHiHiClearTime <> In_MergeInletInput.Cfg.Cfg_HiHiClearTime THEN
+	LastHiHiClearTime := In_MergeInletInput.Cfg.Cfg_HiHiClearTime;
+	nHiHiClearTime := REAL_TO_UINT(LastHiHiClearTime * 1000); 
+	tHiHiClearTime := UINT_TO_TIME(nHiHiClearTime);
+END_IF
+
+// Product Wait timer
+IF LastMrgReqPrdctWaitTime <> In_MergeInletInput.Cfg.Cfg_MrgReqPrdctWaitTime THEN
+	LastMrgReqPrdctWaitTime := In_MergeInletInput.Cfg.Cfg_MrgReqPrdctWaitTime;
+	nMrgReqPrdctWaitTime := REAL_TO_UINT(LastMrgReqPrdctWaitTime * 1000); 
+	tMrgReqPrdctWaitTime := UINT_TO_TIME(nMrgReqPrdctWaitTime);
+END_IF
+
+// Fulfilled Release Count Wait timer
+IF LastReleaseCountWaitTime <> In_MergeInletInput.Cfg.Cfg_ReleaseCountWaitTime THEN
+	LastReleaseCountWaitTime := In_MergeInletInput.Cfg.Cfg_ReleaseCountWaitTime;
+	nReleaseCountWaitTime := REAL_TO_UINT(LastReleaseCountWaitTime * 1000); 
+	tReleaseCountWaitTime := UINT_TO_TIME(nReleaseCountWaitTime);
+END_IF
+
+// Run-Out Clear timer
+IF LastClearRunOutTime <> In_MergeInletInput.Cfg.Cfg_ClearRunOutTime THEN
+	LastClearRunOutTime := In_MergeInletInput.Cfg.Cfg_ClearRunOutTime;
+	nClearRunOutTime := REAL_TO_UINT(LastClearRunOutTime * 1000); 
+	tClearRunOutTime := UINT_TO_TIME(nClearRunOutTime);
+END_IF
+
+// Set InletEnabled to the Inlet conveyor Auto, or the Inlet conveyor running (for manual opertion)
+InletEnabled := ((In_MergeInletInput.Ctrl.In_InletState = E_StateCntrl.stAuto)
+				OR (In_MergeInletInput.Ctrl.In_InletState = E_StateCntrl.stManual AND In_MergeInletInput.Ctrl.In_oMergeRelease));
+
+// Watch for manual mode and manual PB
+IF In_MergeSubState = E_MergeState.stMergeManual AND InletEnabled THEN
+	ManualOperEnable := In_MergeInletInput.Ctrl.In_oMergeRelease;
+ELSE
+	ManualOperEnable := FALSE;
+END_IF
+
+ManualModeFTrig(CLK:= ManualOperEnable, Q=> );
+
+// Look at photo eyes and determine if a merge request is needed
+MergeEntryHasProduct:= (In_MergeSubState = E_MergeState.stMergeOperational)
+ 						AND In_MergeInletInput.Ctrl.PhotoEyeDischarge
+						AND (In_MergeInletInput.Ctrl.In_InletState = E_StateCntrl.stAuto);
+// Set timer to keep product from waiting too long if full mark is not met
+MergeRelPrdctWaitTimer(IN:= MergeEntryHasProduct AND (In_MergeInletInput.Cfg.Cfg_UseHighWaterPE OR In_MergeInletInput.Cfg.Cfg_UseHiHiWaterPE)
+						, PT:= tMrgReqPrdctWaitTime, Q=> , ET=> );
+
+// Watch the Timer to check for a High Water event
+MergeEntryHighTimer.IN:= In_MergeInletInput.Ctrl.PhotoEyeEntryHigh AND In_MergeInletInput.Cfg.Cfg_UseHighWaterPE AND MergeEntryHasProduct;
+MergeEntryHighTimer(PT:= tHighTriggerTime, Q=> , ET=> );
+
+// Watch the Timer to check for a HiHi Water event
+MergeEntryHighTimer.IN:= In_MergeInletInput.Ctrl.PhotoEyeEntryHiHi AND In_MergeInletInput.Cfg.Cfg_UseHiHiWaterPE AND MergeEntryHasProduct;
+MergeEntryHiHiTimer(PT:= tHiHiTriggerTime, Q=> , ET=> );
+IF (MergeEntryHiHiTimer.Q) THEN
+	Sts_MergeInlet.HiHiDetected := MergeEntryHiHiTimer.Q;
+END_IF
+
+// Set merge request based on entry and full PE's and wait timer(s)
+IF ((MergeEntryHighTimer.Q)
+   OR (MergeEntryHiHiTimer.Q)
+   OR ((NOT In_MergeInletInput.Cfg.Cfg_UseHighWaterPE AND NOT In_MergeInletInput.Cfg.Cfg_UseHiHiWaterPE) AND MergeEntryHasProduct)
+   OR (MergeRelPrdctWaitTimer.Q)) 
+   AND (NOT Sts_MergeInlet.MergeRequested AND NOT In_MergeGranted) OR ManualOperEnable THEN
+	Sts_MergeInlet.MergeRequested := TRUE;
+ELSIF Sts_MergeInlet.MergeRequested AND (NOT MergeEntryHasProduct) AND (NOT In_MergeGranted) THEN
+	Sts_MergeInlet.MergeRequested := FALSE;
+ELSIF In_MergeGranted THEN
+	Sts_MergeInlet.MergeRequested := FALSE;
+END_IF
+
+// Upon merge request or entry of manual mode reset Count, Timer and Complete bit
+ManModeTrig(CLK:= In_MergeSubState = E_MergeState.stMergeManual, Q=> );
+MergeRequestRTrig(CLK:= Sts_MergeInlet.MergeRequested, Q=> );
+IF MergeRequestRTrig.Q OR ManModeTrig.Q THEN
+	Sts_MergeInlet.CrrntReleaseCount := 0;
+	Sts_MergeInlet.MergeComplete := FALSE;
+//	ManualOperEnable := FALSE;
+END_IF
+
+// If merge granted and HiHi Water mark detected, run the merge for the HiHi Clear time
+//	This is a Timer Pulse so it will run for a specified period of time after the rising edge of the In condition is detected 
+ClearHiHiTimer(IN := Sts_MergeInlet.HiHiDetected AND In_MergeGranted, PT := tHiHiClearTime);
+	
+// If merge granted count product release on falling trigger of the photo eye
+//	Don't add up the count if the ClearRunOutTimer is running
+ProductReleaseCountFTrig(CLK:= In_MergeInletInput.Ctrl.PhotoEyeDischarge, Q=> );
+IF ProductReleaseCountFTrig.Q AND In_MergeGranted AND NOT ClearRunOutTimer.Q THEN
+	Sts_MergeInlet.CrrntReleaseCount := Sts_MergeInlet.CrrntReleaseCount +1; 
+END_IF
+
+// If merge granted set timer to release if count isn't met
+// Restart/stop the count when the merge is complete, a manual release is in process, an item is detected at the merge discharge
+TimerReleaseCountWaitActive := In_MergeGranted AND Sts_MergeInlet.Sts_MergeInletRun 
+											AND (NOT Sts_MergeInlet.MergeComplete) 
+											AND (NOT ManualOperEnable) 
+											AND (NOT MergeEntryHasProduct);
+ReleaseCountWaitTimer(IN:= TimerReleaseCountWaitActive, PT:= tReleaseCountWaitTime, Q=> , ET=> );
+
+// Set to complete if release count is met or if count wait timer expires 
+IF ((In_MergeGranted AND In_TakeAwayMtrSts)
+   AND NOT ManualOperEnable 
+   AND NOT ClearHiHiTimer.Q 
+   AND ((Sts_MergeInlet.CrrntReleaseCount >= In_MergeInletInput.Cfg.Cfg_ReleaseCount 
+   		AND In_MergeInletInput.Cfg.Cfg_ReleaseCount >= 0) 
+   		OR ReleaseCountWaitTimer.Q))
+   OR ManualModeFTrig.Q 
+   THEN
+	Sts_MergeInlet.MergeComplete := TRUE;
+END_IF
+
+// Set the HiHiTimedReleaseActive when the merge is granted and the a HiHi Event was detected
+Sts_MergeInlet.HiHiTimedReleaseActive := ClearHiHiTimer.Q;
+
+// Reset Complete when merge granted is released
+// Clear the Release count
+// Set the RunOutActive flag to prevent jams while the last released item is cleared into the merge
+MergeGrantedFTrig(CLK:= In_MergeGranted, Q=> );
+IF MergeGrantedFTrig.Q THEN
+	Sts_MergeInlet.MergeRunOutActive := TRUE;
+	Sts_MergeInlet.CrrntReleaseCount := 0;
+	Sts_MergeInlet.MergeComplete := FALSE;
+	Sts_MergeInlet.HiHiDetected := FALSE;
+END_IF
+
+// Start the ClearRunOutTimer when the MergeRunOutActive is on and the Discharge PE is clear
+ClearRunOutTimer(IN:= Sts_MergeInlet.MergeRunOutActive AND NOT In_MergeInletInput.Ctrl.PhotoEyeDischarge, PT := tClearRunOutTime);
+
+// Use the ClearRunOutTimer to reset the MergeRunOutActive
+fClearRunOut(CLK := ClearRunOutTimer.Q);
+IF fClearRunOut.Q THEN
+	Sts_MergeInlet.MergeRunOutActive := FALSE;
+END_IF
+ 
+MergePreLoad := (NOT In_MergeGranted) AND (NOT In_MergeInletInput.Ctrl.PhotoEyeDischarge);	
+
+// Set Run Output, whatever it involves
+RunEnable := In_MergeSubState = E_MergeState.stMergeOperational AND In_TakeAwayMtrSts AND (In_MergeGranted
+		OR MergePreLoad) OR (ManualOperEnable AND In_MergeGranted);
+Sts_MergeInlet.Out_MergeInletRunActive := RunEnable AND (NOT In_MergeInletInput.Ctrl.SimActive);
+ 
+Sts_MergeInlet.Sts_MergeInletRun := (In_MergeInletInput.Cfg.Cfg_UseMtrFdBck AND In_MergeInletInput.Ctrl.MergeInletMtrFdBck) OR ((NOT In_MergeInletInput.Cfg.Cfg_UseMtrFdBck) AND RunEnable);
+
+// Indicate the Granted condition
+Sts_MergeInlet.Granted := In_MergeGranted;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_MergeInlet">
+      <LineId Id="2945" Count="42" />
+      <LineId Id="2995" Count="1" />
+      <LineId Id="3153" Count="0" />
+      <LineId Id="2997" Count="0" />
+      <LineId Id="3039" Count="113" />
+      <LineId Id="242" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,246 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="System" Id="{741af542-e67c-4e6c-b125-8937dbba14b1}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM System
+VAR
+	SysStateCntrlSts        	:    ST_EquipmentStatus;    // System State/Control/Status Data
+    SysState                	:    FB_SystemCntrl;
+    SysStateCntrl_StatePB       :    ST_StateCntrlPB;
+
+    SysIntlksAllOk AT %Q*    	:    BOOL;    // Bit to show that System interlocks are OK   
+    SysEventsAllOk AT %Q*		: 	BOOL;    // Bit to show that Syetem events are all OK If system events are needed use event manager FB tie to here
+	
+	ConvDefaultState AT %Q*		: 	E_StateCntrl := E_StateCntrl.stManual;	// The default state of all conveyors
+	Sys_SimActive AT %Q*		: 	BOOL;	// Bit for simulation
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	HMI_PBSysStart:	BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	HMI_PBSysStop:	BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	HMI_PBSysReset:	BOOL;
+	
+	SysShrtPulseTmr: FB_Flasher;
+	SysShrtPlsOnTime: TIME := T#750MS;
+	SysShrtPlsOffTime: TIME := T#750MS;
+	
+	Cnvyr_Auto AT %Q*:	BOOL;		// Bit to send to all conveyors to put them in Auto mode
+	Cnvyr_Manual AT %Q*:	BOOL;	// Bit to send to all conveyors to put them in Manual mode
+	Cnvyr_Offline AT %Q*:	BOOL;	// Bit to send to all conveyors to put them in Offline mode -- Not used here
+	Cnvyr_Reset AT %Q*:	BOOL;		// Bit to send to all conveyors to reset faults, safeties and etc
+	Cnvyr_AlertTime:	TIME := T#5S;	
+	Cnvyr_DelayTime:	TIME := T#1S;	
+	Start_PulseWidth:	TIME := T#100MS;
+	AlertDelay: FB_AlrtStrtDelay;
+	
+	nStatusArrayIndex : DINT;	// Increment to process the SysEquipStatusArray
+	nTempStsIndex : DINT := 0;	// Used to Prevent Status Array Index duplicate assignments 
+
+	ConveyorHasWarn: BOOL;
+	ConveyorHasFault: BOOL;
+	ConveyorIsSleeping: BOOL;
+	ConveyorInAuto: BOOL;
+	nTempRemoteIndex: DINT := 0;	//Temporary Remote Index to Simplify Code
+	
+END_VAR
+
+VAR PERSISTENT    {attribute 'OPC.UA.DA' := '1'}
+    cfgSysStateIntlksArry: ARRAY [0..15] OF ST_CfgEvents;
+    {attribute 'OPC.UA.DA' := '1'}
+    cfgSysStateEvntsArry: ARRAY [0..15] OF ST_CfgEvents;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Send out reset PB put here in case added logic was needed
+SysStateCntrl_StatePB.ResetPB := GVL_IO.PB_SysReset OR HMI_PBSysReset; 
+SysStateCntrl_StatePB.AutoPB := (HMI_PBSysStart OR GVL_IO.PB_SysStart) AND SysIntlksAllOk;
+SysStateCntrl_StatePB.StopPB := HMI_PBSysStop OR (NOT GVL_IO.PB_SysStop);
+
+// Set up system short pulse for alarm beacons, horns ets
+SysShrtPulseTmr(In_Trig:= TRUE , Cfg_OnTime:= SysShrtPlsOnTime, Cfg_OffTime:= SysShrtPlsOffTime, Output=> );
+
+// Set up System Interlocks
+(*
+SysState.In_SystemIntlks.0 := GVL_IO.SystemAirPressure;
+*)
+
+ 
+
+// Setup the InterlockArray since persistent data items cannot by initilaized the same
+// Index 0
+(*
+cfgSysStateIntlksArry[0].Description := 'System Air Pressure';
+cfgSysStateIntlksArry[0].DeviceLabel := 'PS22121';
+cfgSysStateIntlksArry[0].OKState := TRUE;
+*)
+
+// Set up System Events
+
+//SysState.In_SystemEvents.0 := GVL_IO.Panel_Estop_Button;
+//SysState.In_SystemEvents.1 := GVL_IO.P5031_Estop_Button;
+//SysState.In_SystemEvents.2 := GVL_IO.P5032_Estop_Button;
+
+// Setup the EventArray since persistent data items cannot by initilaized the same
+// Index 0
+cfgSysStateEvntsArry[0].Description := 'Panel E-Stop';
+cfgSysStateEvntsArry[0].DeviceLabel := 'PB1';
+cfgSysStateEvntsArry[0].OKState := TRUE;
+cfgSysStateEvntsArry[0].StopCode := E_StopCodes.SystemStop;
+// Index 1
+cfgSysStateEvntsArry[1].Description := 'P5031 E-Stop Button';
+cfgSysStateEvntsArry[1].DeviceLabel := 'P5031';
+cfgSysStateEvntsArry[1].OKState := TRUE;
+cfgSysStateEvntsArry[1].StopCode := E_StopCodes.SystemStop;
+// Index 2
+cfgSysStateEvntsArry[2].Description := 'P5032 E-Stop Button';
+cfgSysStateEvntsArry[2].DeviceLabel := 'P5032';
+cfgSysStateEvntsArry[2].OKState := TRUE;
+cfgSysStateEvntsArry[2].StopCode := E_StopCodes.SystemStop;
+
+// Function Call
+SysState(
+    In_p_EquipStatePB:= SysStateCntrl_StatePB,
+	Cfg_EquipLabel := '4th Floor Large Box',  
+    Cfg_EquipIntlksArry:= cfgSysStateIntlksArry,
+    Cfg_EquipEvntsArry:= cfgSysStateEvntsArry, 
+    Sts_EquipState := SysStateCntrlSts,
+	Out_Reset => Cnvyr_Reset
+);
+
+SysIntlksAllOk := SysState.Sts_All_Intlks_OK;
+SysEventsAllOk :=  NOT SysState.Sts_FaultActive;
+
+// Set up Start up delay and Auto/Manual control for conveyors
+
+// Offline is set up in conveyors but has no logic here controlling it(This could be added here)
+AlertDelay(
+	In_StrtPulse:= SysState.Out_Auto , 
+	In_StpPulse:= SysState.Out_Stop,
+	CFG_AlertTime:= Cnvyr_AlertTime, 
+	CFG_WaitTime:= Cnvyr_DelayTime,
+	CFG_PulseTime:= Start_PulseWidth,
+	In_ManTstTrig:= , 
+	In_BypssDelay:= , 
+	Out_Timed => Cnvyr_Auto,
+	Out_Pulse => , 
+	Out_Alert=> GVL_IO.HornMainPanel, 
+	WaitActive=> );
+
+Cnvyr_Manual:= SysState.Out_Stop; 	
+
+//===========================================================================================
+// Serialize the reporting equipment
+
+// Set the value of System_Equip_Count, TempStsIndex should always match the number of identified statuses
+GVL_EquipArrays.nSystemEquip_Count := nTempStsIndex;
+
+// Control tower light
+// Initialize the Equipment state detection
+ConveyorHasWarn := 0;
+ConveyorHasFault := 0;
+ConveyorIsSleeping := 0;
+ConveyorInAuto := 0;
+
+//Conveyor Equipment
+// Adjust GVL_EquipArrays.cEQUIP_COUNT_MAX to accommodate all of the equipment to monitor
+IF GVL_EquipArrays.nEquipIndex <> 0 THEN
+    FOR nStatusArrayIndex := 1 TO GVL_EquipArrays.nEquipIndex BY 1 DO
+		IF nStatusArrayIndex <= GVL_EquipArrays.cEQUIP_COUNT_MAX THEN
+			// Test for an already assigned Index value, but only to the outbound index, eventually this will populate the inbound value
+			IF GVL_EquipArrays.aEquipStatusArray_Out[nStatusArrayIndex].RemIndex = 0 THEN
+				// Increment the TempStsIndex only when we need to
+				nTempStsIndex := nTempStsIndex + 1;
+				// Assign the Remote Index to the Conveyor Status Data Item
+				GVL_EquipArrays.aEquipStatusArray_Out[nStatusArrayIndex].RemIndex := nTempStsIndex;
+			END_IF
+			// Assign the Conveyor Status Value to the Status Array
+			nTempRemoteIndex := GVL_EquipArrays.aEquipStatusArray_Out[nStatusArrayIndex].RemIndex;
+			GVL_EquipArrays.aSystemEquipStatusArray[nTempRemoteIndex] := GVL_EquipArrays.aEquipStatusArray_In[nStatusArrayIndex];
+		END_IF
+    END_FOR
+END_IF
+
+// All System Equipment
+// Adjust GVL_EquipArrays.cEQUIP_COUNT_MAX to accommodate all of the equipment to monitor
+IF GVL_EquipArrays.nSystemEquip_Count <> 0 THEN
+	FOR nStatusArrayIndex := 1 TO GVL_EquipArrays.nSystemEquip_Count BY 1 DO
+		IF nStatusArrayIndex <= GVL_EquipArrays.cEQUIP_COUNT_MAX THEN
+			// Only process the equipment if is is not in an offline state, this allows for the separate PLC equipment to 
+			IF GVL_EquipArrays.aSystemEquipStatusArray[nStatusArrayIndex].CrntState <> E_StateCntrl.stOffline THEN
+				// Test for an active warning on a coveyor
+				IF GVL_EquipArrays.aSystemEquipStatusArray[nStatusArrayIndex].StsHasWarnings THEN
+					ConveyorHasWarn := 1;
+				END_IF
+				// Test for an active Equipment fault, more than just a conveyor fault, could include Remote/IO, Barcode reader, etc..
+				IF GVL_EquipArrays.aSystemEquipStatusArray[nStatusArrayIndex].StsFaulted THEN
+					ConveyorHasFault := 1;
+				END_IF
+				// Test for a sleeping state
+				IF GVL_EquipArrays.aSystemEquipStatusArray[nStatusArrayIndex].CrntOperState = E_OperStateCntrl.sleeping THEN
+					ConveyorIsSleeping := 1;
+				END_IF
+				// Test for the Auto state, again an equipment state test to include non-conveyor equipment
+				IF GVL_EquipArrays.aSystemEquipStatusArray[nStatusArrayIndex].StsAuto THEN
+					ConveyorInAuto := 1;
+				END_IF
+			END_IF
+		END_IF
+	END_FOR
+END_IF
+
+// Initialise the Stack Light, only changing values as required
+//GVL_IO.LT_MainPanelStack_Blue := FALSE;
+GVL_IO.LT_MainPanelStack_Green := FALSE;
+GVL_IO.LT_MainPanelStack_Yellow := FALSE;
+GVL_IO.LT_MainPanelStack_Red := FALSE;
+	
+IF ConveyorHasFault OR NOT SystemSafety.Safety_SystemEstopsOK THEN
+	// Red light SOLID ON
+	GVL_IO.LT_MainPanelStack_Red := TRUE;
+ELSE
+	IF ConveyorHasWarn THEN
+		// Orange Light SOLID ON
+		GVL_IO.LT_MainPanelStack_Yellow := TRUE;
+	ELSE
+		IF ConveyorInAuto THEN
+			// Green Light SOLID ON
+			GVL_IO.LT_MainPanelStack_Green := TRUE;
+		ELSE
+			GVL_IO.LT_MainPanelStack_Green := SysShrtPulseTmr.Output;
+		END_IF
+	END_IF
+	IF GVL_IO.HornMainPanel THEN
+		// Orange Light FLASHING ON
+		GVL_IO.LT_MainPanelStack_Yellow := SysShrtPulseTmr.Output;
+	END_IF;
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="System">
+      <LineId Id="797" Count="2" />
+      <LineId Id="935" Count="1" />
+      <LineId Id="800" Count="1" />
+      <LineId Id="815" Count="15" />
+      <LineId Id="833" Count="22" />
+      <LineId Id="858" Count="6" />
+      <LineId Id="937" Count="0" />
+      <LineId Id="865" Count="0" />
+      <LineId Id="868" Count="3" />
+      <LineId Id="536" Count="17" />
+      <LineId Id="717" Count="13" />
+      <LineId Id="986" Count="0" />
+      <LineId Id="731" Count="1" />
+      <LineId Id="989" Count="0" />
+      <LineId Id="733" Count="9" />
+      <LineId Id="990" Count="0" />
+      <LineId Id="743" Count="3" />
+      <LineId Id="993" Count="0" />
+      <LineId Id="747" Count="1" />
+      <LineId Id="991" Count="0" />
+      <LineId Id="749" Count="18" />
+      <LineId Id="992" Count="0" />
+      <LineId Id="768" Count="28" />
+      <LineId Id="419" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

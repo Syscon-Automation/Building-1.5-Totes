@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_MergeInletCfg" Id="{c7754e7b-16eb-4e03-8d08-af52a5e24de6}">
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_MergeInletCfg :
+STRUCT
+	Cfg_UseMtrFdBck				:	BOOL := FALSE;	// Configuration bit to determine if motor feed back is used (1= use feedback)
+	Cfg_UseHighWaterPE			:	BOOL := FALSE;	// Configuration bit to determine if the High Water indicator PE is used (1= use High Water PE)
+	Cfg_UseHiHiWaterPE			:	BOOL := FALSE;	// Configuration bit to determine if the HiHi Water indicator PE is used (1= use HiHi Water PE)
+	Cfg_HighTriggerTime			:	REAL := 1;		// Time that full trigger has to be on to record high condition
+	Cfg_HiHiTriggerTime			:	REAL := 1;		// Time that full trigger has to be on to record hihi condition
+	Cfg_HiHiClearTime			:	REAL := 10;		// Time Merge runs in response to a HiHi Water condition
+	Cfg_MrgReqPrdctWaitTime		: 	REAL := 45;		// Time that product has to wait for full mark to be reached before requesting merge
+	Cfg_ReleaseCount			:	INT := 1;		// Required count to be released before switching merge locations
+	Cfg_ReleaseCountWaitTime	:	REAL := 60;		// Time to wait to achieve release count before switching merge locations
+	Cfg_ClearRunOutTime			:	REAL := 25;		// Time to wait for product to clear the merge
+	Cfg_MergeName				:	STRING(20);		// Name used to Identify the Merge on the HMI
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

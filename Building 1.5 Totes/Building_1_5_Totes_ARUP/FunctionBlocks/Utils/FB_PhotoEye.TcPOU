@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_PhotoEye" Id="{84687745-43e2-4a30-9d0e-0ad390900019}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PhotoEye
+(*
+Function Block to combine the functionality of the Debounce Block and the 
+	Jam Timer Block into one
+*)
+VAR_INPUT
+	In_Status:	BOOL;		// Status to determine if Timer should run (like running status or State) (1=Watch for Jams)
+	CFG_PEOKState: BOOL;		// The OK or ON State of the Input (0 or 1)
+	CFG_OnDlyTime: TIME;		// Time to delay Output turning On after Input is On
+	CFG_OffDlyTime: TIME;		// Time to delay Output turning Off after Input is Off
+	CFG_JamDetTime: TIME;		// Time to wait before sending Jam detected Output
+	{attribute 'OPC.UA.DA' := '1'}
+	In_Sim:	BOOL;		// Simulation Input Bit acts just like the input but can be forced from the program for testing
+END_VAR
+VAR_OUTPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	Out:	BOOL;		// Output Based on ON or OK state
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_OnFltrd:	BOOL;		// ON filtered Only Output
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_OffFltrd:	BOOL;		// Off filtered Only OutPut
+	Out_OnOffFltrd:	BOOL;		// Both On and Off Filtered Output 
+	Sts_OnDlyActive:	BOOL;
+	Sts_OffDlyActive:	BOOL;
+	JamDetected:	BOOL;
+END_VAR
+VAR
+	In_PE AT %I* : BOOL;		// Mapped IO input for PE
+	PEInFttr:	FB_DigDebnce;	
+	PEInJam: 	FB_JamDetect;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+// Filter the ON and OFF of a digital input
+PEInFttr(
+	In:= In_PE, 
+	CFG_OKState:= CFG_PEOKState, 
+	CFG_OnDlyTime:= CFG_OnDlyTime, 
+	CFG_OffDlyTime:= CFG_OffDlyTime, 
+	In_Sim:= In_Sim, 
+	Out=> Out, 
+	OutOnFltrd=> Out_OnFltrd, 
+	OutOffFltrd=> Out_OffFltrd, 
+	OutOnOffFltrd=> Out_OnOffFltrd, 
+	Sts_OnDlyActive=> Sts_OnDlyActive, 
+	Sts_OffDlyActive=> Sts_OffDlyActive);
+	
+	
+// Watch the time the photo eye is blocked 
+PEInJam(
+	In_PE:= In_PE, 
+	In_Status:= In_Status, 
+	CFG_PEOKState:= CFG_PEOKState, 
+	JamDetTime:= CFG_JamDetTime, 
+	JamDetected=> JamDetected);]]></ST>
+    </Implementation>
+    <LineIds Name="FB_PhotoEye">
+      <LineId Id="58" Count="1" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="26" Count="9" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="68" Count="2" />
+      <LineId Id="39" Count="4" />
+      <LineId Id="37" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

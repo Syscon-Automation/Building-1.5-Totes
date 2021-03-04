@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_DivertCommission" Id="{57a00f10-7d90-4a03-9ee7-14f066965371}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertCommission
+VAR_INPUT
+	InductTrigger	: BOOL; //This is the starting point you want to measure from
+	ReferenceValue 	: UDINT; //This is the measurement reference you want to use (most typically will be an encoder value)
+	DischargeTrigger: BOOL; //This is the end point that you want to stop measuring
+	Reset			: BOOL; //1 - reset all values 0 - keep existing values
+	TestTime 		: TIME; //Maximum amount of time it could possibly take to get measurement. If you're not getting a measurement, increase this time
+END_VAR
+
+VAR_IN_OUT
+	Diverts			: ARRAY[*] OF ST_Divert; //Diverts that you want to measure
+END_VAR
+
+VAR
+	DivertIndex		: DINT;
+	StartCount 		: UDINT;
+	EndCount 		: UDINT;
+	InductFlag		: BOOL;
+	NumberofDiverts	: DINT; 
+	DivertLength 	: ARRAY[0..10] OF UDINT;
+	DivertTime 		: ARRAY[0..10] OF TIME;
+	DischargeFlag	: ARRAY[0..10] OF BOOL;
+	
+	DivertTimer 	: TON := (PT := TestTime);	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[DivertTimer();
+
+NumberofDiverts	:= UPPER_BOUND(Diverts,1);
+
+IF NumberofDiverts < 10 THEN
+	IF InductTrigger AND NOT InductFlag THEN
+		StartCount := ReferenceValue;
+		DivertTimer(IN := TRUE);
+		InductFlag := TRUE;
+	END_IF
+	
+	IF DischargeTrigger AND NOT DischargeFlag[0] THEN
+		DivertLength[0] := ReferenceValue;
+		DivertTime[0]   := DivertTimer.ET;
+		DivertTimer(IN := FALSE);
+		DischargeFlag[0] := TRUE;
+	END_IF
+	
+	FOR DivertIndex := 1 TO NumberOfDiverts DO
+		IF Diverts[DivertIndex].ConfirmPE AND NOT DischargeFlag[DivertIndex] THEN
+			DivertLength[DivertIndex]  := ReferenceValue;
+			DivertTime[DivertIndex]    := DivertTimer.ET;
+			DischargeFlag[DivertIndex] := TRUE;	
+		END_IF
+	END_FOR
+	
+	IF Reset THEN
+		InductFlag := FALSE;
+		DivertTimer(IN := FALSE);
+		FOR DivertIndex := 0 TO NumberOfDiverts DO
+			DischargeFlag[DivertIndex] := FALSE;
+			DivertLength[DivertIndex] := 0;
+		END_FOR
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_DivertCommission">
+      <LineId Id="366" Count="33" />
+      <LineId Id="84" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

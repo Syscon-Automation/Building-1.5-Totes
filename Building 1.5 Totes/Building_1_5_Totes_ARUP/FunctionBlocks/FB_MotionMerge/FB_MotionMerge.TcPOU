@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_MotionMerge" Id="{600f8e32-9e16-4628-aa98-9b29c0fee688}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MotionMerge
+VAR_IN_OUT
+	InOut_ConveyorArry: ARRAY[*] OF ST_MotionMergeItem; // Array for the total items on conveyor
+END_VAR
+VAR_INPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	In_InductPhotoEye: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	In_DownstreamClearPhotoEye: BOOL;
+	In_St_Encoder: ST_Encoder;
+	{attribute 'OPC.UA.DA' := '1'}
+	In_MergeRunning: BOOL;
+
+	cfg_MotionMerge:	ST_MotionMergeConfig;
+END_VAR
+
+VAR_OUTPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_MergeSpaceBusy: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_MergeClearing: BOOL;
+END_VAR
+
+VAR
+	MergeStartedTrig: R_TRIG;
+	LastMergeClearTime:	REAL;
+	nMergeClearTime: UINT;
+	Cfg_MergeClearTime: TIME := T#10S;
+	ClearMergeTimer: TOF;
+	ClearingMergeTakeAwayTimer: TON;
+	InductPE_Rtrig: R_TRIG;
+	InductPE_Ftrig: F_TRIG;
+	ConveyorIndx: INT := 1;		// Index to add item to conveyor
+	EncoderRead_Old: UDINT;
+	i: INT;		// Index to process items on conveyor
+	NextI: INT;		// Index of next to process items on conveyor
+	GapSize: UDINT;
+	InMergeSpace: BOOL;
+	Distance_ItemStart: UDINT;
+	Distance_ItemEnd: UDINT;
+	Distance_ClearItemArry: UDINT;
+	ArrayMinSize : DINT;
+	ArrayMaxSize : DINT;
+	EncoderMax	: UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Set triggers for the rise and fall of the photoeye
+InductPE_Rtrig(CLK:= In_InductPhotoEye, Q=> );
+InductPE_Ftrig(CLK:= In_InductPhotoEye, Q=> );
+
+// Calculate and set the merge clear timer
+IF LastMergeClearTime <> cfg_MotionMerge.MergeClearTime THEN
+	LastMergeClearTime := cfg_MotionMerge.MergeClearTime;
+	nMergeClearTime := REAL_TO_UINT(LastMergeClearTime * 1000); 
+	Cfg_MergeClearTime := UINT_TO_TIME(nMergeClearTime);
+END_IF
+
+IF EncoderMax = 0 THEN
+	EncoderMax := LREAL_TO_UDINT(EXPT(2,In_ST_Encoder.BitMaskSize));
+END_IF
+// If rising take read of location on conveyor
+IF InductPE_Rtrig.Q THEN
+	InOut_ConveyorArry[ConveyorIndx].Count_InductStart := In_St_Encoder.CurrentCount;
+//	InOut_ConveyorArry[ConveyorIndx].Count_InductStart := F_CalculateIndex(Offset := - UINT_TO_LINT(Cfg_MotionMerge.Item_ExtendFwd)
+//																			, InitialValue := In_St_Encoder.CurrentCount
+//																			, BufferSize := EncoderMax);
+END_IF
+ArrayMinSize := LOWER_BOUND(InOut_ConveyorArry,1);
+ArrayMaxSize := UPPER_BOUND(InOut_ConveyorArry,1);
+// If falling take read of location on conveyor and calculate length, comparing the magnitude of the start and end to get the absolute difference
+IF InductPE_Ftrig.Q THEN
+	InOut_ConveyorArry[ConveyorIndx].Count_InductEnd := In_St_Encoder.CurrentCount;
+//	InOut_ConveyorArry[ConveyorIndx].Count_InductEnd := F_CalculateIndex(Offset := UINT_TO_LINT(Cfg_MotionMerge.Item_ExtendRev)
+//																			, InitialValue := In_St_Encoder.CurrentCount
+//																			, BufferSize := EncoderMax);
+	InOut_ConveyorArry[ConveyorIndx].Length := F_CalculateDifference(CurrentIndex := InOut_ConveyorArry[ConveyorIndx].Count_InductEnd,
+																	CompareIndex := InOut_ConveyorArry[ConveyorIndx].Count_InductStart,
+																	BufferSize := EncoderMax);
+	InOut_ConveyorArry[ConveyorIndx].OnConveyor := TRUE;
+	ConveyorIndx := F_IncIndex(IDX:= ConveyorIndx , IdxMIN:= DINT_TO_INT(ArrayMinSize), IdxMAX:=DINT_TO_INT(ArrayMaxSize));
+END_IF
+
+// If conveyor has moved watch location of each item on conveyor and process accordingly
+IF EncoderRead_Old <> In_St_Encoder.CurrentCount THEN
+	FOR i := DINT_TO_INT(ArrayMinSize) TO DINT_TO_INT(ArrayMaxSize) DO	// array of items on conveyor with a limit of ARRAYSIZE_MAX
+		IF InOut_ConveyorArry[i].OnConveyor = TRUE THEN // Only process if it is currently on the conveyor
+			// Calculate distance of Item to merge point
+			
+//			Distance_ItemStart := InOut_ConveyorArry[i].Count_InductStart + Cfg_MotionMerge.MergeDistance - Cfg_MotionMerge.Item_ExtendFwd;
+			Distance_ItemStart := F_CalculateIndex(Offset :=  (Cfg_MotionMerge.MergeDistance - Cfg_MotionMerge.Item_ExtendFwd)
+													, InitialValue := InOut_ConveyorArry[i].Count_InductStart
+													, BufferSize := EncoderMax);
+//			Distance_ItemEnd := InOut_ConveyorArry[i].Count_InductEnd + Cfg_MotionMerge.MergeDistance + Cfg_MotionMerge.Item_ExtendRev;
+			Distance_ItemEnd := F_CalculateIndex(Offset :=  (Cfg_MotionMerge.MergeDistance + Cfg_MotionMerge.Item_ExtendRev)
+													, InitialValue := InOut_ConveyorArry[i].Count_InductEnd
+													, BufferSize := EncoderMax);
+
+			// If item is at merge point report that it is busy
+			// Test for both possible start/end value conditions
+			//	Start < End and Start > End
+			IF (Distance_ItemEnd > Distance_ItemStart) THEN
+				IF (In_St_Encoder.CurrentCount >= Distance_ItemStart) AND (In_St_Encoder.CurrentCount < Distance_ItemEnd)  THEN
+					Out_MergeSpaceBusy := TRUE;
+				END_IF
+			ELSE
+				IF (In_St_Encoder.CurrentCount >= Distance_ItemStart) OR (In_St_Encoder.CurrentCount < Distance_ItemEnd)  THEN
+					Out_MergeSpaceBusy := TRUE;
+				END_IF
+			END_IF
+			
+			// If Item is past the merge or there is nothing behind it then report clear, otherwise look at opening to see if item will fit			
+			// Test for when the Item End is greater than the Item start and when the Item Start is greater than the Item End
+			//		If the CurrentCount is less than the ItemStart when the Currentcount is greater than the Item End, the Start is greater than the end
+			IF (In_St_Encoder.CurrentCount > Distance_ItemEnd)
+			   AND ((Distance_ItemEnd > Distance_ItemStart) OR (In_St_Encoder.CurrentCount < Distance_ItemStart))
+			   THEN
+				Nexti := F_IncIndex(IDX:= i , IdxMIN:= DINT_TO_INT(ArrayMinSize), IdxMAX:=DINT_TO_INT(ArrayMaxSize));
+				IF (InOut_ConveyorArry[Nexti].OnConveyor = FALSE) THEN
+					Out_MergeSpaceBusy := FALSE;
+				ELSE
+//					GapSize := InOut_ConveyorArry[Nexti].Count_InductStart - InOut_ConveyorArry[i].Count_InductEnd;	
+					GapSize := F_CalculateDifference(CurrentIndex := (UDINT_TO_DINT(InOut_ConveyorArry[Nexti].Count_InductStart))
+													, CompareIndex := InOut_ConveyorArry[i].Count_InductEnd
+													, BufferSize := EncoderMax);	
+				END_IF
+					
+				IF (GapSize > Cfg_MotionMerge.MergeOpening_Min) THEN  // If we had an encoder on the spur or the size of the item on the spur we could compare here ie: AND (GapSize > ItemToMerge)  
+					Out_MergeSpaceBusy := FALSE;	
+				END_IF		
+			END_IF
+		END_IF
+		
+		// Clear out items from the conveyor array
+		Distance_ClearItemArry := F_CalculateDifference(CurrentIndex := In_St_Encoder.CurrentCount
+													, CompareIndex := InOut_ConveyorArry[i].Count_InductStart
+													, BufferSize := EncoderMax);
+		IF (Distance_ClearItemArry > cfg_MotionMerge.MergeClearDistance) THEN
+			InOut_ConveyorArry[i].OnConveyor := FALSE;
+			InOut_ConveyorArry[i].Count_InductStart :=0;
+			InOut_ConveyorArry[i].Count_InductEnd :=0;
+			InOut_ConveyorArry[i].Length :=0;
+		END_IF
+		
+	END_FOR
+	
+	EncoderRead_Old := In_St_Encoder.CurrentCount;
+END_IF
+
+	(* ------------------------------------------------------------------------------------
+	Set up a clear timer interlock and watch to see if downstream is full and hold back merge items
+	*)
+	MergeStartedTrig(CLK:= In_MergeRunning);
+	IF MergeStartedTrig.Q OR In_DownstreamClearPhotoEye THEN
+		Out_MergeClearing := TRUE;
+	END_IF
+	
+	ClearingMergeTakeAwayTimer(IN:= (Out_MergeClearing AND NOT In_DownstreamClearPhotoEye) , PT:= Cfg_MergeClearTime);
+	IF ClearingMergeTakeAwayTimer.Q THEN
+		Out_MergeClearing := FALSE;
+	END_IF
+	(*------------------------------------------------------------------------------------*)
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_MotionMerge">
+      <LineId Id="356" Count="115" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

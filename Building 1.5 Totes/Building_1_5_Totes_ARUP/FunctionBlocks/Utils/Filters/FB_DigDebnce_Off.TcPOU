@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_DigDebnce_Off" Id="{3c6b0e49-5185-438a-a4b0-22c66735f116}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+Function Block to filter the OFF of a digital input In
+The normal OK state can be configured with CFG_OKState
+The Time for the Off delay is configured by CFG_OffDlyTime
+and can be simulated using the In_Sim input
+If the input In goes true
+If the input In goes false the output CFG_OffDlyTime will be held on until the off delay time has elapsed
+The status output Sts_OffDlyActive shows that the delay is active
+*)
+FUNCTION_BLOCK FB_DigDebnce_Off
+VAR_INPUT
+	In:	BOOL;	// Digital Input
+	CFG_OKState:	BOOL;		// The OK or ON State of the Input (0 or 1)
+	CFG_OffDlyTime:	TIME;		// Time to delay Output turning Off after Input is Off
+	In_Sim:	BOOL;		// Simulation Input Bit acts just like the input but can be forced from the program for testing
+END_VAR
+VAR_OUTPUT
+	Out:	BOOL;		// Output Based on ON or OK state
+	OutOffFltrd:	BOOL;		// Off filtered Only OutPut
+	Sts_OffDlyActive: BOOL;
+END_VAR
+VAR
+	OffDlyTof: TOF;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Compare to normal ON state
+Out := (In OR In_Sim) XOR CFG_OKState;
+
+//Setup Off Delay
+OffDlyTof(IN:= Out , PT:= CFG_OffDlyTime , Q=> OutOffFltrd , ET=> );
+Sts_OffDlyActive := Out <> OutOffFltrd;
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_DigDebnce_Off">
+      <LineId Id="39" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="56" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

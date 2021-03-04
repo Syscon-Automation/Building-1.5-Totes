@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_EAP_Subscriber" Id="{a04524eb-c09d-43d2-b90c-d757abd0229f}">
+    <Declaration><![CDATA[TYPE ST_EAP_Subscriber :
+STRUCT
+	Name				: 	STRING;		// Name of the EAP Subscriber
+	FrameState	AT %I*	:	UINT;		// EAP FrameState, unused
+	FrameCtrl	AT %Q*	:	UINT;		// EAP FrameCtrl, unused
+	Variables			:	ARRAY[0..9] OF ST_EAP_Sub_Variable;		// Array of Subscribed variables
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

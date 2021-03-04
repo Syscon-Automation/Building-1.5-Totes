@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_EventMngr" Id="{6bff6855-00eb-4a34-929a-30fc219789bf}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_EventMngr
+(*
+=====================================================================
+	Copyright ©  Syscon Automation.  All Rights Reserved.
+	Version 1 Release 2 2020
+=====================================================================
+ 
+	This FB monitors 16 Event inputs
+	Each "Good or OK" State for each Event Input is configurable (Default is 0=OK, 1=trip)
+	Events may be configured to latch which require a Reset Command to clear (latching can be disabled)
+	Events may be configured as Warnings or Alarms)
+
+	Release Notes: 2 - Added Equipment state/control/status reference and Stop codes to record Faults/Warnings to report to the System
+						The Equipment reference was added because just adding the stop register as an array cannot compile (3.1.4022.32)
+ --------------------------------------------------------------------
+*)
+VAR_IN_OUT
+	sEquipStateCntrlSts: ST_StateCntrlSts;		// Equipment State, Control and Status Object
+END_VAR 
+VAR_INPUT
+	In_EventsArry:	ARRAY[0..15] OF BOOL;		// Events 0 to 15 Input	
+	CFG_EvntsArry:	ARRAY[0..15] OF ST_CfgEvents;		// Event Configuration 
+	HMI_LatchIgnore:	BOOL;		// Input to ignore all latching requirements
+	HMI_LatchReset:	BOOL;		// Input to reset latching Event
+	
+END_VAR
+VAR_OUTPUT	
+	Out_FaultActive:	BOOL;	// Status Bit Showing that a fault is present (0= No Active Faults, 1= Fault Active)
+	Out_WarnActive:	BOOL;	// Status Bit Showing that a warning is present (0= No Active Warnings, 1= Warning Active)
+	Sts_All_Evnts_OK: BOOL;		// Status Bit Showing that ALL Events are OK to RUN (0= Event Present, 1= OK to Run)
+	Sts_FaultsArry:	ARRAY[0..15] OF ST_EventSts;		// Status of each Fault Event State (0= OFF, 1=ON)
+	Sts_WarnsArry:	ARRAY[0..15] OF ST_EventSts;		// Status of each Warning Event State (0= OFF, 1=ON)
+	Sts_EvntsArry:	ARRAY[0..15] OF ST_EventSts;		// Status of each Event State (0= OFF, 1=ON)
+	Sts_LatchResetReq:	BOOL;		// Status bit to show that latch reset is req
+	Sts_StopCode: UINT;				// Highest Priority Stop Code (Lowest Bit Weight)
+	
+END_VAR
+VAR
+	Evnt_CrntStsArry:	ARRAY[0..15] OF BOOL;		// The Current state of the Event after compared to OK state
+	Evnts_LatchedArry:	ARRAY[0..15] OF BOOL;		//Currently Latched ON
+	STS_LatchResetReqArry:	ARRAY[0..15] OF BOOL; 		// Status to see if latch reset is required (0= OFF, 1=ON)
+
+	Evnt_ON:	BOOL;		// Testing Bit to Show that an Event is Active Based on Current OK State (ignoring Latches and Bypassing)
+	i: INT;		//index
+	fb_ManageStopCodes	:	FB_ManageCodes;			// Function Block with Methods to manage codes
+
+	Evnt_Delay:		ARRAY[0..15] OF Tc2_Standard.TON;	// Set of timers to Delay configured events
+	DelayTest:	DWORD;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Clear the Sts_StopCode each pass
+Sts_StopCode := 0;
+
+// Run loop to check each input
+FOR i := 0 TO 15 DO
+
+	// Only "Online" items can be faulted
+	IF sEquipStateCntrlSts.CrntState <> E_StateCntrl.stOffline THEN
+		// Test for a value in the EventDelay
+		DelayTest := TIME_TO_DWORD(CFG_EvntsArry[i].EventDelay); 
+		IF ( DelayTest > 0) THEN
+			Evnt_Delay[i].PT := CFG_EvntsArry[i].EventDelay;
+			Evnt_Delay[i].IN := In_EventsArry[i] XOR CFG_EvntsArry[i].OKState;
+			Evnt_Delay[i]();
+			Evnt_CrntStsArry[i] := Evnt_Delay[i].Q;
+		ELSE
+			// Compare to OK State, if they match, the CrntStsArry is = 0
+			//  1 XOR 1 = 0, 1 XOR 0 = 1, 0 XOR 1 = 1, 0 XOR 0 = 0 
+			Evnt_CrntStsArry[i] := In_EventsArry[i] XOR CFG_EvntsArry[i].OKState;
+		END_IF
+	ELSE
+		Evnt_CrntStsArry[i] := FALSE;
+	END_IF
+	
+	//Look at Latching
+	// HMI_LatchIgnore latches ALL Events, over-riding the Latch setup per event
+	IF HMI_LatchIgnore THEN
+		Evnts_LatchedArry[i] := Evnt_CrntStsArry[i];
+	ELSE
+		Evnts_LatchedArry[i] := Evnt_CrntStsArry[i] OR CFG_EvntsArry[i].LatchRequired; 			
+	END_IF
+	
+	//Set Status based on Latching
+	Sts_EvntsArry[i].Status := (Sts_EvntsArry[i].Status AND Evnts_LatchedArry[i]) OR Evnt_CrntStsArry[i];
+	Sts_EvntsArry[i].Description := CFG_EvntsArry[i].Description;
+	Sts_EvntsArry[i].DeviceLabel := CFG_EvntsArry[i].DeviceLabel;	
+	STS_LatchResetReqArry[i] := (Sts_EvntsArry[i].Status AND Evnts_LatchedArry[i] AND CFG_EvntsArry[i].LatchRequired);
+	IF Sts_EvntsArry[i].Status AND Sts_EvntsArry[i].Description <> '' THEN
+		Sts_EvntsArry[i].StatusTxt := 'TRUE';
+	ELSE
+		Sts_EvntsArry[i].StatusTxt := 'FALSE';
+	END_IF
+	
+	//Seperate into Alarms and Faults 
+	Sts_FaultsArry[i].Status := Sts_EvntsArry[i].Status AND CFG_EvntsArry[i].FaultWarn;
+	Sts_FaultsArry[i].Description := Sts_EvntsArry[i].Description;
+	Sts_FaultsArry[i].DeviceLabel := Sts_EvntsArry[i].DeviceLabel;
+	IF Sts_FaultsArry[i].Status AND Sts_FaultsArry[i].Description <> '' THEN
+		Sts_FaultsArry[i].StatusTxt := 'TRUE';
+	ELSE
+		Sts_FaultsArry[i].StatusTxt := 'FALSE';
+	END_IF
+	
+	Sts_WarnsArry[i].Status := Sts_EvntsArry[i].Status AND (NOT CFG_EvntsArry[i].FaultWarn);
+	Sts_WarnsArry[i].Description := Sts_EvntsArry[i].Description;
+	Sts_WarnsArry[i].DeviceLabel := Sts_EvntsArry[i].DeviceLabel;	
+	IF Sts_WarnsArry[i].Status AND Sts_WarnsArry[i].Description <> '' THEN
+		Sts_WarnsArry[i].StatusTxt := 'TRUE';
+	ELSE
+		Sts_WarnsArry[i].StatusTxt := 'FALSE';
+	END_IF
+
+	// Instanciate the fb_ManageStopCodes Function Block
+	fb_ManageStopCodes(aCodeRegister := sEquipStateCntrlSts.stsStopRegister);
+
+	// Check for a configured stop code
+	IF CFG_EvntsArry[i].StopCode <> 0  THEN
+		// Set the Stop Register for the configured stop code
+		IF Sts_EvntsArry[i].Status THEN
+			// Lowest Stop Code is highest Priority
+			IF (Sts_StopCode > CFG_EvntsArry[i].StopCode) THEN
+				Sts_StopCode := CFG_EvntsArry[i].StopCode;
+			END_IF
+			fb_ManageStopCodes.Set(nCodeToSet := CFG_EvntsArry[i].StopCode);
+		ELSE
+			// Clear the Stop Register for non-latching Events, when the HMI_LatchIgnore is NOT set
+			IF NOT (CFG_EvntsArry[i].LatchRequired) AND NOT HMI_LatchIgnore THEN
+				fb_ManageStopCodes.Clear(nCodeToClear := CFG_EvntsArry[i].StopCode);
+			END_IF
+		END_IF
+	END_IF
+	
+END_FOR
+
+IF HMI_LatchReset OR (sEquipStateCntrlSts.CrntState = E_StateCntrl.stOffline) THEN
+	FOR i := 0 TO 15 DO
+		Sts_EvntsArry[i].Status := FALSE;
+		STS_LatchResetReqArry[i] := FALSE;
+	END_FOR
+	// When the Reset is issued, clear the entire stop register
+	fb_ManageStopCodes.ClearRegister();
+END_IF
+
+//Set Up test bit showing all active Event ignoring bypasses and latching
+Evnt_ON := In_EventsArry[0] OR In_EventsArry[1] OR In_EventsArry[2] OR In_EventsArry[3] 
+			OR In_EventsArry[4]OR In_EventsArry[5] OR In_EventsArry[6] OR In_EventsArry[7]
+			OR In_EventsArry[8] OR In_EventsArry[9] OR In_EventsArry[10] OR In_EventsArry[11]
+			OR In_EventsArry[12] OR In_EventsArry[13] OR In_EventsArry[14] OR In_EventsArry[15];
+			
+//Set Up test bit showing that a latch is required
+STS_LatchResetReq := NOT HMI_LatchIgnore AND (STS_LatchResetReqArry[0] OR STS_LatchResetReqArry[1] OR STS_LatchResetReqArry[2] OR STS_LatchResetReqArry[3] 
+			OR STS_LatchResetReqArry[4]OR STS_LatchResetReqArry[5] OR STS_LatchResetReqArry[6] OR STS_LatchResetReqArry[7]
+			OR STS_LatchResetReqArry[8] OR STS_LatchResetReqArry[9] OR STS_LatchResetReqArry[10] OR STS_LatchResetReqArry[11]
+			OR STS_LatchResetReqArry[12] OR STS_LatchResetReqArry[13] OR STS_LatchResetReqArry[14] OR STS_LatchResetReqArry[15]);
+						
+// Set up bit showing that All Event are good			
+STS_All_Evnts_OK := NOT( Sts_EvntsArry[0].Status OR Sts_EvntsArry[1].Status OR Sts_EvntsArry[2].Status OR Sts_EvntsArry[3].Status
+			OR Sts_EvntsArry[4].Status OR Sts_EvntsArry[5].Status OR Sts_EvntsArry[6].Status OR Sts_EvntsArry[7].Status
+			OR Sts_EvntsArry[8].Status OR Sts_EvntsArry[9].Status OR Sts_EvntsArry[10].Status OR Sts_EvntsArry[11].Status
+			OR Sts_EvntsArry[12].Status OR Sts_EvntsArry[13].Status OR Sts_EvntsArry[14].Status OR Sts_EvntsArry[15].Status);
+
+// Set up bit showing A Fault is Active			
+Out_FaultActive := Sts_FaultsArry[0].Status OR Sts_FaultsArry[1].Status OR Sts_FaultsArry[2].Status OR Sts_FaultsArry[3].Status
+			OR Sts_FaultsArry[4].Status OR Sts_FaultsArry[5].Status OR Sts_FaultsArry[6].Status OR Sts_FaultsArry[7].Status
+			OR Sts_FaultsArry[8].Status OR Sts_FaultsArry[9].Status OR Sts_FaultsArry[10].Status OR Sts_FaultsArry[11].Status
+			OR Sts_FaultsArry[12].Status OR Sts_FaultsArry[13].Status OR Sts_FaultsArry[14].Status OR Sts_FaultsArry[15].Status;
+			
+// Set up bit showing A Warning is Active			
+Out_WarnActive :=  Sts_WarnsArry[0].Status OR Sts_WarnsArry[1].Status OR Sts_WarnsArry[2].Status OR Sts_WarnsArry[3].Status
+			OR Sts_WarnsArry[4].Status OR Sts_WarnsArry[5].Status OR Sts_WarnsArry[6].Status OR Sts_WarnsArry[7].Status
+			OR Sts_WarnsArry[8].Status OR Sts_WarnsArry[9].Status OR Sts_WarnsArry[10].Status OR Sts_WarnsArry[11].Status
+			OR Sts_WarnsArry[12].Status OR Sts_WarnsArry[13].Status OR Sts_WarnsArry[14].Status OR Sts_WarnsArry[15].Status;
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_EventMngr">
+      <LineId Id="941" Count="0" />
+      <LineId Id="943" Count="0" />
+      <LineId Id="994" Count="0" />
+      <LineId Id="498" Count="0" />
+      <LineId Id="422" Count="0" />
+      <LineId Id="1103" Count="1" />
+      <LineId Id="1098" Count="0" />
+      <LineId Id="1153" Count="0" />
+      <LineId Id="1165" Count="0" />
+      <LineId Id="1155" Count="1" />
+      <LineId Id="1166" Count="2" />
+      <LineId Id="1158" Count="0" />
+      <LineId Id="1160" Count="2" />
+      <LineId Id="1157" Count="0" />
+      <LineId Id="1099" Count="0" />
+      <LineId Id="1102" Count="0" />
+      <LineId Id="1101" Count="0" />
+      <LineId Id="501" Count="0" />
+      <LineId Id="521" Count="0" />
+      <LineId Id="905" Count="0" />
+      <LineId Id="502" Count="0" />
+      <LineId Id="516" Count="1" />
+      <LineId Id="504" Count="1" />
+      <LineId Id="518" Count="0" />
+      <LineId Id="520" Count="0" />
+      <LineId Id="522" Count="0" />
+      <LineId Id="754" Count="0" />
+      <LineId Id="855" Count="0" />
+      <LineId Id="584" Count="0" />
+      <LineId Id="806" Count="3" />
+      <LineId Id="573" Count="0" />
+      <LineId Id="805" Count="0" />
+      <LineId Id="537" Count="0" />
+      <LineId Id="654" Count="0" />
+      <LineId Id="755" Count="0" />
+      <LineId Id="856" Count="0" />
+      <LineId Id="797" Count="1" />
+      <LineId Id="803" Count="1" />
+      <LineId Id="799" Count="3" />
+      <LineId Id="857" Count="0" />
+      <LineId Id="811" Count="3" />
+      <LineId Id="810" Count="0" />
+      <LineId Id="906" Count="0" />
+      <LineId Id="1047" Count="2" />
+      <LineId Id="907" Count="1" />
+      <LineId Id="935" Count="0" />
+      <LineId Id="924" Count="0" />
+      <LineId Id="940" Count="0" />
+      <LineId Id="937" Count="2" />
+      <LineId Id="926" Count="3" />
+      <LineId Id="934" Count="0" />
+      <LineId Id="933" Count="0" />
+      <LineId Id="925" Count="0" />
+      <LineId Id="910" Count="0" />
+      <LineId Id="917" Count="0" />
+      <LineId Id="413" Count="0" />
+      <LineId Id="566" Count="0" />
+      <LineId Id="565" Count="0" />
+      <LineId Id="567" Count="0" />
+      <LineId Id="569" Count="0" />
+      <LineId Id="582" Count="0" />
+      <LineId Id="570" Count="0" />
+      <LineId Id="915" Count="0" />
+      <LineId Id="912" Count="0" />
+      <LineId Id="568" Count="0" />
+      <LineId Id="525" Count="0" />
+      <LineId Id="508" Count="0" />
+      <LineId Id="500" Count="0" />
+      <LineId Id="511" Count="2" />
+      <LineId Id="662" Count="0" />
+      <LineId Id="576" Count="4" />
+      <LineId Id="575" Count="0" />
+      <LineId Id="561" Count="3" />
+      <LineId Id="541" Count="0" />
+      <LineId Id="657" Count="4" />
+      <LineId Id="656" Count="0" />
+      <LineId Id="713" Count="0" />
+      <LineId Id="663" Count="4" />
+      <LineId Id="414" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

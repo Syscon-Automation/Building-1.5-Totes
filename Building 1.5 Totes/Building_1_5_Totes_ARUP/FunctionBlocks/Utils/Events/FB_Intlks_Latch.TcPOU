@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_Intlks_Latch" Id="{4fb6ec83-abf7-48ec-9cb1-72c13b7e7f63}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Intlks_Latch
+(*
+=====================================================================
+	Copyright ©  Syscon Automation.  All Rights Reserved.
+	Version 1 Release 1 2018
+=====================================================================
+ 
+	This FB monitors 16 interlock inputs
+	Each "Good or OK" State for each Interlock Input is configurable (Default is 0=OK, 1=trip)
+	Interlocks may be configured to latch which require a Reset Command to clear (latching can be disabled)
+	Interlocks may be configured as Bypassable.
+ --------------------------------------------------------------------
+*)
+ 
+VAR_INPUT
+	In_Intlks:	ARRAY[0..15] OF BOOL;		// Interlocks 0 to 15 Input
+	CFG_IntlksArry:	ARRAY[0..15] OF ST_CfgEvents;		// Configuration of Interlocks
+	HMI_LatchIgnore:	BOOL;		// Input to ignore all latching requirements
+	HMI_LatchReset:	BOOL;		// Input to reset latching interlocks
+END_VAR
+VAR_OUTPUT
+	All_Intlk_OK: BOOL;		// Status Bit Showing that ALL Interlocks are OK to RUN (either interlock is OK or it has been bypassed (0= Interlock Enabled-Stop, 1= OK to Run)	
+	STS_Intlks:	ARRAY[0..15] OF ST_EventSts;		// Status of each Interlock State (0= OFF, 1=ON)
+	STS_LatchResetReq:	BOOL;		// Status bit to show that latch reset is req
+	STS_BypassActive: BOOL;		// Status Bit Showing that a Bypass is Active (0= No Active Bypass, 1= A Bypass is Active) 
+	
+END_VAR
+VAR
+	Intlk_CrntStsArry:	ARRAY[0..15] OF BOOL;		// The Current state of the interlock after compared to OK state
+	Intlks_LatchedArry:	ARRAY[0..15] OF BOOL;		//Currently Latched ON
+	Intlks_Bypassed:	ARRAY[0..15] OF BOOL;		// Interlocks where Bypass is ON and Allowed
+	STS_LatchResetReqArry:	ARRAY[0..15] OF BOOL; 		// Status to see if latch reset is required (0= OFF, 1=ON)
+	Sts_Intlks_BypassNotAllowed:	ARRAY[0..15] OF BOOL;		// Status representing each Non Bypassable Interlock State (0= OFF, 1=ON)
+	IntlkRaw_ON:	BOOL;		// Testing Bit to Show that an Interlock is Active Based on Current OK State (ignoring Latches and Bypassing)
+	Intlk_ON:	BOOL;		// Testing Bit to Show that an Interlock is Active Based on Current OK State (After Latches and Bypassing)
+	i: INT;		//index
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Run loop to check each input
+FOR i := 0 TO 15 DO
+	// Compare to OK State
+	Intlk_CrntStsArry[i] := In_Intlks[i] XOR CFG_IntlksArry[i].OKState;
+	
+	//Look at Latching
+	IF HMI_LatchIgnore THEN
+		Intlks_LatchedArry[i] := Intlk_CrntStsArry[i];
+	ELSE
+		Intlks_LatchedArry[i] := Intlk_CrntStsArry[i] OR CFG_IntlksArry[i].LatchRequired; 			
+	END_IF
+	
+	//Set Status based on Latching
+	STS_Intlks[i].Status := (STS_Intlks[i].Status AND Intlks_LatchedArry[i]) OR Intlk_CrntStsArry[i];
+	STS_LatchResetReqArry[i] := (STS_Intlks[i].Status AND Intlks_LatchedArry[i] AND CFG_IntlksArry[i].LatchRequired);
+	
+	//Look for Bypass State
+	Intlks_Bypassed[i] := CFG_IntlksArry[i].ByPssAllwd AND CFG_IntlksArry[i].HMI_BypassPB; 
+	Sts_Intlks_BypassNotAllowed[i] := NOT Intlks_Bypassed[i];  
+	Sts_Intlks_BypassNotAllowed[i] := Sts_Intlks_BypassNotAllowed[i] AND STS_Intlks[i].Status;
+	
+	//Update Status based on bypass
+	STS_Intlks[i].Status := STS_Intlks[i].Status AND (NOT Intlks_Bypassed[i]);
+	STS_Intlks[i].Description := CFG_IntlksArry[i].Description;
+	STS_Intlks[i].DeviceLabel := CFG_IntlksArry[i].DeviceLabel;
+	IF STS_Intlks[i].Status AND STS_Intlks[i].Description <> '' THEN
+		STS_Intlks[i].StatusTxt := 'TRUE';
+	ELSE
+		STS_Intlks[i].StatusTxt := 'FALSE';
+	END_IF
+END_FOR
+
+IF HMI_LatchReset THEN
+	FOR i := 0 TO 15 DO
+		STS_Intlks[i].Status := FALSE;
+		STS_LatchResetReqArry[i] := FALSE;
+	END_FOR
+END_IF
+
+//Set Up test bit showing all active interlocks ignoring
+IntlkRaw_ON := In_Intlks[0] OR In_Intlks[1] OR In_Intlks[2] OR In_Intlks[3] 
+			OR In_Intlks[4]OR In_Intlks[5] OR In_Intlks[6] OR In_Intlks[7]
+			OR In_Intlks[8] OR In_Intlks[9] OR In_Intlks[10] OR In_Intlks[11]
+			OR In_Intlks[12] OR In_Intlks[13] OR In_Intlks[14] OR In_Intlks[15];
+			
+// Set up bit showing that All interlocks are good			
+Intlk_ON := STS_Intlks[0].Status OR STS_Intlks[1].Status OR STS_Intlks[2].Status OR STS_Intlks[3].Status
+			OR STS_Intlks[4].Status OR STS_Intlks[5].Status OR STS_Intlks[6].Status OR STS_Intlks[7].Status
+			OR STS_Intlks[8].Status OR STS_Intlks[9].Status OR STS_Intlks[10].Status OR STS_Intlks[11].Status
+			OR STS_Intlks[12].Status OR STS_Intlks[13].Status OR STS_Intlks[14].Status OR STS_Intlks[15].Status;
+	
+//Set Up test bit showing that a latch is required
+STS_LatchResetReq := NOT HMI_LatchIgnore AND (STS_LatchResetReqArry[0] OR STS_LatchResetReqArry[1] OR STS_LatchResetReqArry[2] OR STS_LatchResetReqArry[3] 
+			OR STS_LatchResetReqArry[4]OR STS_LatchResetReqArry[5] OR STS_LatchResetReqArry[6] OR STS_LatchResetReqArry[7]
+			OR STS_LatchResetReqArry[8] OR STS_LatchResetReqArry[9] OR STS_LatchResetReqArry[10] OR STS_LatchResetReqArry[11]
+			OR STS_LatchResetReqArry[12] OR STS_LatchResetReqArry[13] OR STS_LatchResetReqArry[14] OR STS_LatchResetReqArry[15]);
+						
+// Set up bit showing that a bypass is active			
+STS_BypassActive := Intlks_Bypassed[0] OR Intlks_Bypassed[1] OR Intlks_Bypassed[2] OR Intlks_Bypassed[3]
+			OR Intlks_Bypassed[4] OR Intlks_Bypassed[5] OR Intlks_Bypassed[6] OR Intlks_Bypassed[7]
+			OR Intlks_Bypassed[8] OR Intlks_Bypassed[9] OR Intlks_Bypassed[10] OR Intlks_Bypassed[11]
+			OR Intlks_Bypassed[12] OR Intlks_Bypassed[13] OR Intlks_Bypassed[14] OR Intlks_Bypassed[15];
+			
+// Set up bit showing that All interlocks are good			
+All_Intlk_OK := NOT( STS_Intlks[0].Status OR STS_Intlks[1].Status OR STS_Intlks[2].Status OR STS_Intlks[3].Status
+			OR STS_Intlks[4].Status OR STS_Intlks[5].Status OR STS_Intlks[6].Status OR STS_Intlks[7].Status
+			OR STS_Intlks[8].Status OR STS_Intlks[9].Status OR STS_Intlks[10].Status OR STS_Intlks[11].Status
+			OR STS_Intlks[12].Status OR STS_Intlks[13].Status OR STS_Intlks[14].Status OR STS_Intlks[15].Status);
+		
+			
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Intlks_Latch">
+      <LineId Id="724" Count="22" />
+      <LineId Id="861" Count="0" />
+      <LineId Id="948" Count="0" />
+      <LineId Id="900" Count="3" />
+      <LineId Id="899" Count="0" />
+      <LineId Id="747" Count="13" />
+      <LineId Id="941" Count="0" />
+      <LineId Id="943" Count="3" />
+      <LineId Id="942" Count="0" />
+      <LineId Id="823" Count="0" />
+      <LineId Id="761" Count="10" />
+      <LineId Id="822" Count="0" />
+      <LineId Id="772" Count="6" />
+      <LineId Id="414" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

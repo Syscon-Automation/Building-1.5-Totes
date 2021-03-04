@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <EnumerationTextList Name="DRIVE_STATE" Id="{c80eb09b-c890-4023-9c6d-450875857e49}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE DRIVE_STATE :
+(
+	SWITCH_ON_INHIBITED := 64,
+	SWITCH_ON_INHIBITED_BIT_5 := 96,
+	NOT_READY_TO_SWITCH_ON := 0,
+	NOT_READY_TO_SWITCH_ON_BIT_5 := 32,
+	READY_TO_SWITCH_ON := 33,
+	SWITCHED_ON		   := 35,
+	QUICK_STOP_ACTIVE	:= 7,
+	OPERATION_ENABLED := 39,
+	TROUBLE			:= 8,
+	TROUBLE_BIT_5	:= 40,
+	FAULT_REACTION_ACTIVE := 15,
+	FAULT_REACTION_ACTIVE_BIT_5 := 47
+) UINT;
+END_TYPE
+]]></Declaration>
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="TextListEnumerationTextListObject">
+          <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"SWITCH_ON_INHIBITED"</v>
+              <v n="TextDefault">"64"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"SWITCH_ON_INHIBITED_BIT_5"</v>
+              <v n="TextDefault">"96"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"NOT_READY_TO_SWITCH_ON"</v>
+              <v n="TextDefault">"0"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"NOT_READY_TO_SWITCH_ON_BIT_5"</v>
+              <v n="TextDefault">"32"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"READY_TO_SWITCH_ON"</v>
+              <v n="TextDefault">"33"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"SWITCHED_ON"</v>
+              <v n="TextDefault">"35"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"QUICK_STOP_ACTIVE"</v>
+              <v n="TextDefault">"7"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"OPERATION_ENABLED"</v>
+              <v n="TextDefault">"39"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"TROUBLE"</v>
+              <v n="TextDefault">"8"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"TROUBLE_BIT_5"</v>
+              <v n="TextDefault">"40"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"FAULT_REACTION_ACTIVE"</v>
+              <v n="TextDefault">"15"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"FAULT_REACTION_ACTIVE_BIT_5"</v>
+              <v n="TextDefault">"47"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">""</v>
+              <v n="TextDefault">""</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+          </l>
+          <l n="Languages" t="ArrayList" />
+          <v n="GuidInit">{53316687-9d56-42b9-a058-079f89e120e1}</v>
+          <v n="GuidReInit">{d6807ef6-80bc-4745-8bc7-3c0eef673e5b}</v>
+          <v n="GuidExitX">{0e071526-2d22-437a-b626-ff6f1cba8adb}</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="String">System.String</Type>
+        <Type n="TextListEnumerationTextListObject">{4b60233c-f940-4beb-b331-82133b520151}</Type>
+        <Type n="TextListRow">{53da1be7-ad25-47c3-b0e8-e26286dad2e0}</Type>
+      </TypeList>
+    </XmlArchive>
+  </EnumerationTextList>
+</TcPlcObject>

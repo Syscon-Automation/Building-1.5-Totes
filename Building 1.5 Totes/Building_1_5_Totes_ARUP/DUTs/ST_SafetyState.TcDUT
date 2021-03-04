@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_SafetyState" Id="{c5081bf1-d7f2-413c-af60-2558b3559f11}">
+    <Declaration><![CDATA[TYPE ST_SafetyState :
+STRUCT
+	Reset 	 	AT %Q* : BOOL;
+	Run 	 	AT %Q* : BOOL;
+	ErrAck 	 	AT %Q* : BOOL;
+	CommErrAck	AT %Q*	:BOOL;
+	ComErr    	AT %I* : BOOL;
+	FBErr     	AT %I* : BOOL;
+	OtherErr  	AT %I* : BOOL;
+	InRun 		AT %I* : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

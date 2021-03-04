@@ -1,0 +1,1089 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="MsgControl" Id="{2ad4410f-a5b6-449d-a112-8dab3c58adad}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MsgControl
+VAR_INPUT
+	TransmitEnable 				: BOOL;
+	nConnectionIndex			: UDINT;
+END_VAR
+VAR
+	MsgID						: DINT;			// TCP/IP Message ID as per Communication protocol defined in FA 
+	DeviceID					: STRING(5);	// TCP/IP Device ID as per Communication protocol defined in FA 
+	BarCode						: STRING(20);	// TCP/IP Load ID (Bar Code) as per Communication protocol defined in FA
+	BarCodeNoSpace				: STRING(20);	// TCP/IP Load ID (Bar Code) as per Communication protocol defined in FA stripped of spaces  
+	Destination					: DINT;			// TCP/IP Destination as per Communication protocol defined in FA
+	DefDestination				: DINT;			// TCP/IP Default Destination as per Communication protocol defined in FA
+	Status						: BYTE;				// 
+	Msg_EquipStatArry			: ARRAY[1..7] OF ST_Msg_EquipStat;
+	nSystemStatusIndex 			: DINT; 	// Index used for Processing the system status array
+	nTempOperState 				: DINT;	//Capture the Temporary Operating State of the Equipment for comparison
+	nEquipStatusIndex			: DINT;	//Index used for adding items to the MSG_EquipStatArray
+	StrStartPos					: INT;
+	StrEndPos					: INT;
+	MsgString					: STRING(55);
+	RawMsgArray					: ARRAY[1..10] OF T_MaxString;	// Capture the last Raw messages for troubleshooting
+	RawMsgLenArray				: ARRAY[1..10] OF INT;			// Capture the last  Raw message lengths for troubleshooting
+	RawMsgStartPosArray			: ARRAY[1..10] OF INT;			// Capture the last  Raw message start positions for troubleshooting
+	RawMsgEndPosArray			: ARRAY[1..10] OF INT;			// Capture the last  Raw message end positions for troubleshooting
+	MsgArray					: ARRAY[1..10] OF STRING(55);		// Capture the last 10 messages that have been stripped from the starting character  for troubleshooting
+	Blank_Msg_ConveyorStatArry	: ARRAY [1..7] OF ST_Msg_EquipStat := [7((Status := 99))];
+
+	i 							: INT;
+	j							: INT;
+	
+	RxCounter_Old				: UDINT;
+	TxCounter_Old				: UDINT;
+	TransmitMsgBuffer			: ARRAY [1..TransmitMsgBuffer_Size] OF STRING(55);	// Buffer to hold transmit messages
+	TransmitMsgBuffer_Index		: INT :=	1;		// Index to the Buffer
+	TransmitMsgStatus			: INT;			
+	SendingMsg_Index			: INT :=	1;		// Index to send message
+	
+	ItemTransport				: ST_Item;		// Output Item Update with destination from ARUP Host (Send to Sorter PLC)
+	BlankItem					: ST_Item := (ID := '', UniqueID := 0
+													, Destination := 0
+													, Status := E_StatusCode.No_Status
+													, ExtStatus := E_StatusCode.No_Status
+													, DeviceID := ''
+													, MessageType := E_MessageIds.NoMessage_00);
+	Out_DefaultDestination AT %Q* : DINT;  // Update default destination location from Host(Send to Sorter PLC)
+
+	ReadBCRID_S2140_01_Old			: UDINT;		// Bar Code watch variable
+	ReadBCRID_S2141_01_Old			: UDINT;		// Bar Code watch variable
+	ReadBCRID_S2150_01_Old			: UDINT;		// Bar Code watch variable	
+	ReadBCRID_S3080_01_Old			: UDINT;		// Bar Code watch variable
+			
+	TransmittedArray			: ARRAY[0..10] OF STRING(55);
+	x							: DINT;
+	y							: INT;
+	
+	SpacePosition				: INT;
+	
+	fb_CheckStopRegister		: FB_ManageCodes;	// Used to test for a specific Stop Code to report to the Host
+	bOverHeight					: BOOL; 	// Detect OverHeight to report to the Host
+	st_UpdateMessageToSend		: ST_Item;			// Message to Send to Host
+
+	st_SorterUpdateBuffer AT %I*	: ST_ItemBuffer;  	// Input from the sorter to update the host messaging (MsgControl)
+	st_UpdateFdbkIn 				: ST_ItemBufferFdbk;
+	st_UpdateFdbkOut AT %Q*			: ST_ItemBufferFdbk;
+	fb_SorterUpdateBuffer			: FB_ItemBuffer;	// Function to Process the SorterUpdateBuffer
+
+	st_SorterTransportBuffer AT %Q*	: ST_ItemBuffer;  	// Output to the sorter to update the Item Destinations
+	st_TransportFdbkIn AT %I*		: ST_ItemBufferFdbk;
+	st_TransportFdbkOut				: ST_ItemBufferFdbk;
+	fb_SorterTransportBuffer		: FB_ItemBuffer;	// Function to Process the SorterTransportBuffer
+
+	sMessage	:	STRING;
+	
+END_VAR
+
+VAR CONSTANT
+	SEND_ARRIVAL			:	INT := 5;
+	SEND_LOCATION			:	INT := 7;
+	TransmitMsgBuffer_Size	:	INT :=	25;		// Number of Messages to hold in buffer
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Create instances of Buffer Processing Functions to initialize the buffers and data
+fb_SorterUpdateBuffer.Master := FALSE;
+fb_SorterTransportBuffer.Master := TRUE;
+
+// Activate or de-activate logging
+fb_SorterUpdateBuffer.LogEntries := .nItemBufferLogEnable.UPDATE;
+fb_SorterTransportBuffer.LogEntries := .nItemBufferLogEnable.TRANSPORT;
+
+// Setup Buffer names for Logging purposes
+fb_SorterUpdateBuffer.Name := 'SYS UPDATE';
+fb_SorterTransportBuffer.Name := 'SYS TRANSPORT';
+
+fb_SorterUpdateBuffer(st_BufferData := st_SorterUpdateBuffer
+					, st_BufferFdbkIn := st_UpdateFdbkIn
+					, st_BufferFdbkOut => st_UpdateFdbkOut);
+fb_SorterTransportBuffer(st_BufferData := st_SorterTransportBuffer
+					, st_BufferFdbkIn := st_TransportFdbkIn
+					, st_BufferFdbkOut => st_TransportFdbkOut);
+
+(* -------------------- On Receive Message Process the data -------------------- *)
+IF RxCounter_Old <> ServerControl.fbServer.aApplications[nConnectionIndex].RxCounter  THEN
+	ItemTransport := BlankItem; // Clear the ItemTransport each pass to capture only new transport commands
+	RECEIVE();
+	// Test the DeviceID and route the Transport accordingly
+	//	If there is only one possible DeviceID, this IF statement can be removed, but the fb_(TransportBuffer).AddItem call still has to be made
+	//	Also, the default destination needs to be passed per DeviceID
+	IF DeviceID = 'P8005' THEN
+		fb_SorterTransportBuffer.AddItem(st_ItemToAdd := ItemTransport);
+		Out_DefaultDestination := DefDestination;
+	END_IF
+
+	RxCounter_Old := ServerControl.fbServer.aApplications[nConnectionIndex].RxCounter;
+END_IF
+
+(* -------------------- Transmit Messages if any are waiting in the buffer --------------------- *)
+IF SendingMsg_Index <> TransmitMsgBuffer_Index THEN
+	TRANSMIT(TransmitEnable:= TRUE);
+END_IF
+
+(* -------------------- Watch Bar code readers and send message when load is read -------------------- *)
+(* ----- BCR_S2140_01: P2140 Divert  ----- *)	
+ReadBCRID_S2140_01_Old := BarCodeMessage(cDatamanReader := BarCodeReaders.BCR_S2140_01
+									, nOldCount := ReadBCRID_S2140_01_Old
+									, nMessageToSend := SEND_ARRIVAL);
+(* ----- BCR_S2141_01: P2143 Induct Confirm ----- *)	
+ReadBCRID_S2141_01_Old := BarCodeMessage(cDatamanReader := BarCodeReaders.BCR_S2141_01
+									, nOldCount := ReadBCRID_S2141_01_Old
+									, nMessageToSend := SEND_LOCATION);
+(* ----- BCR_S2150_01: P2150 Sorter ----- *)	
+ReadBCRID_S2150_01_Old := BarCodeMessage(cDatamanReader := BarCodeReaders.BCR_S2150_01
+									, nOldCount := ReadBCRID_S2150_01_Old
+									, nMessageToSend := SEND_ARRIVAL);
+(* ----- BCR_S3080_01: P3080 Lane Confirm ----- *)	
+ReadBCRID_S3080_01_Old := BarCodeMessage(cDatamanReader := BarCodeReaders.BCR_S3080_01
+									, nOldCount := ReadBCRID_S3080_01_Old
+									, nMessageToSend := SEND_LOCATION);
+
+
+(* -------------------- Watch Sorter and Device Status and transmit on change -------------------- *)
+// Transmit On update from Sorter
+// Detect a new message to process when the in and out pointer values disagree
+IF st_SorterUpdateBuffer.nInPointer <> fb_SorterUpdateBuffer.OutPointer THEN
+	// Pull the next message out of the buffer
+	fb_SorterUpdateBuffer.RemoveItem(st_ItemToReturn => st_UpdateMessageToSend);
+	CASE st_UpdateMessageToSend.MessageType OF
+
+		E_MessageIds.TransportResponse_25:			// Response to a Transport Command
+
+			CASE st_UpdateMessageToSend.Status OF
+				E_StatusCode.Assign_Accepted:		// Assignment Accepted
+					TransmitMsgStatus := E_TransportResponse.Accepted; 
+				E_StatusCode.Assign_Full:			// Assigned Lane Unavailable
+					TransmitMsgStatus := E_TransportResponse.DivertLaneUnavailable; 
+				E_StatusCode.Assign_NotFound:		// Assigned Load ID Not Found
+					TransmitMsgStatus := E_TransportResponse.LoadIdNotFound; 
+				E_StatusCode.Assign_NotInducted:	// Assigned Load Not Inducted
+					TransmitMsgStatus := E_TransportResponse.NextLoadReady; 
+				E_StatusCode.Diverting:	// Assigned Load already Inducting
+					TransmitMsgStatus := E_TransportResponse.LateInduction; 
+			ELSE
+				TransmitMsgStatus := E_TransportResponse.UnknownFailure; // Capture any other failures
+				IF nMessageLogEnable.TransportResponse_25 THEN
+					sMessage := CONCAT(' Item: ', st_UpdateMessageToSend.ID);
+					sMessage := CONCAT(sMessage,' Destination: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_UpdateMessageToSend.Destination));
+					sMessage := CONCAT(sMessage,' TR Status: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_UpdateMessageToSend.Status));
+					// Write to the Error List
+					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+						, msgFmtStr := 'Unhandled Transport Response Status: %s'
+						, strArg := sMessage);
+				END_IF
+			END_CASE
+			TransmitMsgBuffer[TransmitMsgBuffer_Index] := TransportResponse(Device := st_UpdateMessageToSend.DeviceID
+																			, Barcode := st_UpdateMessageToSend.ID
+																			, Status := TransmitMsgStatus);
+			TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+
+		E_MessageIds.TransportComplete_26:			// Indication of the final disposition of a transported item
+
+			CASE st_UpdateMessageToSend.Status OF
+				E_StatusCode.Divert_Success:		// Divert Success Message
+					TransmitMsgStatus := E_TransportComplete.Success; 
+				E_StatusCode.Divert_Complete:		// Divert Success Message
+					TransmitMsgStatus := E_TransportComplete.Success; 
+			ELSE 									// Catch all other failures
+				TransmitMsgStatus := E_TransportComplete.Faulted; 
+			END_CASE			
+			CASE st_UpdateMessageToSend.ExtStatus OF
+				E_StatusCode.Divert_Full:			// Divert Full/Unavailable
+					TransmitMsgStatus := E_TransportComplete.Unavailable; 
+				E_StatusCode.Divert_Offline:		// Divert Offline
+					TransmitMsgStatus := E_TransportComplete.Offline; 
+				E_StatusCode.Divert_Missed:		// Divert Missed
+					TransmitMsgStatus := E_TransportComplete.Passed; 
+				E_StatusCode.Divert_Recirculated:		// Divert Missed
+					TransmitMsgStatus := E_TransportComplete.Success; 
+			END_CASE			
+			TransmitMsgBuffer[TransmitMsgBuffer_Index] := TransportComplete(Device:= st_UpdateMessageToSend.DeviceID
+																			, BarCode:= st_UpdateMessageToSend.ID
+																			, Dest:= DINT_TO_INT(st_UpdateMessageToSend.Destination)
+																			, Status:= TransmitMsgStatus ); 
+			TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+
+	END_CASE
+END_IF
+
+// Transmit on Device Status Change
+DeviceStatus();
+
+(* -------------------- Reset The Transmit Triger after the message is succesfully added to the buffer ------------------- *)
+IF ((ServerControl.fbServer.aApplications[nConnectionIndex].bTransmitTrigger = TRUE) OR ServerControl.TransmitTrigger = TRUE)  AND (TxCounter_Old <> ServerControl.fbServer.aApplications[nConnectionIndex].TxCounter) THEN
+	ServerControl.TransmitTrigger := FALSE;
+	TRANSMIT(TransmitEnable:= FALSE);
+	TxCounter_Old := ServerControl.fbServer.aApplications[nConnectionIndex].TxCounter;
+END_IF
+]]></ST>
+    </Implementation>
+    <Action Name="A_BarCodeMessages" Id="{04c21bd4-f328-48ca-a994-bd1dc504296d}">
+      <Implementation>
+        <ST><![CDATA[// Send Read Information to ARUP Host
+(* ----- BCR_S2140_01: P2140 Divert  ----- *)
+IF ReadBCRID_S2140_01_Old <> BarCodeReaders.BCR_S2140_01.GoodreadCount THEN
+	// Send Transport message to host
+	TransmitMsgBuffer[TransmitMsgBuffer_Index] := Arrival(BarCodeReaders.BCR_S2140_01.In_EquipID,BarCodeReaders.BCR_S2140_01.Out_ReadString,00);
+//	TransmitMsgBuffer[TransmitMsgBuffer_Index] := Transport_Msg('00007',BarCodeReaders.BCR_S2140_01.Out_ReadString,00);
+	TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+	ReadBCRID_S2140_01_Old := BarCodeReaders.BCR_S2140_01.GoodreadCount;
+END_IF
+
+(* ----- BCR_S2141_01: P2143 Induct Confirm ----- *)
+IF ReadBCRID_S2141_01_Old <> BarCodeReaders.BCR_S2141_01.GoodreadCount THEN
+	// Send location update message to host
+	TransmitMsgBuffer[TransmitMsgBuffer_Index] := LocationUpdate(BarCodeReaders.BCR_S2141_01.In_EquipID,BarCodeReaders.BCR_S2141_01.Out_ReadString,00);
+	TransmitMsgBuffer[TransmitMsgBuffer_Index] := LocationUpdate('00001',BarCodeReaders.BCR_S2141_01.Out_ReadString,00);
+	TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+	ReadBCRID_S2141_01_Old := BarCodeReaders.BCR_S2141_01.GoodreadCount;
+END_IF
+
+(* ----- BCR_S2150_01: P2150 Sorter ----- *)		
+IF ReadBCRID_S2150_01_Old <> BarCodeReaders.BCR_S2150_01.GoodreadCount THEN
+	// Send Transport message to host
+	TransmitMsgBuffer[TransmitMsgBuffer_Index] := Arrival(BarCodeReaders.BCR_S2150_01.In_EquipID,BarCodeReaders.BCR_S2150_01.Out_ReadString,00);
+//	TransmitMsgBuffer[TransmitMsgBuffer_Index] := Transport_Msg('00007',BarCodeReaders.BCR_S2150_01.Out_ReadString,00);
+	TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+	ReadBCRID_S2150_01_Old := BarCodeReaders.BCR_S2150_01.GoodreadCount;
+END_IF
+
+(* ----- BCR_S3080_01: P3080 Lane Confirm ----- *)	
+IF ReadBCRID_S3080_01_Old <> BarCodeReaders.BCR_S3080_01.GoodreadCount THEN
+	// Send location update message to host
+	TransmitMsgBuffer[TransmitMsgBuffer_Index] := LocationUpdate(BarCodeReaders.BCR_S3080_01.In_EquipID,BarCodeReaders.BCR_S3080_01.Out_ReadString,00);
+	TransmitMsgBuffer[TransmitMsgBuffer_Index] := LocationUpdate('00016',BarCodeReaders.BCR_S3080_01.Out_ReadString,00);
+	TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+	ReadBCRID_S3080_01_Old := BarCodeReaders.BCR_S3080_01.GoodreadCount;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Arrival" Id="{393b8523-a43e-4b0d-b4b5-7c64712e9e9d}">
+      <Declaration><![CDATA[METHOD PRIVATE Arrival : STRING(55)
+VAR_INPUT
+	Device :	STRING(5);		// Device Label per communication standard
+	BarCode:	STRING(30);		// Barcode from barcode reader
+	DefDest:	INT;		// Default destination
+END_VAR
+VAR
+	String1: STRING(55);
+	BC_Len: INT;
+	x: INT;
+	String_DefDest: STRING(2);
+	y: INT;
+	Device_Len: INT;
+	i: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Message from communication Spec:
+	[STX (0x02h)][23][Device ID (5 CHR)][Barcode (20 CHR)][Default Dest (2 CHR)][Blank (22 CHR)][ETX 0x03h)]
+*)
+
+// Start Message with header
+String1 := '$0223';
+
+// Check Device for length and Pad with spaces if needed
+Device_Len := LEN(Device);
+IF Device_Len = 5 THEN
+	String1 := CONCAT(STRING1, Device);
+ELSIF Device_Len < 5 THEN
+	String1 := CONCAT(STRING1, Device);
+	FOR i := 1 TO (5-Device_Len) DO
+		String1 := CONCAT(String1,' ');
+	END_FOR
+ELSE
+	String1 := CONCAT(String1, 'XXXXX');
+END_IF
+
+// Check Barcode for length and Pad with spaces if needed
+BC_Len := LEN(BARCODE);
+IF BC_Len <20 THEN
+	String1 := CONCAT(STRING1, BarCode);
+	FOR x := 1 TO (20-BC_Len) DO
+		String1 := CONCAT(String1,' ');
+	END_FOR
+ELSIF BC_Len = 20 THEN
+	String1 := CONCAT(STRING1, BarCode);
+ELSE 
+	String1 := CONCAT(STRING1, RIGHT(BarCode,20));	
+END_IF
+
+// Check Default Destination for length and Pad with spaces if needed
+String_DefDest := INT_TO_STRING(DefDest);
+IF DefDest < 10 THEN
+	String1 := CONCAT(String1,'0');
+	String1 := CONCAT(String1, String_DefDest);
+ELSIF (DefDest >= 10) AND (DefDest < 100) THEN
+	String1 := CONCAT(String1, String_DefDest);
+ELSE
+	String1 := CONCAT(String1, 'XX');
+END_IF	
+
+// Pad with spaces
+FOR y := 1 TO 22 DO
+	String1 := CONCAT(String1,' ');
+END_FOR
+
+// Add ending Character
+String1 := CONCAT(String1,'$03');
+	
+Arrival := String1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="BarCodeMessage" Id="{2d1b083e-f12e-4a46-aa5e-2e6d76ae375f}">
+      <Declaration><![CDATA[METHOD PRIVATE BarCodeMessage : UDINT
+VAR_INPUT
+	cDatamanReader	: CognexDataMan260;
+//	sLocation		:	STRING(5);
+	nOldCount		:	UDINT;
+	nMessageToSend	: 	INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF nOldCount <> cDatamanReader.GoodreadCount THEN
+	// Send location update message to host
+	CASE nMessageToSend OF
+		SEND_ARRIVAL:	TransmitMsgBuffer[TransmitMsgBuffer_Index] := Arrival(cDatamanReader.In_EquipID, cDatamanReader.Out_ReadString,00);
+		SEND_LOCATION: TransmitMsgBuffer[TransmitMsgBuffer_Index] := LocationUpdate(cDatamanReader.In_EquipID, cDatamanReader.Out_ReadString,00);
+	END_CASE
+	TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+	BarCodeMessage := cDatamanReader.GoodreadCount;
+ELSE
+	BarCodeMessage := nOldCount;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="DeviceStatus" Id="{6f2ea99a-b2ad-4c65-9c09-93cefc1dbe51}">
+      <Implementation>
+        <ST><![CDATA[(*
+	
+	Local Data items used for Equipment status processing
+	Msg_EquipStatArry:	ARRAY[1..7] OF ST_Msg_EquipStat;
+	nSystemStatusIndex : INT; 	// Index used for Processing the system status array
+	nEquipStatusIndex: INT;	//Index used for adding items to the MSG_EquipStatArray
+	nTempOperState : DINT;	//Capture the Temporary Operating State of the Equipment for comparison
+	
+	GVL_EquipmentArray items used for Equipment Status processing
+	// System Equipment
+	SystemEquip_Count : INT; //Count of Equipment to Process in System PLC
+	SystemEquipStatusArray : ARRAY[1..EQUIP_COUNT_MAX] OF ST_StateCntrlSts; //Array of Equipment Status Current
+	SystemEquipStatusArray_Last : ARRAY[1..EQUIP_COUNT_MAX] OF ST_StateCntrlSts; //Array of Equipment Status Last State
+*)
+
+//===================================================================================
+(* 	Process the Conveyor/Equipment status arrays comparing the current state to the last state
+ 	When a state change is deteted, add the correspoding equipment to the Msg_EquipStatArray
+		Then increment/test the nEquipStatusIndex and add the message to the outbound buffer
+		if the Msg_EquipStatArry is full, and reset the nEquipStatusIndex value to the lower bound
+*)
+// Initialise the nEquipStatusIndex to 0 to detect when items are in the Msg_EquipStatArry buffer
+nEquipStatusIndex := 0;
+
+FOR nSystemStatusIndex := 1 TO gvl_equiparrays.nSystemEquip_Count BY 1 DO
+	// Capture Offline State
+	IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stOffline THEN
+		nTempOperState := E_EquipmentUpdate.Offline;
+	ELSE
+		// Capture Faulted State, or a specific Fault (in this instance, OverHeight)
+		IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stFaulted THEN
+			// Check for an OverHeight in the Stop Register
+			fb_CheckStopRegister.Check(nCodeToCheck := E_StopCodes.OverHeightFLT,
+				bCodeSet => bOverHeight);
+			// Set over Height
+			IF bOverHeight THEN
+				nTempOperState := E_EquipmentUpdate.OverHeight;
+			ELSE
+				// Otherwise, set Faulted
+				nTempOperState := E_EquipmentUpdate.Faulted;
+			END_IF
+		ELSE
+			// Capture Auto/Manual States and Running/Sleeping states where appropriate
+			IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stAuto THEN
+				// Capture Auto-Running
+				IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.running THEN
+					nTempOperState := E_OperStateCntrl.running;
+				// Capture Auto-Sleeping
+				ELSIF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.sleeping THEN
+					nTempOperState := E_OperStateCntrl.sleeping;
+				// Capture Auto
+				ELSE
+					nTempOperState := E_StateCntrl.stAuto;
+				END_IF
+			else
+				// Capture Manual-Running
+				IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.running THEN
+					nTempOperState := E_OperStateCntrl.running;
+				// Capture Manual
+				ELSE
+					nTempOperState := E_StateCntrl.stManual;
+				END_IF
+			end_if
+		END_IF
+	END_IF
+	// Test for a change in Operatinal state or a non-initialized Storage array
+	IF GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].LstOperState <> nTempOperState OR GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].Index = 0 THEN
+		IF GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].Index = 0 THEN
+			// Initialise the Storage Data Record
+			GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex] := GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex];
+		END_IF
+		// Capture the nTempOperState for future comparisons
+		GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].LstOperState := TO_INT(nTempOperState);
+		// Increment the status index and check for roll-over
+		nEquipStatusIndex := nEquipStatusIndex + 1;
+		IF nEquipStatusIndex > 7 THEN
+			// When there are 7 status updates, create the message
+			TransmitMsgBuffer[TransmitMsgBuffer_Index] := EquipStatUpdate(Msg_EquipStatArry);
+			// Increment the buffer index
+			TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+			// Set the index for the next message
+			nEquipStatusIndex := 1;
+		END_IF
+		// Capture the Label and Index of the current Equipment status record
+		Msg_EquipStatArry[nEquipStatusIndex].DeviceID := GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].Label;
+		Msg_EquipStatArry[nEquipStatusIndex].Status := TO_INT(nTempOperState);
+	END_IF
+END_FOR
+
+// Detect unsent items in the Msg_EquipStatArry buffer
+IF nEquipStatusIndex > 0 THEN
+	// Prepare the Equipment Status Message
+	TransmitMsgBuffer[TransmitMsgBuffer_Index] := EquipStatUpdate(Msg_EquipStatArry);
+	// Add the Equipment Status Message to the outbound buffer
+	TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="EquipStatUpdate" Id="{2321939e-111c-4b05-8eb0-93df00614849}">
+      <Declaration><![CDATA[METHOD PRIVATE EquipStatUpdate : STRING(55)
+VAR_IN_OUT
+	Msg_ConveyorStatArry:	ARRAY[1..7] OF ST_Msg_EquipStat; // Array of Device status
+END_VAR
+VAR
+	String1: STRING(55);
+	x: INT;
+	String_DefDest: STRING(2);
+	y: INT;
+	String_Status: STRING(2);
+	Device_Len: INT;
+	i: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Message from communication Spec:
+	[STX (0x02h)][28][Device 1 ID (5 CHR)][Status (2 CHR)] repeated for devices thru 7[ETX 0x03h)]
+*)
+
+// Start Message with header
+String1 := '$0228';
+
+FOR x := 1 TO 7 DO
+	IF (Msg_ConveyorStatArry[x].DeviceID <> '') THEN
+		// Check Device for length and Pad with spaces if needed
+		Device_Len := LEN(Msg_ConveyorStatArry[x].DeviceID);
+		IF Device_Len = 5 THEN
+			String1 := CONCAT(String1,Msg_ConveyorStatArry[x].DeviceID);
+		ELSIF Device_Len < 5 THEN
+			Device_Len := LEN(Msg_ConveyorStatArry[x].DeviceID);
+			FOR i := 1 TO (5-Device_Len) DO
+				String1 := CONCAT(String1,' ');
+			END_FOR
+		ELSE
+			String1 := CONCAT(String1, 'XXXXX');
+		END_IF
+		// Clear the DeviceID after processing
+		Msg_ConveyorStatArry[x].DeviceID := '';
+		
+	
+		// Check Status for length and Pad with spaces if needed
+		String_Status := INT_TO_STRING(Msg_ConveyorStatArry[x].Status);
+		IF Msg_ConveyorStatArry[x].Status < 10 THEN
+			String1 := CONCAT(String1,'0');
+			String1 := CONCAT(String1, String_Status);
+		ELSIF (Msg_ConveyorStatArry[x].Status >= 10) AND (Msg_ConveyorStatArry[x].Status < 100) THEN
+			String1 := CONCAT(String1, String_Status);
+		ELSE
+			String1 := CONCAT(String1, 'XX');
+		END_IF	
+		// Clear the Status after processing
+		Msg_ConveyorStatArry[x].Status := 0;
+	ELSE 
+		String1 := CONCAT(String1,'       ');
+	END_IF	
+END_FOR
+
+// Add ending Character
+String1 := CONCAT(String1,'$03');
+	
+EquipStatUpdate := String1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="KeepAliveResponse" Id="{84673126-43a8-4636-afc5-ab945f436879}">
+      <Declaration><![CDATA[METHOD PRIVATE KeepAliveResponse : STRING(55)
+VAR_INPUT
+END_VAR
+VAR
+	String1: STRING(55);
+	x: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Message from communication Spec:
+	[STX (0x02h)][29][Blank (49 CHR)][ETX 0x03h)]
+*)
+
+// Start Message with header
+String1 := '$0229';
+
+// Pad with Spaces
+FOR x := 1 TO 49 DO
+	String1 := CONCAT(String1,' ');
+END_FOR
+
+// Add ending Character
+String1 := CONCAT(String1,'$03');
+	
+KeepAliveResponse := String1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="LocationUpdate" Id="{15f56496-1fb9-477c-86da-9bec7473c08d}">
+      <Declaration><![CDATA[METHOD PRIVATE LocationUpdate : STRING(55)
+VAR_INPUT
+	Device :	STRING(5);		// Device Label per communication standard
+	BarCode:	STRING(30);		// Barcode from barcode reader
+	Dest:	INT;		// Default destination
+END_VAR
+VAR
+	String1: STRING(55);
+	BC_Len: INT;
+	x: INT;
+	String_Dest: STRING(2);
+	y: INT;
+	Device_Len: INT;
+	i: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Message from communication Spec:
+	[STX (0x02h)][27][Device ID (5 CHR)][Barcode (20 CHR)][Destination (2 CHR)][Blank (24 CHR)][ETX 0x03h)]
+*)
+
+// Start Message with header
+String1 := '$0227';
+
+// Check Device for length and Pad with spaces if needed
+Device_Len := LEN(Device);
+IF Device_Len = 5 THEN
+	String1 := CONCAT(STRING1, Device);
+ELSIF Device_Len < 5 THEN
+	String1 := CONCAT(STRING1, Device);
+	FOR i := 1 TO (5-Device_Len) DO
+		String1 := CONCAT(String1,' ');
+	END_FOR	
+ELSE
+	String1 := CONCAT(String1, 'XXXXX');
+END_IF
+
+
+// Check Barcode for length and Pad with spaces if needed
+BC_Len := LEN(BARCODE);
+IF BC_Len <20 THEN
+	String1 := CONCAT(STRING1, BarCode);
+	FOR x := 1 TO (20-BC_Len) DO
+		String1 := CONCAT(String1,' ');
+	END_FOR
+ELSIF BC_Len = 20 THEN
+	String1 := CONCAT(STRING1, BarCode);
+ELSE 
+	String1 := CONCAT(STRING1, RIGHT(BarCode,20));	
+END_IF
+
+(* Destination isn't needed in location Update 
+// Check Default Destination for length and Pad with spaces if needed
+String_Dest := INT_TO_STRING(Dest);
+IF Dest < 10 THEN
+	String1 := CONCAT(String1,'0');
+	String1 := CONCAT(String1, String_Dest);
+ELSIF (Dest >= 10) AND (Dest < 100) THEN
+	String1 := CONCAT(String1, String_Dest);
+ELSE
+	String1 := CONCAT(String1, 'XX');
+END_IF	
+*)
+
+// Pad with spaces
+FOR y := 1 TO 24 DO
+	String1 := CONCAT(String1,' ');
+END_FOR
+
+// Add ending Character
+String1 := CONCAT(String1,'$03');
+	
+LocationUpdate := String1;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="RECEIVE" Id="{e22fb3b2-e33a-4f01-9566-e2de5aea02ef}">
+      <Implementation>
+        <ST><![CDATA[// Empty all outputs
+	DeviceID := BarCode := '';
+	Destination := DefDestination := 0;
+	Status := 99;
+	Msg_EquipStatArry := Blank_Msg_ConveyorStatArry;
+
+	// Set up index with clipping to keep it within array boundaries	
+	i := IncIndex(i,1,10);
+		
+	// Clear one before to make it easy to find newest entry 
+	IF i = 10 THEN
+		RawMsgArray[1] := '';	
+		RawMsgLenArray[1] := 0;	
+		RawMsgStartPosArray[1] := 0;
+		RawMsgEndPosArray[1] :=  0;
+	ELSE
+		RawMsgArray[i+1] := '';	
+		RawMsgLenArray[i+1] := 0;	
+		RawMsgStartPosArray[i+1] := 0;
+		RawMsgEndPosArray[i+1] :=  0;
+	END_IF
+	
+	
+	// Fill Appropriate info for each message
+	RawMsgArray[i] := ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage;	
+	RawMsgLenArray[i] := LEN(ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage);	
+	StrStartPos := FIND(STR1:= RawMsgArray[i], STR2:='$02' );
+	StrEndPos :=  FIND(STR1:= RawMsgArray[i], STR2:='$03' );
+	RawMsgStartPosArray[i] := StrStartPos;
+	RawMsgEndPosArray[i] := StrEndPos;
+	
+{info 'Maybe: Possibly add do while loop here to process the case where more than one message comes in at a time and clean up StrStartPos and end pos with array'}	
+	IF StrStartPos <> 0 THEN
+		MsgString := MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 51 , POS:= StrStartPos);
+		MsgArray[i] := MsgString;
+		MsgID := STRING_TO_DINT(MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 2, POS:= StrStartPos+1));
+	
+		CASE MsgID OF
+			E_MessageIds.TransportCommand_05:  	// Transport Command Message
+				DeviceID := MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage, LEN:= 5, POS:= StrStartPos+3);
+				BarCode := MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage, LEN:= 20, POS:= StrStartPos+8);
+				Destination := STRING_TO_DINT( MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage, LEN:= 2, POS:= StrStartPos+28));
+				DefDestination := STRING_TO_DINT( MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage, LEN:= 2, POS:= StrStartPos+30));
+				Status := STRING_TO_BYTE( MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 2, POS:= StrStartPos+50));
+
+				//Strip spaces from Bar Code
+				SpacePosition := (FIND(STR1:= BarCode, STR2:=' ' ))+3;
+				BarCodeNoSpace := MID(STR:=BarCode, LEN:= (20-SpacePosition), POS:= 1);
+				// Update Info to send to Sorter PLC
+//				ItemTransport := BlankItem;
+				ItemTransport.DeviceID := DeviceID;
+				ItemTransport.ID := BarCodeNoSpace;
+				ItemTransport.Destination := Destination;
+				ItemTransport.Status := E_StatusCode.UpdateNeeded;
+				ItemTransport.MessageType := E_MessageIds.TransportCommand_05;
+//				fb_SorterTransportBuffer.AddItem(st_ItemToAdd := ItemTransport);
+//				Out_DefaultDestination := DefDestination;
+
+			E_MessageIds.LocationUpdateResponse_07:		// Location Update Response
+				DeviceID := MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 5, POS:= StrStartPos+3);
+				BarCode := MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 20, POS:= StrStartPos+8);
+				Destination := STRING_TO_DINT( MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 2, POS:= StrStartPos+23));
+				Status := STRING_TO_BYTE( MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 2, POS:= StrStartPos+50));
+						
+			E_MessageIds.EquipmentStatusResponse_08:		// Equipment Status Response
+				FOR j := 0 TO 6 DO
+					Msg_EquipStatArry[j+1].DeviceID := MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 5, POS:= ((StrStartPos+3)+(j*7)));
+					Msg_EquipStatArry[j+1].Status := STRING_TO_BYTE(MID(STR:=ServerControl.fbServer.aApplications[nConnectionIndex].RxRawMessage , LEN:= 2, POS:= ((StrStartPos+8)+(j*7))));	
+				END_FOR
+			
+			E_MessageIds.KeepAlive_09:		// Keep Alive
+				// If Keep Alive message is recieved send the response to the transmit buffer
+				TransmitMsgBuffer[TransmitMsgBuffer_Index] := KeepAliveResponse();
+				TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);				
+		END_CASE
+	END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="TRANSMIT" Id="{a974ddda-c5af-4d9c-b0e3-1d4059ab2082}">
+      <Implementation>
+        <ST><![CDATA[
+// Transmit messages from buffer
+IF NOT ServerControl.TransmitTrigger AND TransmitEnable THEN
+	ServerControl.TxMessage := TransmitMsgBuffer[SendingMsg_Index];
+	ServerControl.TransmitTrigger := TRUE;
+	SendingMsg_Index := IncIndex(SendingMsg_Index,1,TransmitMsgBuffer_Size);
+	
+	TransmittedArray[y] := ServerControl.TxMessage;
+	// Clear out message before last update to ease in testing
+	IF y = 10 THEN
+		TransmittedArray[1] := '';
+	ELSE
+		TransmittedArray[y+1] := '';
+	END_IF
+	
+	y :=  IncIndex(IDX:= y, IdxMIN:= 0, IdxMAX:=10 );
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="TransportComplete" Id="{02cc8415-546f-4abe-b8b8-02bcdfae1f8d}">
+      <Declaration><![CDATA[METHOD PRIVATE TransportComplete : STRING(55)
+VAR_INPUT
+	Device :	STRING(5);		// Device Label per communication standard
+	BarCode:	STRING(30);		// Barcode from barcode reader
+	Dest:	INT;		// Default destination
+	Status:	INT;		// Status
+END_VAR
+VAR
+	String1: STRING(55);
+	BC_Len: INT;
+	x: INT;
+	String_Dest: STRING(2);
+	y: INT;
+	String_Status: STRING(2);
+	Device_Len: INT;
+	i: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Message from communication Spec:
+	[STX (0x02h)][26][Device ID (5 CHR)][Barcode (20 CHR)][Destination (2 CHR)][Blank (20 CHR)][Status (2 CHR)][ETX 0x03h)]
+*)
+
+// Start Message with header
+String1 := '$0226';
+
+// Check Device for length and Pad with spaces if needed
+Device_Len := LEN(Device);
+IF Device_Len = 5 THEN
+	String1 := CONCAT(STRING1, Device);
+ELSIF Device_Len < 5 THEN
+	String1 := CONCAT(STRING1, Device);
+	FOR i := 1 TO (5-Device_Len) DO
+		String1 := CONCAT(String1,' ');
+	END_FOR
+ELSE
+	String1 := CONCAT(String1, 'XXXXX');
+END_IF
+
+// Check Barcode for length and Pad with spaces if needed
+BC_Len := LEN(BARCODE);
+IF BC_Len <20 THEN
+	String1 := CONCAT(STRING1, BarCode);
+	FOR x := 1 TO (20-BC_Len) DO
+		String1 := CONCAT(String1,' ');
+	END_FOR
+ELSIF BC_Len = 20 THEN
+	String1 := CONCAT(STRING1, BarCode);
+ELSE 
+	String1 := CONCAT(STRING1, RIGHT(BarCode,20));	
+END_IF
+
+// Check Destination for length and Pad with spaces if needed
+String_Dest := INT_TO_STRING(Dest);
+IF Dest < 10 THEN
+	String1 := CONCAT(String1,'0');
+	String1 := CONCAT(String1, String_Dest);
+ELSIF (Dest >= 10) AND (Dest < 100) THEN
+	String1 := CONCAT(String1, String_Dest);
+ELSE
+	String1 := CONCAT(String1, 'XX');
+END_IF	
+
+// Pad with Spaces
+FOR y := 1 TO 20 DO
+	String1 := CONCAT(String1,' ');
+END_FOR
+
+// Check Status for length and Pad with spaces if needed
+String_Status := INT_TO_STRING(Status);
+IF Status < 10 THEN
+	String1 := CONCAT(String1,'0');
+	String1 := CONCAT(String1, String_Status);
+ELSIF (Status >= 10) AND (Status < 100) THEN
+	String1 := CONCAT(String1, String_Status);
+ELSE
+	String1 := CONCAT(String1, 'XX');
+END_IF	
+
+// Add ending Character
+String1 := CONCAT(String1,'$03');
+	
+TransportComplete := String1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="TransportResponse" Id="{e83eacf8-a434-47e5-8683-cc87bbe6c34d}">
+      <Declaration><![CDATA[METHOD PRIVATE TransportResponse : STRING(55)
+VAR_INPUT
+	Device :	STRING(5);		// Device Label per communication standard
+	BarCode :	STRING(30);		// Barcode from barcode reader
+	Status :	INT;		// Status
+END_VAR
+VAR
+	String1: STRING(55);
+	BC_Len: INT;
+	x: INT;
+	String_Status: STRING(2);
+	y: INT;
+	Device_Len: INT;
+	i: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Message from communication Spec:
+	[STX (0x02h)][25][Device ID (5 CHR)][Barcode (20 CHR)][Blank (22 CHR)][Status (2 CHR)][ETX 0x03h)]
+*)
+
+// Start Message with header
+String1 := '$0225';
+
+// Check Device for length and Pad with spaces if needed
+Device_Len := LEN(Device);
+IF Device_Len = 5 THEN
+	String1 := CONCAT(STRING1, Device);
+ELSIF Device_Len < 5 THEN
+	String1 := CONCAT(STRING1, Device);
+	FOR i := 1 TO (5-Device_Len) DO
+		String1 := CONCAT(String1,' ');
+	END_FOR
+ELSE
+	String1 := CONCAT(String1, 'XXXXX');
+END_IF
+
+// Check Barcode for length and Pad with spaces if needed
+BC_Len := LEN(BARCODE);
+IF BC_Len <20 THEN
+	String1 := CONCAT(STRING1, BarCode);
+	FOR x := 1 TO (20-BC_Len) DO
+		String1 := CONCAT(String1,' ');
+	END_FOR
+ELSIF BC_Len = 20 THEN
+	String1 := CONCAT(STRING1, BarCode);
+ELSE 
+	String1 := CONCAT(STRING1, RIGHT(BarCode,20));	
+END_IF
+
+// Pad with Spaces
+FOR y := 1 TO 22 DO
+	String1 := CONCAT(String1,' ');
+END_FOR
+
+// Check Status for length and Pad with spaces if needed
+String_Status := INT_TO_STRING(Status);
+IF Status < 10 THEN
+	String1 := CONCAT(String1,'0');
+	String1 := CONCAT(String1, String_Status);
+ELSIF (Status >= 10) AND (Status < 100) THEN
+	String1 := CONCAT(String1, String_Status);
+ELSE
+	String1 := CONCAT(String1, 'XX');
+END_IF
+
+// Add ending Character
+String1 := CONCAT(String1,'$03');
+	
+TransportResponse := String1;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="MsgControl">
+      <LineId Id="1370" Count="20" />
+      <LineId Id="1929" Count="0" />
+      <LineId Id="1391" Count="0" />
+      <LineId Id="1939" Count="2" />
+      <LineId Id="1930" Count="0" />
+      <LineId Id="1933" Count="1" />
+      <LineId Id="1932" Count="0" />
+      <LineId Id="1938" Count="0" />
+      <LineId Id="1392" Count="8" />
+      <LineId Id="2033" Count="2" />
+      <LineId Id="2031" Count="0" />
+      <LineId Id="1474" Count="0" />
+      <LineId Id="1531" Count="0" />
+      <LineId Id="1533" Count="0" />
+      <LineId Id="1631" Count="0" />
+      <LineId Id="1483" Count="0" />
+      <LineId Id="1534" Count="0" />
+      <LineId Id="1536" Count="0" />
+      <LineId Id="1632" Count="0" />
+      <LineId Id="1492" Count="0" />
+      <LineId Id="1537" Count="0" />
+      <LineId Id="1539" Count="0" />
+      <LineId Id="1633" Count="0" />
+      <LineId Id="1636" Count="0" />
+      <LineId Id="1549" Count="0" />
+      <LineId Id="1403" Count="18" />
+      <LineId Id="1819" Count="6" />
+      <LineId Id="1828" Count="0" />
+      <LineId Id="1836" Count="1" />
+      <LineId Id="1829" Count="4" />
+      <LineId Id="1422" Count="10" />
+      <LineId Id="1734" Count="1" />
+      <LineId Id="1443" Count="2" />
+      <LineId Id="1718" Count="0" />
+      <LineId Id="1721" Count="5" />
+      <LineId Id="1736" Count="1" />
+      <LineId Id="1733" Count="0" />
+      <LineId Id="1446" Count="17" />
+      <LineId Id="271" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.A_BarCodeMessages">
+      <LineId Id="4" Count="0" />
+      <LineId Id="88" Count="6" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="39" Count="4" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="44" Count="6" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="51" Count="4" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.Arrival">
+      <LineId Id="20" Count="51" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.BarCodeMessage">
+      <LineId Id="6" Count="1" />
+      <LineId Id="32" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.DeviceStatus">
+      <LineId Id="2" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="84" Count="2" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="60" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.EquipStatUpdate">
+      <LineId Id="18" Count="44" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.KeepAliveResponse">
+      <LineId Id="12" Count="14" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.LocationUpdate">
+      <LineId Id="20" Count="54" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.RECEIVE">
+      <LineId Id="207" Count="38" />
+      <LineId Id="247" Count="19" />
+      <LineId Id="268" Count="5" />
+      <LineId Id="275" Count="5" />
+      <LineId Id="282" Count="3" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.TRANSMIT">
+      <LineId Id="20" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.TransportComplete">
+      <LineId Id="21" Count="62" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MsgControl.TransportResponse">
+      <LineId Id="20" Count="51" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

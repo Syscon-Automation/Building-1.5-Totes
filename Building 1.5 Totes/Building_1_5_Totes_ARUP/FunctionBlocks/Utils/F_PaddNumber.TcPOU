@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="F_PaddNumber" Id="{3db3ff25-bfa2-48a3-b483-7084f71588c0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_PaddNumber : STRING
+VAR_INPUT
+	nNumberToConvert: DINT; // Number to convert to string
+	nCharsToReturn: DINT;	// Number of Characters to Pad
+	sCharToPaddWith: STRING[1] := '0';	// Character to Pad with
+	bLeftJustify: BOOL := 0;	// If true, justify to the Left, pad to the right
+END_VAR
+VAR
+	sConvertedString: STRING;	// Number converted to string
+	nStringLength: INT;	// Length of the original string
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Convert the number to a string
+sConvertedString := TO_STRING(nNumberToConvert);
+
+// Get the length of the converted string
+nStringLength := LEN(sConvertedString);
+
+// Test the length to varify it is not longer than the requested length
+IF nStringLength < nCharsToReturn THEN
+	// Pad the string to length, either to the left or right
+	WHILE nStringLength < nCharsToReturn DO
+		IF bLeftJustify THEN
+			sConvertedString := CONCAT(sConvertedString, sChartoPaddWith);
+		else
+			sConvertedString := CONCAT(sConvertedString, sChartoPaddWith);
+		END_IF
+		nStringLength := LEN(sConvertedString);
+	END_WHILE
+	F_PaddNumber := sConvertedString;
+ELSE
+	// If the number is longer, just cut it off
+	IF bLeftJustify THEN
+		F_PaddNumber := LEFT(sConvertedString, TO_INT(nCharsToReturn));
+	ELSE
+		F_PaddNumber := RIGHT(sConvertedString, TO_INT(nCharsToReturn));
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="F_PaddNumber">
+      <LineId Id="7" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

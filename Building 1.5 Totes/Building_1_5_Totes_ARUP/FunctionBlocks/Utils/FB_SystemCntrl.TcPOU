@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_SystemCntrl" Id="{35f3f1a5-d376-44b6-8b57-8c08aa22e010}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SystemCntrl
+
+(* System Interlock and Event Set up,
+	Uses Interlocks.
+	Doesn't use Start Conditions or the horn delay  
+	Uses Events
+	
+	This exists to allow the Interlock/Event descriptions and setup to be managed through the HMI
+	and be easily setup as system faults.
+*)
+VAR_IN_OUT
+	Sts_EquipState				: ST_EquipmentStatus;		// State Status
+END_VAR
+VAR_INPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	In_o_EquipStatePB			: ST_StateCntrlPB;		// Hmi push buttons to change states
+	In_p_EquipStatePB			: ST_StateCntrlPB;		// Other push buttons to change states
+	{attribute 'OPC.UA.DA' := '1'}
+	Cfg_EquipLabel				: STRING(20);		// Label of the equipment
+	// Events
+	In_SystemEvents				: UINT;		// Event that is specific to the instance of the solenoid/actuator
+	Cfg_EquipEvntsArry			: ARRAY [0..15] OF ST_CfgEvents;
+	
+	// Interlocks that can be Instance Specific
+	In_SystemIntlks				: UINT;		// Interlock that is specific to the instance of the solenoid/actuator
+	Cfg_EquipIntlksArry		: ARRAY [0..15] OF ST_CfgEvents;		// Descriptions of the Interlock 
+	
+END_VAR
+VAR_OUTPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Auto					:	BOOL;	// Combine HMI and Other Start/Auto signals to issue a single START/AUTO command
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Stop					:	BOOL;	// Combine HMI and Other Stop signals to issue a single STOP command
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Reset					:	BOOL;	// Combine HMI and Other Reset signals to issue a single RESET command
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_All_Intlks_OK			: BOOL;		// Status bit to show that all interloks are good to Run 
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_FaultActive				: BOOL;	// Status Bit Showing that a fault is present (0= No Active Faults, 1= Fault Active)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_WarnActive				: BOOL;	// Status Bit Showing that a warning is present (0= No Active Warnings, 1= Warning Active)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_All_Evnts_OK			: BOOL;		// Status Bit Showing that ALL Events are OK to RUN (0= Event Present, 1= OK to Run)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_IntlksArry				: ARRAY[0..15] OF ST_EventSts;		// Interlock status 0 to 15 Input
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_FaultsArry				: ARRAY[0..15] OF ST_EventSts;	// Status of each Fault Event State (0= OFF, 1=ON)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_WarnsArry				: ARRAY[0..15] OF ST_EventSts;		// Status of each Warning Event State (0= OFF, 1=ON)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_EvntsArry				: ARRAY[0..15] OF ST_EventSts; 	// Status of each Event State (0= OFF, 1=ON)
+END_VAR
+VAR
+	System_fbIntrlks				: FB_Intlks_Latch;
+	System_IntlksArry				: ARRAY[0..15] OF BOOL;
+	System_EventManager				: FB_EventMngr;
+	System_EventArry				: ARRAY[0..15] OF BOOL;
+	System_LatchIgnore				: BOOL := FALSE;		// Put as a place holder for ease of future use
+	System_LatchReset				: BOOL := FALSE;		//Put as a place holder for ease of future use
+	System_IntlkBypassed			: ARRAY [0..15] OF BOOL;		//Put as a place holder for ease of future use
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Set Up inputs for interlocks that are specific for the configuration instance
+System_IntlksArry[0] := In_SystemIntlks.0;
+System_IntlksArry[1] := In_SystemIntlks.1; 
+System_IntlksArry[2] := In_SystemIntlks.2;
+System_IntlksArry[3] := In_SystemIntlks.3;
+System_IntlksArry[4] := In_SystemIntlks.4;
+System_IntlksArry[5] := In_SystemIntlks.5;
+System_IntlksArry[6] := In_SystemIntlks.6;
+System_IntlksArry[7] := In_SystemIntlks.7;
+System_IntlksArry[8] := In_SystemIntlks.8;
+System_IntlksArry[9] := In_SystemIntlks.9; 
+System_IntlksArry[10] := In_SystemIntlks.10;
+System_IntlksArry[11] := In_SystemIntlks.11;
+System_IntlksArry[12] := In_SystemIntlks.12;
+System_IntlksArry[13] := In_SystemIntlks.13;
+System_IntlksArry[14] := In_SystemIntlks.14;
+System_IntlksArry[15] := In_SystemIntlks.15;
+	
+// Call Interlock block
+System_fbIntrlks(
+	In_Intlks:= System_IntlksArry,
+	CFG_IntlksArry:= Cfg_EquipIntlksArry, 
+	HMI_LatchIgnore:= System_LatchIgnore, 
+	HMI_LatchReset:= System_LatchReset, 
+	All_Intlk_OK=> Sts_All_Intlks_OK, 
+	STS_Intlks=> Sts_IntlksArry);
+	
+System_EventArry[0]:= In_SystemEvents.0;
+System_EventArry[1]:= In_SystemEvents.1;
+System_EventArry[2]:= In_SystemEvents.2;
+System_EventArry[3]:= In_SystemEvents.3;
+System_EventArry[4]:= In_SystemEvents.4;
+System_EventArry[5]:= In_SystemEvents.5;
+System_EventArry[6]:= In_SystemEvents.6;
+System_EventArry[7]:= In_SystemEvents.7;
+System_EventArry[8]:= In_SystemEvents.8;
+System_EventArry[9]:= In_SystemEvents.9;
+System_EventArry[10]:= In_SystemEvents.10;
+System_EventArry[11]:= In_SystemEvents.11;
+System_EventArry[12]:= In_SystemEvents.12;
+System_EventArry[13]:= In_SystemEvents.13;
+System_EventArry[14]:= In_SystemEvents.14;
+System_EventArry[15]:= In_SystemEvents.15;
+
+// Event Manager
+System_EventManager(
+	sEquipStateCntrlSts := Sts_EquipState.Sts_EquipmentState,
+	In_EventsArry := System_EventArry ,  
+	CFG_EvntsArry:= Cfg_EquipEvntsArry, 
+	HMI_LatchReset:= In_o_EquipStatePB.ResetPB OR In_p_EquipStatePB.ResetPB,
+	Out_FaultActive=> Sts_FaultActive, 
+	Out_WarnActive=> Sts_WarnActive, 
+	Sts_All_Evnts_OK=> Sts_All_Evnts_OK, 
+	Sts_FaultsArry=> Sts_FaultsArry, 
+	Sts_WarnsArry=> Sts_WarnsArry, 
+	Sts_EvntsArry=> Sts_EvntsArry);
+
+// Activate the Out_ variables
+Out_Auto := In_o_EquipStatePB.AutoPB OR In_p_EquipStatePB.AutoPB;
+Out_Stop := In_o_EquipStatePB.StopPB OR In_p_EquipStatePB.StopPB;
+Out_Reset := In_o_EquipStatePB.ResetPB OR In_p_EquipStatePB.ResetPB;
+
+// Populate the Sts Output Variables
+Sts_EquipState.Sts_All_Intlks_OK  := Sts_All_Intlks_OK;
+Sts_EquipState.Sts_All_Evnts_OK  := Sts_All_Evnts_OK;
+Sts_EquipState.Sts_FaultActive := Sts_FaultActive;
+Sts_EquipState.Sts_WarnActive := Sts_WarnActive;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_SystemCntrl">
+      <LineId Id="7158" Count="56" />
+      <LineId Id="7279" Count="0" />
+      <LineId Id="7281" Count="2" />
+      <LineId Id="7280" Count="0" />
+      <LineId Id="7215" Count="3" />
+      <LineId Id="6809" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

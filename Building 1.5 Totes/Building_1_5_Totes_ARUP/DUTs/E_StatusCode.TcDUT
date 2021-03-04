@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="E_StatusCode" Id="{da60a0dd-abf5-4016-b877-d47a12b2aaf7}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+(*
+	0-19 	-System level faults
+	20-39	-Sorter Transfer Specific Status Codes
+	40-59	-Diverter Transfer Specific Status Codes
+	60-79	-Transfer Specific Status Codes
+*)
+TYPE E_StatusCode :
+(
+	No_Status				:= 0,
+	OK						:= 1,
+	Stopped					:= 2,
+	Faulted					:= 3,	
+	UnknownError	 		:= 9,	
+	
+	NotInSorter				:= 20,	
+	UpdateRequested			:= 21,
+	QueryNeeded				:= 22,
+	UpdateNeeded 			:= 23,
+	UpdateReceived 			:= 24,
+	ReqNotReceived			:= 25,
+	ItemNotUpdated			:= 26,
+	UnidentifiedItem		:= 27,
+	ItemNotFound			:= 28,
+	Sorter_UnknownError 	:= 29,
+	Assign_Accepted			:= 30,
+	Assign_Full				:= 31,
+	Assign_NotFound			:= 32,
+	Assign_NotInducted		:= 33,
+	Exiting_Sorter			:= 34,
+	Exited_Sorter			:= 35,
+	
+	Divert_Idle				:= 40,
+	In_Sorter 				:= 41,
+	Diverting 				:= 42,
+	Divert_Missed 			:= 43,
+	Divert_Full				:= 44,
+	Divert_Offline			:= 45,
+	Divert_Faulted			:= 46,
+	Divert_NotInducted		:= 47,
+	Divert_LateAssignment	:= 48,
+	Divert_UnknownError 	:= 49,
+	Divert_Recirculated		:= 50,
+	Divert_Detected			:= 51,
+	Divert_Success			:= 52,
+	Divert_Complete			:= 53,
+	
+	In_Transfer 			:= 61,
+	Transferring 			:= 62,
+	Tranfer_Success	 		:= 63,
+	Transfer_Missed 		:= 64,
+	Transfer_Failed 		:= 65,	
+	Transfer_UnknownError 	:= 69
+) USINT;
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

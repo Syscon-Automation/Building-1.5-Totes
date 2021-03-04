@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="E_TransportComplete" Id="{6b7889b7-2742-487b-9e74-043732646096}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_TransportComplete :
+(
+	Success := 0,
+	Unavailable := 1,
+	Faulted := 2,
+	Offline := 3,
+	Passed := 8,
+	ConfirmFailed := 11,
+	InductFailed := 12
+)INT ;
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

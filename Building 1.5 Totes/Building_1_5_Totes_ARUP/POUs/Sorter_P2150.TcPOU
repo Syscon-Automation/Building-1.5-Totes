@@ -1,0 +1,440 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="Sorter_P2150" Id="{2147324e-605f-456c-8043-9467e4eb8174}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Sorter_P2150
+
+VAR_IN_OUT
+	In_ItemToInduct					: ST_Item;
+	In_InductingItem				: ST_Item;
+	st_tempItem						: ST_ItemTemporary;	// Temporary record used when barcode not yet received
+	st_Sorter						: ST_Sorter;
+	aDiverts						: ARRAY[Sorter.DIVERTMIN..Sorter.NUMBEROFDIVERTS] OF ST_DIVERT;
+	aItems 							: ARRAY[Sorter.SORTERENCODERMIN..Sorter.SORTERENCODERMAX] OF ST_Item;
+END_VAR
+
+VAR
+	// Sorter Diagnostics
+	aSorterDiagLog		: ST_ItemLogBuffer;
+	fbSorterDiagLog		: FB_ItemLogBuffer;
+
+	//Logging Variables
+	UpdateSorterLog : FB_UpdateLog;
+	
+	//Induct Variables
+	testEncoderCount		: UDINT;
+	exitEncoderCount		: UDINT;
+	lastCompareCount		: UDINT;
+	updatingEncoderCount	: UDINT;
+
+	tailendcount		: DINT := 0;
+	inductindex 		: DINT;
+	
+	//Divert Variables
+	fb_DivertDecision 		: FB_DivertDecision;
+	fb_DivertFullMonitor  	: FB_DivertFullMonitor;
+	DivertIndex				: DINT;
+	Divertoffset			: INT;
+	nTestItemIndex			: UDINT;
+	Output2ItemIndex		: UDINT;
+
+	// Confirm Check variables
+	fb_ConfirmCheck 		: ARRAY[Sorter.DIVERTMIN..Sorter.NUMBEROFDIVERTS] OF FB_ConfirmCheck;
+	st_ConfirmItem 			: ARRAY[Sorter.DIVERTMIN..Sorter.NUMBEROFDIVERTS] OF ST_Item;
+	nConfirmItemIndex 		: UDINT;
+	
+	st_DischargeItme	:	ST_Item;
+
+	BlankItem				: ST_Item := (ID := ''
+											, UniqueID := 0
+											, Destination := 0
+											, Status := E_StatusCode.No_Status
+											, ExtStatus := E_StatusCode.No_Status
+											, DeviceID := ''
+											, MessageType := E_MessageIds.NoMessage_00);
+
+	workingItem			: ST_Item;	// Actual item to induct
+
+	LastItemInducted 	: STRING;
+	nIndexToClear		: UDINT;	// Clear Item Array at this index
+	nItemArraySize		: UDINT;
+	ItemsArrayMax		: UDINT;
+	ItemsArrayMin		: UDINT;
+
+	rInductPE			: R_TRIG; 	// Capture the Rising edge of the Induct PE
+	fInductPE			: F_TRIG; 	// Capture the Falling edge of the Induct PE
+	sMessage			: STRING;
+
+	st_DisplayItem		:st_Item;
+	
+	LogSorterDump: BOOL := FALSE;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Initialize FB_ItemExtBuffer
+fbSorterDiagLog(st_BufferData := aSorterDiagLog);
+
+(*
+// Test visu variables	
+inductPE := SorterInductPE;
+ItemsOut := Items;
+ArrivalOut := ArrivalBuffer;
+// End test variables
+*)
+(*
+	Capture the Upper/Lower bound of relevant IO_OUT arrays for looping purposes
+	ItemsArrayMax/Min for the sorter array slot count
+*)
+ItemsArrayMin		:= Sorter.SORTERENCODERMIN;
+ItemsArrayMax		:= Sorter.SORTERENCODERMAX;
+
+// Size is Max - Min + 1 to capture both extremes
+nItemArraySize := ItemsArrayMax - ItemsArrayMin + 1;
+
+FOR divertIndex := Sorter.DIVERTMIN TO Sorter.NUMBEROFDIVERTS DO
+	fb_DivertFullMonitor(Divert := Sorter.aSorterDiverts[divertIndex]);
+END_FOR
+
+(*
+	Detect barcode receipt after item is already in Item array
+	the tempItem is reset when the induct PE is cleared
+	The tempItem is populated when the induct PE is blocked and there
+	is not an associated barcode waiting to be inducted
+*)
+IF st_tempItem.Item.ID <> '' THEN
+	// Test the IN_ItemToInduct.ID for a value
+	// This record will be cleared as soon as it reaches the sorter loop
+	IF In_ItemToInduct.ID <> '' THEN
+		// The tempItem is overwritten with the IN_ItemToInduct after it is updated
+		// But the starting encoder count is not changed so the same items can be updated
+		// if the destination update is received while the item is still being inducted
+		IF In_ItemToInduct.ID <> st_tempItem.Item.ID THEN 
+			// Set the starting count for the testing/updating process
+			// The testEncodeCount is incremented upon start, so we start -1 of the encoder count for the item
+			testEncoderCount := f_CalculateIndex(Offset := -1, InitialValue:= st_tempItem.Counts, BufferSize := nItemArraySize);
+			// Clear the length and start over
+			In_ItemToInduct.Length := 0;
+			st_tempItem.Item := In_ItemToInduct;
+		END_IF 
+		// Test for a change of destination after the barcode data has been received
+		IF In_ItemToInduct.Destination <> st_tempItem.Item.Destination THEN 
+			// Set the starting count for the testing/updating process
+			// The testEncodeCount is incremented upon start, so we start -1 of the encoder count for the item
+			testEncoderCount := f_CalculateIndex(Offset := -1, InitialValue:= st_tempItem.Counts, BufferSize := nItemArraySize);
+			// Clear the length and start over
+			In_ItemToInduct.Length := 0;
+			// Copy the IN_ItemToInduct to prevent running this until something else in the record changes
+			st_tempItem.Item := IN_ItemToInduct;
+		END_IF
+	END_IF 
+END_IF
+
+
+// Test for the rising edge of the induct PE
+// Use this rising edge to log the IN_ItemToInduct record
+rInductPE(CLK:= st_Sorter.InductPE, Q =>);
+
+IF rInductPE.Q THEN
+	IF .nSorterLogEnable.SORTER_INDUCT THEN
+		sMessage := CONCAT(' Item: ', In_ItemToInduct.ID);
+		sMessage := CONCAT(sMessage, ' Pulses: ');
+		sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Induct Info: %s'
+			, strArg := sMessage);
+	END_IF
+END_IF
+// Test for the falling edge of the induct PE
+// Use this falling edge to clear the IN_ItemToInduct record
+fInductPE(CLK:= st_Sorter.InductPE, Q =>);
+
+IF fInductPE.Q THEN
+	IF .nSorterLogEnable.SORTER_INDUCT THEN
+		sMessage := CONCAT(' Item: ', In_ItemToInduct.ID);
+		sMessage := CONCAT(sMessage,' Pulses: ');
+		sMessage := CONCAT(sMEssage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Cleared Induct Info: %s'
+			, strArg := sMessage);
+	END_IF
+	// Clear the record
+	In_InductingItem :=  BlankItem;
+END_IF
+
+// Process every array index between the current index and the last processed index
+WHILE st_Sorter.EncoderCounts <> testEncoderCount DO
+
+	// Capture the lastEncoderCount before changing it for comparison of last inducted items
+	lastCompareCount := testEncoderCount;
+
+	// Increment the testEncoderCount
+	// The testEncoderCount variable will be used throughout the processing to ensure
+	//	that all array elements are processed
+	testEncoderCount := f_CalculateIndex(Offset := 1, InitialValue:= testEncoderCount, BufferSize := nItemArraySize);
+	IF st_Sorter.InductPE THEN
+	  	IF (In_ItemToInduct.ID <> '') THEN
+			In_InductingItem := In_ItemToInduct;
+			In_ItemToInduct := BlankItem;
+			IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
+				sMessage := CONCAT(' Item: ', In_InductingItem.ID);
+				sMessage := CONCAT(sMessage,' Pulses: ');
+				sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
+				sMessage := CONCAT(sMessage,' Dest: ');
+				sMessage := CONCAT(sMessage, DINT_TO_STRING(In_InductingItem.Destination));
+				// Write to the Error List
+				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+					, msgFmtStr := 'Inducting Info: %s'
+					, strArg := sMessage);
+			END_IF
+			// Clear the extend counter
+			tailendcount := 0;
+		END_IF
+	  	IF (In_InductingItem.ID <> '') THEN
+			LastItemInducted := In_InductingItem.ID;
+			IF aItems[testEncoderCount].ID <> '' THEN
+				IF aItems[testEncoderCount].Status >= E_StatusCode.Diverting AND aItems[testEncoderCount].Status <= E_StatusCode.Divert_UnknownError THEN
+					aItems[testEncoderCount].Status := E_StatusCode.Divert_UnknownError;
+				END_IF
+				UpdateSorterLog(Status := aItems[testEncoderCount].Status, ItemID := aItems[testEncoderCount].UniqueID);
+			END_IF
+		
+			// Set the Item status
+			In_InductingItem.Status := E_StatusCode.In_Sorter;
+
+			// Check for destination full on the first pass, then ignore it.
+			IF In_InductingItem.Length = 0 THEN
+				IF aDiverts[In_InductingItem.Destination].Full THEN
+					IF st_Sorter.Config.RecircUsed THEN
+						In_InductingItem.Destination := st_Sorter.Config.RecircDestination;
+						In_InductingItem.ExtStatus := E_StatusCode.Divert_Recirculated;
+					ELSE
+						In_InductingItem.Destination := st_Sorter.Config.DefaultDestination;
+						In_InductingItem.ExtStatus := E_StatusCode.Divert_Full;
+					END_IF
+				END_IF
+			END_IF
+			// Clear the extend counter
+			tailendcount := 0;
+
+			// Copy the ItemToInduct to the WorkingItem that will be inducted
+			workingItem := In_InductingItem;
+			// Increment the Length on the ItemToInduct record, then it will be added to the array
+			//  and the length will increment
+			In_InductingItem.Length := In_InductingItem.Length +  1;
+			// Determined by UniqueID = 0
+		ELSE //If the item makes it to the sorter, but is not identified, induct the item with tempItem.Item
+			LastItemInducted := 'UNKNOWN';
+			UpdateSorterLog(Status := E_StatusCode.UnidentifiedItem, ItemID := st_tempItem.Item.UniqueID);
+
+			// Process this the first time
+			IF st_tempItem.Item.Length = 0 THEN
+				IF aDiverts[st_Sorter.Config.DefaultDestination].Full THEN
+					IF st_Sorter.Config.RecircUsed THEN
+						st_tempItem.Item.Destination := st_Sorter.Config.RecircDestination;
+						st_tempItem.Item.ExtStatus := E_StatusCode.Divert_Recirculated;
+					ELSE
+						st_tempItem.Item.Destination := st_Sorter.Config.DefaultDestination;
+						st_tempItem.Item.ExtStatus := E_StatusCode.Divert_Full;
+					END_IF
+				ELSE
+					st_tempItem.Item.Destination := st_Sorter.Config.DefaultDestination;
+				END_IF		
+			END_IF
+			// Copy the tempItem.Item to the WorkingItem that will be inducted
+			workingItem := st_tempItem.Item;
+			// Increment the Length on the ItemToInduct record, then it will be added to the array
+			//  and the length will increment
+			st_tempItem.Item.Length := st_tempItem.Item.Length +  1;
+		END_IF
+
+		// Induct everything
+		aItems[testEncoderCount] := workingItem;
+		fbSorterDiagLog.AddItem(workingItem);
+	// Follow this path when the induct photo-eye is cleared
+	ELSE
+		// Extend the end of the item by a set amount, or to a mimimum length
+		// Test to verify that the Item index is clear, and we are still extending the length of the item
+		IF aItems[lastCompareCount].ID <> '' THEN
+			IF tailendcount < st_Sorter.Config.TailEndLength AND st_Sorter.Config.TailEndLength > 0 THEN
+				aItems[testEncoderCount] := aItems[lastCompareCount]; 
+				fbSorterDiagLog.AddItem(aItems[lastCompareCount]);
+				aItems[testEncoderCount].Length := aItems[testEncoderCount].Length + 1;
+				tailendcount := tailendcount + 1;
+			ELSE
+				// Clear the extend counter
+				tailendcount := 0;
+			END_IF
+			IF aItems[lastCompareCount].Length < st_Sorter.Config.MinimumLength AND st_Sorter.Config.MinimumLength > 0 THEN
+				aItems[testEncoderCount] := aItems[lastCompareCount]; 
+				fbSorterDiagLog.AddItem(aItems[lastCompareCount]);
+				aItems[testEncoderCount].Length := aItems[testEncoderCount].Length + 1;
+			END_IF
+		END_IF
+	END_IF
+END_WHILE
+
+// Process every array index between the current index and the last processed exit index
+WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
+
+	// Increment the exitEncoderCount
+	// The exitEncoderCount variable will be used throughout the processing to ensure
+	//	that all array elements are processed
+	exitEncoderCount := f_CalculateIndex(Offset := 1, InitialValue:= exitEncoderCount, BufferSize := nItemArraySize);
+	// Process the diverts relative to the current encoder count
+	FOR divertIndex := Sorter.DIVERTMIN TO Sorter.NUMBEROFDIVERTS DO
+		// Get the distance to each divert, distance is the number of pulses to actuation
+		Divertoffset := aDiverts[divertIndex].Config.Distance;
+		// Calculate the index of the item to test for a divert
+		// Subtract the offset from the current encoder count (exitEncoderCount)
+		// As the encoder count increases, the current index pointer advances
+		// Subtracting looks backwards into the sorter item array to test for items at the diverts
+		//	distance that should be diverted
+		nTestItemIndex := F_CalculateIndex(initialvalue := exitEncoderCount
+										, offset := -(Divertoffset)
+										, BufferSize := (ItemsArrayMax + 1));	
+		//Setup Out2Item for energizing 2nd divert output
+		Output2ItemIndex := F_CalculateIndex(initialvalue := exitEncoderCount
+										, offset := -(Divertoffset + UINT_TO_INT(st_Sorter.Config.Output2Offset))
+										, BufferSize := (ItemsArrayMax + 1));	
+		// Log Diverts
+		IF aItems[nTestItemIndex].Destination = divertIndex THEN
+			IF .nSorterLogEnable.SORTER_DIVERTS THEN
+				sMessage := CONCAT(' Item: ', aItems[nTestItemIndex].ID);
+				sMessage := CONCAT(sMessage,' Index: ');
+				sMessage := CONCAT(sMessage, UDINT_TO_STRING(nTestItemIndex));
+				sMessage := CONCAT(sMessage,' Dest: ');
+				sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nTestItemIndex].Destination));
+				sMessage := CONCAT(sMessage,' Divert Status: ');
+				sMessage := CONCAT(sMessage, DINT_TO_STRING(aDiverts[DivertIndex].Status));
+				sMessage := CONCAT(sMessage,' Item Status: ');
+				sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nTestItemIndex].Status));
+				// Write to the Error List
+				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+					, msgFmtStr := 'Item at Divert Index: %s'
+					, strArg := sMessage);
+			END_IF
+		END_IF
+		fb_DivertDecision( bLog := .nDivertLogEnable.DIVERT_DECISION 
+					 , Output1Item		:= aItems[nTestItemIndex]
+					 , Output2Item		:= aItems[Output2ItemIndex]
+					 , Divert 			:= aDiverts[DivertIndex]
+					 , DivertIndex		:= DivertIndex
+					 );
+		// Calculate the distance to the confirm PE to test for a successful divert
+		nConfirmItemIndex := F_CalculateIndex(initialvalue := exitEncoderCount
+										, offset := -(Divertoffset + aDiverts[divertIndex].Config.ConfirmDist)
+										, BufferSize := (ItemsArrayMax + 1));
+		// Log Confirms
+		IF aItems[nConfirmItemIndex].Status = E_StatusCode.Diverting AND aItems[nConfirmItemIndex].UniqueID <> 0 THEN
+			IF .nSorterLogEnable.SORTER_CONFIRMS THEN
+				sMessage := CONCAT(' Item: ', aItems[nConfirmItemIndex].ID);
+				sMessage := CONCAT(sMessage,' Index: ');
+				sMessage := CONCAT(sMessage, UDINT_TO_STRING(nConfirmItemIndex));
+				sMessage := CONCAT(sMessage,' Dest: ');
+				sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nConfirmItemIndex].Destination));
+				sMessage := CONCAT(sMessage,' Divert Status: ');
+				sMessage := CONCAT(sMessage, DINT_TO_STRING(aDiverts[DivertIndex].Status));
+				sMessage := CONCAT(sMessage,' Item Status: ');
+				sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nTestItemIndex].Status));
+				// Write to the Error List
+				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+					, msgFmtStr := 'Item at Confirm Index: %s'
+					, strArg := sMessage);
+			END_IF
+		END_IF
+		fb_ConfirmCheck[divertIndex] ( bLog := .nDivertLogEnable.DIVERT_DECISION 
+					 , ConfirmItem		:= aItems[nConfirmItemIndex]
+					 , ConfirmPE 		:= aDiverts[DivertIndex].ConfirmPE
+					 , DivertIndex		:= DivertIndex
+					 , bIsDischarge		:= aDiverts[DivertIndex].Config.IsDischarge
+					 , DetectedItem => st_ConfirmItem[DivertIndex]
+					 );
+	END_FOR
+	
+	// Capture the last item discharged by this sorter section
+	IF st_ConfirmItem[Sorter.NUMBEROFDIVERTS].ID <> '' THEN
+		st_DischargeItme := st_ConfirmItem[Sorter.NUMBEROFDIVERTS];
+	END_IF
+
+	// Clear the Item array ahead of the current encoder count
+	nIndexToClear := f_CalculateIndex(Offset := 400, InitialValue:= exitEncoderCount, BufferSize := nItemArraySize);
+	IF aItems[nIndexToClear].ID <> '' THEN
+		IF .nSorterLogEnable.SORTER_DUMP THEN
+			sMessage := CONCAT(' Item: ', aItems[nIndexToClear].ID);
+			sMessage := CONCAT(sMessage,' Index: ');
+			sMessage := CONCAT(sMessage, UDINT_TO_STRING(nIndexToClear));
+			sMessage := CONCAT(sMessage,' Item Status: ');
+			sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nIndexToClear].Status));
+			// Write to the Error List
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Clear Ahead Dump Info: %s'
+				, strArg := sMessage);
+		END_IF
+	END_IF
+	aItems[nIndexToClear] := BlankItem;
+
+END_WHILE
+]]></ST>
+    </Implementation>
+    <LineIds Name="Sorter_P2150">
+      <LineId Id="6884" Count="57" />
+      <LineId Id="7241" Count="0" />
+      <LineId Id="6942" Count="4" />
+      <LineId Id="7371" Count="0" />
+      <LineId Id="6947" Count="13" />
+      <LineId Id="7363" Count="0" />
+      <LineId Id="6961" Count="6" />
+      <LineId Id="7364" Count="0" />
+      <LineId Id="6968" Count="17" />
+      <LineId Id="7301" Count="0" />
+      <LineId Id="6986" Count="2" />
+      <LineId Id="7226" Count="1" />
+      <LineId Id="6989" Count="3" />
+      <LineId Id="7302" Count="0" />
+      <LineId Id="7954" Count="1" />
+      <LineId Id="6993" Count="17" />
+      <LineId Id="7799" Count="0" />
+      <LineId Id="7011" Count="1" />
+      <LineId Id="7800" Count="0" />
+      <LineId Id="7013" Count="20" />
+      <LineId Id="7801" Count="0" />
+      <LineId Id="7034" Count="1" />
+      <LineId Id="7802" Count="0" />
+      <LineId Id="7036" Count="24" />
+      <LineId Id="7956" Count="2" />
+      <LineId Id="7061" Count="28" />
+      <LineId Id="7094" Count="3" />
+      <LineId Id="7140" Count="0" />
+      <LineId Id="7098" Count="0" />
+      <LineId Id="7369" Count="0" />
+      <LineId Id="7125" Count="4" />
+      <LineId Id="7138" Count="1" />
+      <LineId Id="7431" Count="1" />
+      <LineId Id="7130" Count="3" />
+      <LineId Id="7137" Count="0" />
+      <LineId Id="7370" Count="0" />
+      <LineId Id="7154" Count="0" />
+      <LineId Id="7362" Count="0" />
+      <LineId Id="7100" Count="0" />
+      <LineId Id="7102" Count="2" />
+      <LineId Id="7571" Count="21" />
+      <LineId Id="7565" Count="0" />
+      <LineId Id="7568" Count="2" />
+      <LineId Id="7876" Count="0" />
+      <LineId Id="7878" Count="0" />
+      <LineId Id="7564" Count="0" />
+      <LineId Id="7105" Count="0" />
+      <LineId Id="7798" Count="0" />
+      <LineId Id="7886" Count="0" />
+      <LineId Id="7880" Count="2" />
+      <LineId Id="7885" Count="0" />
+      <LineId Id="7107" Count="1" />
+      <LineId Id="7110" Count="0" />
+      <LineId Id="7365" Count="0" />
+      <LineId Id="7111" Count="2" />
+      <LineId Id="7437" Count="1" />
+      <LineId Id="7114" Count="8" />
+      <LineId Id="6452" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

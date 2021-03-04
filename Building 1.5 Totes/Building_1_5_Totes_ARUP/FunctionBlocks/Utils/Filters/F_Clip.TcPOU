@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="F_Clip" Id="{d348d1f6-e670-41d9-9eca-8e43143dc5b2}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+Function to clip the input InX within the range of InMax and InMin
+the additional outputs show if the input is actively beig clipped
+
+*)
+FUNCTION F_Clip : INT
+VAR_INPUT
+	InX:	INT;
+	InMax:	INT;
+	InMin:	INT;
+END_VAR
+VAR_OUTPUT
+	MaxClipActive:	BOOL;
+	MinClipActive:	BOOL;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF InX > InMAx THEN 
+	MaxClipActive := TRUE;
+	MinClipActive := FALSE;
+	F_Clip:= InMax;
+ELSIF InX < InMin THEN 
+	MaxClipActive := FALSE;
+	MinClipActive := TRUE;
+	F_Clip:= InMin;
+ELSE
+	MaxClipActive := FALSE;
+	MinClipActive := FALSE;
+	F_Clip:= InX;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="F_Clip">
+      <LineId Id="97" Count="11" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="F_DecIndex" Id="{42ed4245-7b0e-420c-b8af-51eb070817ff}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_DecIndex : INT
+VAR_INPUT
+	IDX:	INT;		// Index to be incremented
+	IdxMIN:	INT;		// Min Value for index	
+	IdxMAX:	INT;		// Max Value for index
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF IDX > IdxMIN THEN
+	F_DecIndex := IDX - 1; 
+ELSIF IDX = IdxMIN THEN
+	F_DecIndex := IdxMAX;
+ELSIF IDX < IdxMIN OR IDX > IdxMAX THEN
+	F_DecIndex := IdxMAX;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="F_DecIndex">
+      <LineId Id="51" Count="5" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

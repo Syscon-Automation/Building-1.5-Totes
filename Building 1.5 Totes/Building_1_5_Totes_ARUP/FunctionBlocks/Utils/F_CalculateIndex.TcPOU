@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="F_CalculateIndex" Id="{b514e896-7fa3-4d56-8499-cf63475b2309}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+	This function calculates an index within an array using the max array size, 
+	and the offset that you are looking for. This allows you to easily treat the array like a ring buffer
+	For this function to work properly, the following rules MUST be observed
+	1) The value in OFFSET will define the direction the index is adjusted
+		> 0 Index is adjusted positively
+		< 0 Index is adjusted negatively
+	2)  InitialValue and BufferSize are both unsigned
+	3) BufferSize is the number of elements in an array, not the maximum array index
+		An array defined as ARRAY[0..10] has 11 elements, not 10, as the maximum element implies
+		If the array is defined as [0..ARRAYMAX], where ARRAYMAX is a constant, BufferSize = ARRAYMAX + 1
+*)
+FUNCTION F_CalculateIndex : UDINT 
+VAR_INPUT
+	Offset			: DINT; //The offset that you want to calculate, the sign in important to indicate direction
+	InitialValue	: UDINT; //The original point in the array you want to evaluate
+	BufferSize		: UDINT; //The size of the array, not the index of the last array element
+END_VAR
+VAR
+	TempInitialValue : LINT;
+	TempIndex : LINT; //the calculation of the offset, before taking into account the size of the array, no wraparound
+END_VAR 
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Convert the InitialValue (UDINT) to a LINT to prevent sign changes due to implicit conversions
+TempInitialValue := UDINT_TO_LINT(InitialValue); 
+(*
+	Calculate the new index, always add the Offset assuming the user correctly applied the sign
+	 to indicate which direction to adjust the InitialValue
+*)
+TempIndex := TempInitialValue + Offset;
+
+// Test the TempIndex to determine what the return index should be
+// If it is zero or greater, test against the BufferSize value
+IF TempIndex >= 0 THEN
+	IF TempIndex >= BufferSize THEN 
+		// If TempIndex is greater than the array size, reduce it by the BufferSize value
+		F_CalculateIndex := LINT_TO_UDINT(TempIndex - BufferSize);
+	ELSE
+		// Return the TempIndex, it is with the bounds of the Array
+		f_CalculateIndex := LINT_TO_UDINT(TempIndex);
+	END_IF
+ELSE
+	// If the TempIndex value is negative, Add BufferSize to TempIndex and return the result
+	F_CalculateIndex := LINT_TO_UDINT(BufferSize + TempIndex);
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="F_CalculateIndex">
+      <LineId Id="92" Count="3" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="96" Count="2" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

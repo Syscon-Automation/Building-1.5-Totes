@@ -1,0 +1,315 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_Merge2" Id="{ff4c85b7-b36d-4caa-8257-6277d168420a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Merge2
+(* This function block can handle any number of Inlets to the merge by changing the constant "Cfg_MergeInletCount" 
+	and then saving it as a new named function block. 
+*)
+
+VAR CONSTANT
+	MERGEINLETCOUNT			:	INT := 2;		// Number of inlets on the merge
+END_VAR
+
+VAR_IN_OUT
+	In_MergeProcessOrder	:	ARRAY [1..MERGEINLETCOUNT] OF INT;	// Processing order of the merge inlets
+END_VAR
+
+VAR_INPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	In_MergeState				:	E_StateCntrl;	// The State of the merge take away conveyor
+	In_MergeInletArry			:	ARRAY [1..MERGEINLETCOUNT] OF ST_MergeInlet;
+	In_MergeTakeAwayMtrFdbk		:	BOOL;			// Merge Take Away Motor Feedback, 1=Running
+	{attribute 'OPC.UA.DA' := '1'}
+	In_PhotoEyeJamDetect		:	BOOL;			// Photo Eye located to detect jams at the assigned merge
+	
+	In_SimActive				:	BOOL;	
+	In_Init						:	BOOL;
+		
+	In_MergeWakeTrigArry		: 	ARRAY [1..5] OF BOOL;
+	Cfg_ClearTakeAwayTime		: 	REAL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Cfg_MergeName				:	STRING(20);		// Name used to Identify the Merge on the HMI
+	{attribute 'OPC.UA.DA' := '1'}
+	Cfg_JammedTime				: 	REAL := 15;
+END_VAR
+
+VAR_OUTPUT
+	Sts_MergeSts			:	ST_MergeSts;
+	Sts_MergeInletStsArry	:	ARRAY [1..MERGEINLETCOUNT]OF ST_MergeInletSts;
+END_VAR
+
+VAR
+	MergeRunOutActive		:	BOOL;
+	MergeStateChanged		:	R_TRIG;	
+	LastMergeState			: 	E_StateCntrl;
+
+	MergeEnabledRTrig		: 	R_TRIG;
+	MergeEnabledFTrig		: 	F_TRIG;
+	inletindex				: 	INT := 0;
+	processIndex			:	INT := 0;	
+	i						:	INT;
+	j						:	INT;
+	fb_MergeEntryArry		:	ARRAY [1..MERGEINLETCOUNT]OF FB_MergeInlet;
+	MergeGrantedOwner		:	INT := 0;	// The ID (index) of the inlet that has the merge granted control 
+	MergeSubState_old		: 	INT;
+	AnotherMergeReqIsWaiting: 	BOOL;
+	HiHiMergeReqIsWaiting	: 	BOOL;
+	HiHiIndex				: 	INT;
+	MergeCntrl				: 	INT;
+
+	ClearTakeawayDelay		: 	BOOL;
+	ClearTakeAwayTimer		: 	TON;
+	LastClearTakeAwayTime	: 	REAL;
+	nClearTakeAwayTime		: 	UINT;
+	tClearTakeAwayTime		: 	TIME;
+
+	LastJammedTime			:	REAL;
+	nJammedTime				:	UINT;
+	tJammedTime				:	TIME;
+	fb_JamDetect			:	FB_JamDetect;
+	
+	bIncIndex				:	BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Initialize the Merge Here
+IF In_Init THEN
+	// Make sure the Processing Order doesn't have zeros in it
+	FOR i := 1 TO MERGEINLETCOUNT DO
+		IF In_MergeProcessOrder[i] = 0 THEN
+			In_MergeProcessOrder[i] := i;
+		END_IF
+	END_FOR
+	IF processIndex = 0 THEN
+		processIndex := 1;
+	END_IF
+	Sts_MergeSts.MergeSubState := E_MergeState.stStopped;
+	Sts_MergeSts.MergeSubStateTxt := 'Stopped';
+	Sts_MergeSts.InletCount := MERGEINLETCOUNT;
+	MergeGrantedOwner := In_MergeProcessOrder[1];
+END_IF
+
+// Calculate and set the timer values
+// Clear take away timer
+IF LastClearTakeAwayTime <> Cfg_ClearTakeAwayTime THEN
+	LastClearTakeAwayTime := Cfg_ClearTakeAwayTime;
+	nClearTakeAwayTime := REAL_TO_UINT(LastClearTakeAwayTime * 1000); 
+	tClearTakeAwayTime := UINT_TO_TIME(nClearTakeAwayTime);
+END_IF
+
+// Product Jam Wait timer
+IF LastJammedTime <> Cfg_JammedTime THEN
+	LastJammedTime := Cfg_JammedTime;
+	nJammedTime := REAL_TO_UINT(LastJammedTime * 1000); 
+	tJammedTime := UINT_TO_TIME(nJammedTime);
+END_IF
+
+// Run the Jam Detection
+fb_JamDetect(In_PE := In_PhotoEyeJamDetect
+			, In_Status := Sts_MergeSts.MergeTakeAwayMtrActive
+			, CFG_PEOKState := 0
+			, JamDetTime := tJammedTime
+			, JamDetected => Sts_MergeSts.MergeJammed);
+
+// Set MergeEnabled to the Take Away conveyor Auto, or the take away running, for manual opertion
+Sts_MergeSts.MergeEnabled := ((In_MergeState = E_StateCntrl.stAuto) OR In_MergeTakeAwayMtrFdbk);
+
+// If merge is just enabled set operation
+MergeEnabledRTrig(CLK:= Sts_MergeSts.MergeEnabled, Q=> );	
+
+// Cause a Re-process of the state when the state changes
+MergeStateChanged(CLK := (In_MergeState <> LastMergeState), Q=> );
+// Capture the state change for the next pass 
+LastMergeState := In_MergeState;
+
+// Test for a Merge state change, or an enable trigger
+IF MergeEnabledRTrig.Q OR MergeStateChanged.Q THEN
+	CASE In_MergeState OF
+		// Auto
+		E_StateCntrl.stAuto:
+			Sts_MergeSts.MergeSubState := E_MergeState.stClearTakeAway;
+			Sts_MergeSts.MergeSubStateTxt := 'Clear Take Away';
+		
+		// Manual
+		E_StateCntrl.stManual:
+			Sts_MergeSts.MergeTakeAwayMtrActive := In_MergeTakeAwayMtrFdbk;
+			inletindex := DINT_TO_INT(In_MergeProcessOrder[1]);
+			Sts_MergeSts.MergeSubState := E_MergeState.stMergeManual;
+			Sts_MergeSts.MergeSubStateTxt := 'Manual';
+	END_CASE
+END_IF
+
+// If Merge enabled drops set states per condition
+MergeEnabledFTrig(CLK:= Sts_MergeSts.MergeEnabled, Q=> );
+IF  MergeEnabledFTrig.Q OR MergeStateChanged.Q THEN
+	CASE In_MergeState OF
+		// Offline
+		E_StateCntrl.stOffline:
+			Sts_MergeSts.MergeSubState := E_MergeState.stStopped;
+			Sts_MergeSts.MergeSubStateTxt := 'Stopped';
+		// Faulted
+		E_StateCntrl.stFaulted:
+			Sts_MergeSts.MergeSubState := E_MergeState.stStopped;
+			Sts_MergeSts.MergeSubStateTxt := 'Faulted';
+	END_CASE
+END_IF
+
+//  ===== Set Up Merge Control for merge sub parts =====
+
+// Call inlet function blocks
+FOR i := 1 TO MERGEINLETCOUNT DO
+	fb_MergeEntryArry[i](In_MergeSubState:= Sts_MergeSts.MergeSubState, In_TakeAwayMtrSts:= Sts_MergeSts.MergeTakeAwayMtrActive, In_MergeInletInput:= In_MergeInletArry[i], Sts_MergeInlet=> Sts_MergeInletStsArry[i], In_MergeWakeTrig := In_MergeWakeTrigArry[i]);
+END_FOR
+
+// Turn OFF the increment Index boolean
+bIncIndex := FALSE;
+
+CASE Sts_MergeSts.MergeSubState OF	
+	// Stopped
+	E_MergeState.stStopped:
+		Sts_MergeSts.MergeTakeAwayMtrActive := FALSE;
+		
+	// Clear Takeaway	
+	E_MergeState.stClearTakeAway:
+		ClearTakeawayDelay := TRUE;
+		// Set Take Away Motor Output
+		Sts_MergeSts.MergeTakeAwayMtrActive := ClearTakeawayDelay;
+		
+	
+		IF ClearTakeAwayTimer.Q THEN
+			ClearTakeawayDelay := FALSE;
+			//MergeGrantedOwner := 0;
+			MergeGrantedOwner := In_MergeProcessOrder[1];
+			// Reset Inlets and merge
+			FOR i := 1 TO MERGEINLETCOUNT DO
+				fb_MergeEntryArry[i].In_MergeGranted := FALSE;
+			END_FOR
+			 fb_MergeEntryArry[1].In_MergeGranted := TRUE;
+			IF processIndex = 0 THEN
+				processIndex := 1;
+			END_IF
+			inletindex := In_MergeProcessOrder[processIndex];
+			Sts_MergeSts.MergeSubState := E_MergeState.stMergeOperational;
+			Sts_MergeSts.MergeSubStateTxt := 'Operational';
+		END_IF
+		
+	// Operational
+	E_MergeState.stMergeOperational:
+
+		// Set the inletIndex to the inlet identified at the processIndex in the ProcessOrder
+		inletindex := In_MergeProcessOrder[processIndex];
+
+		// Set Take Away Motor Output
+		Sts_MergeSts.MergeTakeAwayMtrActive := TRUE;
+		
+		// Clear the flags that may be set
+		AnotherMergeReqIsWaiting := FALSE;
+		HiHiMergeReqIsWaiting := FALSE;
+		HiHiIndex := 0;
+		MergeRunOutActive := FALSE;
+		FOR j := 1 TO MERGEINLETCOUNT DO
+			IF fb_MergeEntryArry[j].Sts_MergeInlet.MergeRequested AND MergeGrantedOwner <> j AND MergeGrantedOwner <> 0 THEN
+				AnotherMergeReqIsWaiting := TRUE;
+			END_IF
+			IF fb_MergeEntryArry[j].Sts_MergeInlet.HiHiDetected THEN
+				HiHiMergeReqIsWaiting := TRUE;
+				HiHiIndex := j;
+			END_IF
+			IF fb_MergeEntryArry[j].Sts_MergeInlet.MergeRunOutActive THEN
+				MergeRunOutActive := TRUE;
+			END_IF
+		END_FOR
+
+		// Call individual merge inlets branches
+		IF fb_MergeEntryArry[inletindex].Sts_MergeInlet.MergeRequested THEN
+			// Prioritize the HiHi request
+			IF HiHiMergeReqIsWaiting THEN
+				IF inletindex <> HiHiIndex THEN
+					inletindex := HiHiIndex;
+				END_IF
+			END_IF
+			IF NOT MergeRunOutActive THEN
+				IF (MergeGrantedOwner = 0) THEN
+					MergeGrantedOwner := inletindex;
+					fb_MergeEntryArry[inletindex].In_MergeGranted := TRUE;
+				END_IF
+			END_IF
+		ELSE
+			bIncIndex := TRUE;
+		END_IF	
+		IF MergeGrantedOwner <> 0 THEN	
+			IF (AnotherMergeReqIsWaiting AND fb_MergeEntryArry[MergeGrantedOwner].Sts_MergeInlet.MergeComplete)
+			   OR HiHiMergeReqIsWaiting
+			   THEN
+				// Reset Inlet and merge
+				fb_MergeEntryArry[MergeGrantedOwner].In_MergeGranted := FALSE;
+				MergeGrantedOwner := 0;
+				bIncIndex := TRUE;
+			END_IF
+		END_IF
+	// Manual mode	
+	E_MergeState.stMergeManual:
+		// Set the inletIndex to the inlet identified at the processIndex in the ProcessOrder
+		inletindex := In_MergeProcessOrder[processIndex];
+
+		// Set Take Away Motor Output
+		Sts_MergeSts.MergeTakeAwayMtrActive := In_MergeTakeAwayMtrFdbk;
+		
+		// Call individual merge inlets branches
+		IF fb_MergeEntryArry[inletindex].Sts_MergeInlet.MergeRequested THEN
+			// Prioritize the HiHi request
+			IF HiHiMergeReqIsWaiting THEN
+				IF inletindex <> HiHiIndex THEN
+					inletindex := HiHiIndex;
+				END_IF
+			END_IF
+			IF NOT MergeRunOutActive THEN
+				IF (MergeGrantedOwner = 0) THEN
+					MergeGrantedOwner := inletindex;
+					fb_MergeEntryArry[inletindex].In_MergeGranted := TRUE;
+				END_IF
+			END_IF
+		ELSE
+			bIncIndex := TRUE;
+		END_IF		
+		IF (AnotherMergeReqIsWaiting AND fb_MergeEntryArry[MergeGrantedOwner].Sts_MergeInlet.MergeComplete)
+			   OR HiHiMergeReqIsWaiting
+			   THEN
+				// Reset Inlet and merge
+				fb_MergeEntryArry[MergeGrantedOwner].In_MergeGranted := FALSE;
+				MergeGrantedOwner := 0;
+				bIncIndex := TRUE;
+		END_IF
+END_CASE
+
+// Take Away Timer
+ClearTakeAwayTimer(IN:= ClearTakeawayDelay, PT:= tClearTakeAwayTime, Q=> , ET=> );
+
+// Increment the processIndex
+IF bIncIndex THEN
+	processIndex := processIndex + 1;
+	bIncIndex := FALSE;
+	// Reset index if necessary
+	IF (processIndex > MERGEINLETCOUNT) THEN
+		processIndex := 1;
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Merge2">
+      <LineId Id="2765" Count="13" />
+      <LineId Id="3122" Count="0" />
+      <LineId Id="2779" Count="91" />
+      <LineId Id="3121" Count="0" />
+      <LineId Id="2871" Count="3" />
+      <LineId Id="3130" Count="0" />
+      <LineId Id="2875" Count="51" />
+      <LineId Id="3050" Count="0" />
+      <LineId Id="2927" Count="2" />
+      <LineId Id="2931" Count="1" />
+      <LineId Id="3052" Count="0" />
+      <LineId Id="2933" Count="27" />
+      <LineId Id="3123" Count="6" />
+      <LineId Id="2968" Count="13" />
+      <LineId Id="2690" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_RGB" Id="{bd2a4f5f-70c7-4f74-ab7e-fe97c86d8df1}">
+    <Declaration><![CDATA[TYPE ST_RGB :
+STRUCT
+	Value_Red:	BYTE;		// The Value for the Red LED (0=Off, 255 = Full on)
+	Value_Green:	BYTE;		// The Value for the Blue LED (0=Off, 255 = Full on)
+	Value_Blue:	BYTE;		// The Value for the Blue LED (0=Off, 255 = Full on)
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

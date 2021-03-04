@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="P_PulseCountDist" Id="{27057743-4b0a-4dfc-b889-e1d9fe7f14cb}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_PulseCountDist
+VAR
+	EncoderValue : UDINT;
+	StartValue: UDINT;
+	EndValue: UDINT;
+	Reading: BOOL;
+	TotalCounts: UDINT;
+	ReadCount: UDINT;
+	ReadSum: UDINT;
+	ReadAvg: REAL;
+	Reset: BOOL;
+	Timer: TON;
+	TimeElapsed: REAL;
+	Distance : REAL;
+	Speed_ips : REAL;
+	Speed_fps : REAL;
+	Speed_fpm : REAL;
+	DistperCount :	REAL;
+	TestStart: R_TRIG;
+	TestEnd: R_TRIG;
+END_VAR
+
+VAR CONSTANT
+	EncoderMax: UDINT := MAIN.SORTERENCODERMAX;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Uncomment to get pulse counts for a distance
+//TestStart(CLK:= (* Start photo eye goes here --> *) Photoeyes.PE_24041.Out);
+//TestEnd(CLK:= (* End photo eye goes here --> *) Photoeyes.PE_24161.Out);
+//EncoderValue := MAIN.st_SorterEncoder.CurrentCount;
+
+Timer(IN:= Reading, PT:= T#1H, Q=> , ET=> );
+
+IF Reset THEN
+	ReadCount := 0;	
+	ReadSum := 0;
+	ReadAvg := 0;
+	Reset := FALSE;
+END_IF
+
+IF TestStart.Q THEN 
+	StartValue := EncoderValue;
+	Reading := TRUE;
+	ReadCount := ReadCount +1;
+END_IF
+
+IF Reading THEN
+	TimeElapsed := (TIME_TO_REAL(Timer.ET))/1000;
+END_IF
+
+IF TestEnd.Q THEN 
+	EndValue := EncoderValue;
+	IF EndValue < StartValue THEN
+		TotalCounts := EncoderMax - StartValue;
+		TotalCounts := TotalCounts + EndValue;
+	ELSE
+  		TotalCounts := (EndValue-StartValue);
+	END_IF
+	
+	ReadSum := ReadSum + TotalCounts;
+	IF  ReadCount > 0 THEN 
+		ReadAvg := UDINT_TO_REAL(ReadSum)/UDINT_TO_REAL(ReadCount);
+	END_IF
+	 
+	IF TimeElapsed > 0 THEN
+		Speed_ips := (Distance/TimeElapsed);
+		Speed_fps := Speed_ips/12;
+		Speed_fpm := Speed_fps*60;
+	END_IF
+	IF TotalCounts > 0 THEN
+		DistperCount := Distance / UDINT_TO_REAL(TotalCounts);
+	END_IF
+		Reading := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="P_PulseCountDist">
+      <LineId Id="155" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="21" Count="2" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

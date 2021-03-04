@@ -1,0 +1,345 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_CnvyrCnfig_1" Id="{3ef8a691-dcc9-40ac-aa24-71b15137a9f1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CnvyrCnfig_1
+
+(* Standard Conveyor Set up,
+	Uses Interlocks. Has 14 that can be assigned that are conveyor specific and a common interlock for exit conveyor PE and Dwn Stream MTR status
+	Has an interlock for System.SysIntlksAllOk
+	Doesn't use Start Conditions  
+	Uses Events and has 15 that can be assigned that are conveyor specific and a common event for the exit conveyor PE Jam detected fault  *)
+(* End Conveyor Set up,
+	This configuration doesn't use the downstream motor status
+	Uses Interlocks. Has 14 that can be assigned that are conveyor specific and a common interlock for conveyor full using the exit PE of this conveyor
+	Has an interlock for System.SysIntlksAllOk
+	Doesn't use Start Conditions  
+	Uses Events and has 16 that can be assigned that are conveyor specific *)
+(* Slave Conveyor Set up,
+	Uses Interlocks. Has 14 that can be assigned that are conveyor specific and a common interlock for Dwn Stream MTR status
+	Has an interlock for System.SysIntlksAllOk
+	Doesn't use Start Conditions  
+	Uses Events and has 16 that can be assigned that are conveyor specifi  *)
+
+VAR_IN_OUT
+	CFG_EquipIndex				: DINT;	// Index used for local Equipment status array
+	Sts_EquipState				: ST_EquipmentStatus;		// State Status
+END_VAR
+VAR_INPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	In_o_EquipStatePB			: ST_StateCntrlPB;		// Hmi push butons to change states
+	In_p_EquipStatePB			: ST_StateCntrlPB;		// programming to change states
+	In_P_ConvReqRun				: BOOL;		// Input to start output if in auto and conditions are met
+	In_ConvDwnStrmMtrStatus		: BOOL;		// The Down Stearm Motors Status (0= OFF, 1= ON/Running)
+	In_ConvCrntExitPhotoEye		: BOOL;		// The Current Photo Eye (1= blocked)
+	In_SimActive				: BOOL;
+	In_EquipInit					: BOOL;		// Initialise;
+	In_EquipMtrFdbck			: BOOL := FALSE;	// Motor Running Feedback (1 = Running), VFD or Contactor
+	Cfg_EquipDefState			: E_StateCntrl;
+	{attribute 'OPC.UA.DA' := '1'}
+	Cfg_EquipLabel				: STRING(20);		// Label of the conveyor
+	Cfg_UseMtrFdbck				: BOOL := FALSE;	// Use Feedback from Contactor or VFD 
+	Cfg_UseStartUpDelay			: BOOL := FALSE;	// Use a Start-up Delay
+	Cfg_StartUpDelayTime		: TIME := T#1S;		// Start-up delay time
+	Cfg_InvertMotorOut          : BOOL := FALSE;
+	Cfg_ConvType				: E_ConvType := E_ConvType.standard;	// Default to a standard conveyor type
+	Cfg_JamDetectTime			: TIME;
+	
+	// Events
+	In_EquipEvents				: UINT;		// Events that are specific to the instance of the conveyor
+	Cfg_EquipEvntsArry			: ARRAY [0..15] OF ST_CfgEvents;
+	
+	// Interlocks that can be Instance Specific
+	In_EquipIntlks				: UINT;		// Interlock that is specific to the instance of the conveyor
+	Cfg_EquipIntlksArry			: ARRAY [0..15] OF ST_CfgEvents;		// Descriptions of the Interlock 
+	
+	// Sleep Timer	
+	Cfg_UseSleepTmr				: BOOL;	// Configure sleep or not sleep this conveyor
+	In_WakeSlpTrigArry			: ARRAY [1..5] OF BOOL;		// Input to watch (or wake) for sleep timer
+	Cfg_SleepWaitTime			: TIME;		// Time to Wait after last Input before sleeping
+	
+END_VAR
+VAR_OUTPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_ConvCrntMtr				: BOOL;		// Run command for the current motor
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_ConvCrntMtr_Raw			: BOOL;		// Run command for the current motor
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_ConvCrntMtr				: BOOL;		// Status showing that current motor is running
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_ConvSleepingActive		: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_All_Intlks_OK			: BOOL;		// Status bit to show that all interloks are good to Run 
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_FaultActive				: BOOL;	// Status Bit Showing that a fault is present (0= No Active Faults, 1= Fault Active)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_WarnActive				: BOOL;	// Status Bit Showing that a warning is present (0= No Active Warnings, 1= Warning Active)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_All_Evnts_OK			: BOOL;		// Status Bit Showing that ALL Events are OK to RUN (0= Event Present, 1= OK to Run)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_IntlksArry				: ARRAY[0..15] OF ST_EventSts;		// Interlock status 0 to 15 Input
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_FaultsArry				: ARRAY[0..15] OF ST_EventSts;	// Status of each Fault Event State (0= OFF, 1=ON)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_WarnsArry				: ARRAY[0..15] OF ST_EventSts;		// Status of each Warning Event State (0= OFF, 1=ON)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_EvntsArry				: ARRAY[0..15] OF ST_EventSts; 	// Status of each Event State (0= OFF, 1=ON)
+END_VAR
+VAR
+	Conv_fbIntrlks				: FB_Intlks_Latch;
+	Conv_IntlksArry				: ARRAY[0..15] OF BOOL;
+	Conv_fbEquipCntrl			: FB_EquipCntrl;
+	Conv_EventManager			: FB_EventMngr;
+	Conv_CrrntExitPEJamDetctd	: FB_JamDetect;
+	Conv_EventArry				: ARRAY[0..15] OF BOOL;
+	
+	Conv_LatchIgnore			: BOOL := FALSE;		// Put as a place holder for ease of future use
+	Conv_LatchReset				: BOOL := FALSE;		//Put as a place holder for ease of future use
+	Conv_IntlkBypassed			: ARRAY [0..15] OF BOOL;		//Put as a place holder for ease of future use
+	Conv_RunEnabled				: BOOL;					// TRUE = Enable the conveyor to run
+	Conv_StartEnabled			: BOOL;					// TRUE = Start Motion for Conv Enabled
+	Conv_StartAllowed			: BOOL;					// TRUE = Start Motion for Conv Allowed
+
+	// Sleep Timer
+	fbSleepCntrl				: FB_SleepCntrl;
+
+	// Start-up Delay Timer
+	tStartUpDelay				: TON;
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+	Depending on the conveyor type, the Interlock and Event 0 is different
+	Also, jams are only detected on standard and end conveyors
+
+	If no valid conveyor type is specified, the default is a standard type
+*)
+
+CASE Cfg_ConvType OF
+	E_ConvType.standard:
+		Conv_IntlksArry[0] := In_ConvDwnStrmMtrStatus OR (NOT In_ConvDwnStrmMtrStatus AND NOT In_ConvCrntExitPhotoEye);
+		Conv_EventArry[0] := Conv_CrrntExitPEJamDetctd.JamDetected;
+		Conv_CrrntExitPEJamDetctd(
+			In_PE:= In_ConvCrntExitPhotoEye, 
+			In_Status:= Out_ConvCrntMtr_Raw, 
+			CFG_PEOKState:= 0, 
+			JamDetTime:= cfg_JamDetectTime);
+	E_ConvType.end:
+		Conv_IntlksArry[0] := Conv_CrrntExitPEJamDetctd.JamDetected;
+		Conv_EventArry[0] := In_EquipEvents.0;
+		Conv_CrrntExitPEJamDetctd(
+			In_PE:= In_ConvCrntExitPhotoEye, 
+			In_Status:= Out_ConvCrntMtr_Raw, 
+			CFG_PEOKState:= 0, 
+			JamDetTime:= cfg_JamDetectTime);
+	E_ConvType.slave:
+		Conv_IntlksArry[0] := In_ConvDwnStrmMtrStatus;
+		Conv_EventArry[0] := In_EquipEvents.0;
+	ELSE
+		Conv_IntlksArry[0] := In_ConvDwnStrmMtrStatus OR (NOT In_ConvDwnStrmMtrStatus AND NOT In_ConvCrntExitPhotoEye);
+		Conv_EventArry[0] := Conv_CrrntExitPEJamDetctd.JamDetected;
+		Conv_CrrntExitPEJamDetctd(
+			In_PE:= In_ConvCrntExitPhotoEye, 
+			In_Status:= Out_ConvCrntMtr_Raw, 
+			CFG_PEOKState:= 0, 
+			JamDetTime:= cfg_JamDetectTime);
+END_CASE
+// Set Up Common Converyor Interlocks and inputs for interlocks
+Conv_IntlksArry[1] := System.SysIntlksAllOk; 
+Conv_IntlksArry[2] := In_EquipIntlks.2;
+Conv_IntlksArry[3] := In_EquipIntlks.3;
+Conv_IntlksArry[4] := In_EquipIntlks.4;
+Conv_IntlksArry[5] := In_EquipIntlks.5;
+Conv_IntlksArry[6] := In_EquipIntlks.6;
+Conv_IntlksArry[7] := In_EquipIntlks.7;
+Conv_IntlksArry[8] := In_EquipIntlks.8;
+Conv_IntlksArry[9] := In_EquipIntlks.9; 
+Conv_IntlksArry[10] := In_EquipIntlks.10;
+Conv_IntlksArry[11] := In_EquipIntlks.11;
+Conv_IntlksArry[12] := In_EquipIntlks.12;
+Conv_IntlksArry[13] := In_EquipIntlks.13;
+Conv_IntlksArry[14] := In_EquipIntlks.14;
+Conv_IntlksArry[15] := In_EquipIntlks.15;
+	
+// Call Interlock block
+Conv_fbIntrlks(
+	In_Intlks:= Conv_IntlksArry,
+	CFG_IntlksArry:= Cfg_EquipIntlksArry, 
+	HMI_LatchIgnore:= Conv_LatchIgnore, 
+	HMI_LatchReset:= Conv_LatchReset, 
+	All_Intlk_OK=> Sts_EquipState.Sts_All_Intlks_OK, 
+	STS_Intlks=> Sts_IntlksArry);
+	
+// Set Up Common Converyor Events and inputs for events
+Conv_EventArry[1]:=	In_EquipEvents.1;
+Conv_EventArry[2]:= In_EquipEvents.2;
+Conv_EventArry[3]:= In_EquipEvents.3;
+Conv_EventArry[4]:= In_EquipEvents.4;
+Conv_EventArry[5]:= In_EquipEvents.5;
+Conv_EventArry[6]:= In_EquipEvents.6;
+Conv_EventArry[7]:= In_EquipEvents.7;
+Conv_EventArry[8]:= In_EquipEvents.8;
+Conv_EventArry[9]:= In_EquipEvents.9;
+Conv_EventArry[10]:= In_EquipEvents.10;
+Conv_EventArry[11]:= In_EquipEvents.11;
+Conv_EventArry[12]:= In_EquipEvents.12;
+Conv_EventArry[13]:= In_EquipEvents.13;
+Conv_EventArry[14]:= In_EquipEvents.14;
+Conv_EventArry[15]:= In_EquipEvents.15;
+
+// Event Manager
+Conv_EventManager(
+	sEquipStateCntrlSts := Sts_EquipState.Sts_EquipmentState,
+	In_EventsArry := Conv_EventArry ,  
+	CFG_EvntsArry:= Cfg_EquipEvntsArry, 
+	HMI_LatchReset:= In_o_EquipStatePB.ResetPB OR In_p_EquipStatePB.ResetPB,
+	Out_FaultActive=> Sts_EquipState.Sts_FaultActive, 
+	Out_WarnActive=> Sts_EquipState.Sts_WarnActive, 
+	Sts_All_Evnts_OK=> Sts_EquipState.Sts_All_Evnts_OK, 
+	Sts_FaultsArry=> Sts_FaultsArry, 
+	Sts_WarnsArry=> Sts_WarnsArry, 
+	Sts_EvntsArry=> Sts_EvntsArry);
+	
+//Call Equipment FB to control current motor	
+Conv_fbEquipCntrl(
+	CFG_EquipIndex := cfg_EquipIndex,
+	CFG_EquipLabel := Cfg_EquipLabel,
+	CFG_UseStrtCnd:= FALSE, 
+	CFG_UseIntrlks:= TRUE, 
+	CFG_UseHrnDly:= Cfg_UseStartUpDelay, 
+	CFG_EquipDefState:= Cfg_EquipDefState, 
+	In_IntlksOK:= Sts_EquipState.Sts_All_Intlks_OK, 
+	In_SimActive:= In_SimActive, 
+	In_Init:= In_EquipInit, 
+	o_EquipStatePB:= In_o_EquipStatePB, 
+	p_EquipStatePB:= In_p_EquipStatePB, 
+	P_EquipReqRun:= In_P_ConvReqRun, 
+	In_EquipFaults:= Sts_EquipState.Sts_FaultActive, 
+	Out_EquipRun=> , 
+	Out_Horn=> , 
+	Sts_EquipState:= Sts_EquipState.Sts_EquipmentState);	
+
+//===Sleep Timer
+IF CFG_UseSleepTmr THEN
+	fbSleepCntrl.In_Trigs.0 := In_ConvCrntExitPhotoEye;
+	fbSleepCntrl.In_Trigs.1 := In_WakeSlpTrigArry[1];
+	fbSleepCntrl.In_Trigs.2 := In_WakeSlpTrigArry[2];
+	fbSleepCntrl.In_Trigs.3 := In_WakeSlpTrigArry[3];
+	fbSleepCntrl.In_Trigs.4 := In_WakeSlpTrigArry[4];
+	fbSleepCntrl.In_Trigs.5 := In_WakeSlpTrigArry[5];
+	fbSleepCntrl( 
+		In_CrntFeedBack:= Out_ConvCrntMtr_Raw, 
+		In_ConvState := Sts_EquipState.Sts_EquipmentState.CrntState,
+		CFG_WaitToSlpTime:= Cfg_SleepWaitTime,
+		SleepActive=> Sts_EquipState.Sts_SleepingActive);
+ELSE
+	Sts_EquipState.Sts_SleepingActive := FALSE;
+END_IF
+Sts_ConvSleepingActive := Sts_EquipState.Sts_SleepingActive;
+
+(*
+	Process the Conv_StartAllowed signal
+	The Conv_StartAllowed enforces the cascade start of conveyors by waiting for the downstream motor to be running before
+	this conveyor starts.
+	Any conveyor can be started using the Start/Auto push-button without waiting for the downstream conveyor to be running.
+*)
+IF Sts_EquipState.Sts_EquipmentState.StsAuto THEN
+	IF NOT Conv_StartAllowed THEN
+		Conv_StartAllowed := In_ConvDwnStrmMtrStatus OR In_o_EquipStatePB.AutoPB;
+	END_IF
+ELSE
+	Conv_StartAllowed := FALSE;
+END_IF
+
+// Process the Conv_RunEnabled signal
+Conv_RunEnabled := Conv_fbEquipCntrl.Out_EquipRun
+				AND NOT (Sts_EquipState.Sts_SleepingActive) 
+				AND (Sts_EquipState.Sts_EquipmentState.StsMan OR (Sts_EquipState.Sts_EquipmentState.StsAuto AND Conv_StartAllowed));
+
+// Use or do not use a start-up delay
+IF Cfg_UseStartUpDelay THEN
+	tStartUpDelay(IN := Conv_RunEnabled
+					, PT := Cfg_StartUpDelayTime
+					, Q =>);
+	IF tStartUpDelay.Q THEN
+		Conv_StartEnabled := TRUE;
+	ELSE
+		Conv_StartEnabled := FALSE;
+	END_IF
+ELSE
+		Conv_StartEnabled := Conv_RunEnabled;	
+END_IF
+
+// Run motor based on the results of the Equipment Control and sleeping state
+Out_ConvCrntMtr_Raw := Conv_StartEnabled;
+
+// Capture WarnActive to carry these attributes into the Equipment state for System State reporting and display
+Sts_EquipState.Sts_EquipmentState.StsHasWarnings := Sts_EquipState.Sts_WarnActive;
+
+// Set Conveyor Motor Running Status
+Sts_ConvCrntMtr := (CFG_UseMtrFdbck AND In_EquipMtrFdbck) OR (NOT CFG_UseMtrFdbck AND Out_ConvCrntMtr_Raw) OR (In_SimActive AND Conv_fbEquipCntrl.RunApproved);
+
+// Capture the Operation state of the Conveyor
+IF Sts_ConvCrntMtr THEN
+	// Conveyor Running
+	Sts_EquipState.Sts_EquipmentState.CrntOperState := E_OperStateCntrl.running;
+ELSE
+	IF Sts_EquipState.Sts_SleepingActive THEN
+		// Conveyor Sleeping
+		Sts_EquipState.Sts_EquipmentState.CrntOperState := E_OperStateCntrl.sleeping;
+	ELSE
+		// Conveyor Stopped
+		Sts_EquipState.Sts_EquipmentState.CrntOperState := E_OperStateCntrl.stopped;
+	END_IF
+END_IF
+
+//invert output
+IF Cfg_InvertMotorOut THEN
+    Out_ConvCrntMtr := NOT Out_ConvCrntMtr_Raw;
+ELSE
+    Out_ConvCrntMtr := Out_ConvCrntMtr_Raw;
+END_IF
+
+// Populate the Sts Output Variables
+Sts_All_Intlks_OK  := Sts_EquipState.Sts_All_Intlks_OK;
+Sts_All_Evnts_OK  := Sts_EquipState.Sts_All_Evnts_OK;
+Sts_FaultActive := Sts_EquipState.Sts_FaultActive;
+Sts_WarnActive := Sts_EquipState.Sts_WarnActive;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_CnvyrCnfig_1">
+      <LineId Id="6856" Count="0" />
+      <LineId Id="6859" Count="3" />
+      <LineId Id="6858" Count="0" />
+      <LineId Id="6857" Count="0" />
+      <LineId Id="6772" Count="1" />
+      <LineId Id="6775" Count="0" />
+      <LineId Id="6836" Count="0" />
+      <LineId Id="6841" Count="4" />
+      <LineId Id="6777" Count="0" />
+      <LineId Id="6776" Count="0" />
+      <LineId Id="6837" Count="0" />
+      <LineId Id="6846" Count="4" />
+      <LineId Id="6779" Count="0" />
+      <LineId Id="6778" Count="0" />
+      <LineId Id="6838" Count="0" />
+      <LineId Id="6780" Count="1" />
+      <LineId Id="6839" Count="0" />
+      <LineId Id="6851" Count="4" />
+      <LineId Id="6774" Count="0" />
+      <LineId Id="6840" Count="0" />
+      <LineId Id="6511" Count="25" />
+      <LineId Id="6538" Count="28" />
+      <LineId Id="6574" Count="20" />
+      <LineId Id="6879" Count="1" />
+      <LineId Id="6885" Count="3" />
+      <LineId Id="6595" Count="9" />
+      <LineId Id="6817" Count="13" />
+      <LineId Id="6832" Count="3" />
+      <LineId Id="6607" Count="36" />
+      <LineId Id="6657" Count="0" />
+      <LineId Id="6652" Count="4" />
+      <LineId Id="6651" Count="0" />
+      <LineId Id="6644" Count="4" />
+      <LineId Id="3659" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

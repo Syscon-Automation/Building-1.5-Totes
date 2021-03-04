@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_Msg_ConveyorStat" Id="{99a5425f-a1a7-43c1-b44f-3f44400ce454}">
+    <Declaration><![CDATA[TYPE ST_Msg_ConveyorStat :
+STRUCT
+	DeviceID:	STRING(5);
+	Status:	INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

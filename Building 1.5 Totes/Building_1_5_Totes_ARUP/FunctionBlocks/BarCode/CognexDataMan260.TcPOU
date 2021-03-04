@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="CognexDataMan260" Id="{6b0204a3-1525-40f4-a3f1-79c3ceda7b4d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK CognexDataMan260
+VAR_INPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	In_ResetMetrics		: BOOL;
+	In_ReadTrig			: BOOL;			// Read Trigger input -- (1=Read Bar Code)
+	In_ResetCounts		: BOOL;		// Trigger to reset counters (1=Reset)
+	In_TriggerOnTime	: TIME := T#200MS;
+	In_EquipID			: STRING(20);	// Equip ID used for reporting
+	
+END_VAR
+VAR_OUTPUT
+	Out_NewReadTrig		: BOOL;		// Output trigger(single scan) to show a new read has just posted data to Out_ReadString (1=new read)
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_ReadString		: STRING(30);	// String Output from Barcode read
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_ReadStatus		: BOOL;		// Read Status stays latched if next read is the same (1=Good)
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_ResultID		: INT;		// Read Count from Barcode Reader
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_DeviceState		: UINT;		// Device Connection State 
+	Out_TriggerState	: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	MisreadCount		: UDINT;		// Count for number of bad reads since startup
+	{attribute 'OPC.UA.DA' := '1'}
+	GoodreadCount		: UDINT;		// Count for number of good reads since startup
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_LastTenReads	: ARRAY[1..10] OF STRING(30);	// Array of the last 10 barcodes decoded
+	
+END_VAR
+VAR
+	bLogEntries: BOOL := FALSE;		// If true, log entries
+	ResultID_Old: INT;		// Variable used to detect change in read data
+	DataReadCount: INT;		// Read Data Length Check length
+	x: INT;		// index variable
+	CharArry: ARRAY [0..DataBytesSize] OF STRING(2);		// Characters read in barcode
+	DeviceState	AT %I* : UINT;	// Device Connection State -- From mapped DevState 
+	TriggerReady	AT %I* : BOOL;	// Barcode Reader Mapped VAR
+	TriggerAck	AT %I* : BOOL;	// Barcode Reader Mapped VAR
+	Acquiring 	AT %I* : BOOL;	// Barcode Reader Mapped VAR
+	Decoding 	AT %I* : BOOL;	// Barcode Reader Mapped VAR
+	DecodeComplete 	AT %I* : BOOL;	// Barcode Reader Mapped VAR
+	ResultsAvail	AT %I* : BOOL;	// Barcode Reader Mapped VAR
+	TriggerID	AT %I*: INT;	// Barcode Reader Mapped VAR
+	ResultID	AT %I* : INT;	// Barcode Reader Mapped VAR
+	ResultCode	AT %I* : INT;	// Barcode Reader Mapped VAR
+	ResultLength	AT %I* : INT;	// Barcode Reader Mapped VAR
+	ResultData	AT %I* : ARRAY [0 .. DataBytesSize] OF BYTE;	// Barcode Reader Mapped VAR -- This ARRAY may be increased if more Data is needed 
+	
+	TriggerEnable	AT %Q*: BOOL;	// Barcode Reader Mapped VAR
+	Trigger	AT %Q*: BOOL;	// Barcode Reader Mapped VAR
+	ResultsAck	AT %Q*: BOOL;	// Barcode Reader Mapped VAR
+	ResetTrigger: R_TRIG;
+	TimeTestTrigger	: UINT;  // Variable used bitwise for all of the time testing triggers
+	TriggerTime : TIME;
+	TriggerAckTime: TIME;
+	ResultsAvailTime: TIME;
+	TotalTriggerTime: TIME;
+	TotalResultsTime: TIME;
+	ReadTrig_Trigger: R_TRIG;
+	TriggerOnTimer: TON;
+	TriggerPulse: TP;
+	b_TempTrigger: BOOL;
+END_VAR
+VAR CONSTANT
+	DataBytesSize	:INT := 25;
+	GoodRead	:INT := 0;
+	Validated	:INT := 1;
+	Verified	:INT := 2;
+	AcqTrigOverrun	:INT := 3;
+	AcqBufferOverflow	:INT := 4;
+
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* Pass through Device state Left here in case future manipulation or more specific error codes are needed
+	Bar Code Reader State Defined 
+		0x8000 = Remote Node has no connections, 
+		0x4000 = Remote Node is not reachable,
+	 	0x2000 = TCP Client: initialization failed
+		0x1000 = UDP Client: initialization failed
+		0x0X00 = reserved
+		0x0001 = 1st Connection disconnected
+		0x0002 = 2nd Connection disconnected
+		0x0004 = 3rd Connection disconnected
+----------------------------------------------------*)
+Out_DeviceState := DeviceState;
+
+// Reset the metrics when Requested
+IF In_ResetMetrics THEN
+	MisReadCount := 0;
+	GoodReadCount := 0;
+	In_ResetMetrics := 0;
+END_IF
+
+// Set Reader to enable external trigger
+TriggerEnable := TRUE;
+
+// Watch Function Block for triggers
+ResetTrigger(CLK:= In_ResetCounts);
+
+// Reset single scan variable
+IF Out_NewReadTrig THEN Out_NewReadTrig := FALSE; END_IF
+
+//Set to only read on Rise
+ReadTrig_Trigger(CLK:= In_ReadTrig);
+
+// Fire Bar Code on read trigger
+IF TriggerEnable AND TriggerReady AND ReadTrig_Trigger.Q THEN
+	Trigger := TRUE;
+	b_TempTrigger := TRUE;
+	// Set Time capture for communications testing
+	IF TimeTestTrigger.0 = FALSE THEN
+		TriggerTime := TIME();
+		TimeTestTrigger.0 := TRUE;
+	END_IF
+
+END_IF
+
+// Reset the Temporary trigger
+IF b_TempTrigger AND NOT In_ReadTrig THEN
+	b_TempTrigger := FALSE;
+END_IF
+TriggerOnTimer(IN:= Trigger, PT:= IN_TriggerOnTime);
+//TriggerOnTimer(IN:= b_TempTrigger, PT:= IN_TriggerOnTime);
+
+TriggerPulse(IN := b_TempTrigger, PT := In_TriggerOnTime);
+
+IF Trigger THEN
+	IF TriggerOnTimer.Q  THEN
+		Trigger := FALSE;
+	END_IF
+	
+	// Set Time capture for communications testing
+	IF TriggerAck AND TimeTestTrigger.1 = FALSE THEN
+		TriggerAckTime := TIME();
+		TimeTestTrigger.1 := TRUE;
+	END_IF	
+END_IF
+
+//Trigger := TriggerPulse.Q;
+
+Out_TriggerState := Trigger;
+
+// Watch for Results
+IF ResultsAvail AND ResultID_Old <> ResultID  THEN
+	// Set Time capture for communications testing
+	IF TimeTestTrigger.2 = FALSE THEN
+		ResultsAvailTime := TIME();
+		TimeTestTrigger.2 := TRUE;
+	END_IF
+	// Clear Old read
+	Out_ReadString := '';
+	// Make sure data from barcode fits in array 
+	IF ResultLength > DataBytesSize THEN
+		DataReadCount := DataBytesSize;
+	ELSE 
+		DataReadCount := ResultLength;
+	END_IF
+	
+	// Set Read Status
+	Out_ReadStatus := ResultCode.GoodRead;
+	
+	// Watch Counts
+	IF ResultCode.GoodRead THEN
+		GoodreadCount := GoodreadCount +1;
+	ELSE
+		MisreadCount := MisreadCount +1;
+	END_IF
+		
+	FOR x := 0 TO DataReadCount DO
+		CharArry[x] := F_ToCHR(ResultData[x]);
+		Out_ReadString := CONCAT(STR1:= Out_ReadString , STR2:= CharArry[x] );
+	END_FOR
+
+	// Rotate the last read buffer
+	FOR x := 9 TO 1 BY -1 DO
+		Out_LastTenReads[x+1] := Out_LastTenReads[x];
+	END_FOR
+
+	Out_LastTenReads[1] := Out_ReadString;
+	
+	IF bLogEntries THEN
+		logitem(Out_ReadString);
+	END_IF	
+	
+	// Set trigger for new read
+	Out_NewReadTrig := TRUE;
+	// Reset Scan variables and BCR Acknowledge bit	
+	Trigger := FALSE;
+//	ResultsAck := FALSE;
+	ResultsAck := TRUE; 			// Acknowledge that the results were read
+	Out_ResultID := ResultID;		// Update the Output of the read count to show that a read was tried
+	ResultID_Old := ResultID;
+
+	// Calculate time results
+	IF TimeTestTrigger.3 = FALSE THEN
+		TotalTriggerTime := TriggerAckTime-TriggerTime;
+		TotalResultsTime := ResultsAvailTime-TriggerTime;
+		TimeTestTrigger.3 := TRUE;
+	END_IF
+ 
+END_IF
+
+//Reset the Result Ack
+IF NOT ResultsAvail THEN
+	ResultsAck := FALSE;
+END_IF
+
+// Reset Counts
+IF ResetTrigger.Q THEN
+	GoodreadCount := 0;
+	MisreadCount := 0;
+END_IF
+
+
+]]></ST>
+    </Implementation>
+    <Property Name="LogEntries" Id="{187e0f27-1a42-44d5-948b-ceb15d508a9c}">
+      <Declaration><![CDATA[PROPERTY PUBLIC LogEntries : BOOL]]></Declaration>
+      <Get Name="Get" Id="{42c91921-e213-40dc-b6f3-2a4bb508c5ff}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LogEntries := bLogEntries;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{574c554f-ec71-4145-a257-aaeb2a08ef33}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bLogEntries	 := LogEntries;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="LogItem" Id="{d14a0c20-ca42-4a72-a0df-5de7beb01b9c}">
+      <Declaration><![CDATA[METHOD PRIVATE LogItem
+VAR_INPUT
+	s_Barcode			: STRING;
+END_VAR
+
+VAR
+	sTempField			: STRING;
+	sTempLogData		: STRING(255);
+	nStatus				: INT;
+	Out_ReadString		: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sTempField := CONCAT(' Location: ', In_EquipID);
+sTempField := CONCAT(sTempField,' Read: ');
+sTempField := CONCAT(sTempField, s_Barcode);
+// Write to the Error List
+ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+		, msgFmtStr := 'Barcode %s'
+		, strArg := sTempField);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="CognexDataMan260">
+      <LineId Id="1184" Count="12" />
+      <LineId Id="1514" Count="0" />
+      <LineId Id="1516" Count="1" />
+      <LineId Id="1520" Count="1" />
+      <LineId Id="1518" Count="0" />
+      <LineId Id="1515" Count="0" />
+      <LineId Id="1197" Count="13" />
+      <LineId Id="1358" Count="0" />
+      <LineId Id="1211" Count="7" />
+      <LineId Id="1369" Count="0" />
+      <LineId Id="1372" Count="0" />
+      <LineId Id="1368" Count="0" />
+      <LineId Id="1370" Count="1" />
+      <LineId Id="1359" Count="0" />
+      <LineId Id="1219" Count="1" />
+      <LineId Id="1360" Count="1" />
+      <LineId Id="1221" Count="11" />
+      <LineId Id="1363" Count="0" />
+      <LineId Id="1366" Count="0" />
+      <LineId Id="1364" Count="0" />
+      <LineId Id="1367" Count="0" />
+      <LineId Id="1233" Count="30" />
+      <LineId Id="1441" Count="0" />
+      <LineId Id="1435" Count="5" />
+      <LineId Id="1264" Count="33" />
+      <LineId Id="764" Count="0" />
+    </LineIds>
+    <LineIds Name="CognexDataMan260.LogEntries.Get">
+      <LineId Id="5" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CognexDataMan260.LogEntries.Set">
+      <LineId Id="5" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CognexDataMan260.LogItem">
+      <LineId Id="97" Count="3" />
+      <LineId Id="8" Count="2" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

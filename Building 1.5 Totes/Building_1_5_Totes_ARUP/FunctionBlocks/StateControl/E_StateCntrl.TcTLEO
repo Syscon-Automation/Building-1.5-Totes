@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <EnumerationTextList Name="E_StateCntrl" Id="{2d9f618a-f1f9-49a3-adc1-7e23d917bf4b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+// {attribute 'strict'}
+TYPE E_StateCntrl :
+(
+	// Allowed to transition to Manual
+	stOffline:= 0,
+	// Allowed to transition to Manual/Faulted 
+	stAuto:= 1,
+	// Allowed to transition to Offline/Faulted/Manual 
+	stManual:= 2,
+	// Allowed to transition to Offline/Manual 
+	stFaulted:= 3
+) INT;
+END_TYPE
+]]></Declaration>
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="TextListEnumerationTextListObject">
+          <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"stOffline"</v>
+              <v n="TextDefault">"0"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"stAuto"</v>
+              <v n="TextDefault">"1"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"stManual"</v>
+              <v n="TextDefault">"2"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"stFaulted"</v>
+              <v n="TextDefault">"3"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">""</v>
+              <v n="TextDefault">""</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+          </l>
+          <l n="Languages" t="ArrayList" />
+          <v n="GuidInit">{cc108ee6-e128-4a2a-b1be-ffe122acfc40}</v>
+          <v n="GuidReInit">{346670fb-8b01-4b76-b985-9c305d2b28a8}</v>
+          <v n="GuidExitX">{3f25db62-0060-482b-aabd-d0a8406f6f49}</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="String">System.String</Type>
+        <Type n="TextListEnumerationTextListObject">{4b60233c-f940-4beb-b331-82133b520151}</Type>
+        <Type n="TextListRow">{53da1be7-ad25-47c3-b0e8-e26286dad2e0}</Type>
+      </TypeList>
+    </XmlArchive>
+  </EnumerationTextList>
+</TcPlcObject>

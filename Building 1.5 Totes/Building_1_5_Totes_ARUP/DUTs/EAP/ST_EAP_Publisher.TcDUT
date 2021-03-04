@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_EAP_Publisher" Id="{dc29400a-b9d0-42e3-b1cc-7e7142ea0a3e}">
+    <Declaration><![CDATA[TYPE ST_EAP_Publisher :
+{attribute 'OPC.UA.DA' := '1'}
+STRUCT
+	Name				: 	STRING;		// Name of the EAP Publisher
+	FrameState	AT %I*	: 	UINT;		// EAP FrameState, FrameState.0 = Not Transmitting, .1 = Frame too large, .2 = Subscriber Miissing
+	FrameCtrl	AT %Q*	: 	UINT;		// EAP FrameCtrl, FrameCtrl.0 = Disable Sending, .1 = Remove destination MAC from ARP
+	NetID		AT %Q*	: 	AMSNETID;	// EAP Changeable NetID, MAC/AMS NetID/IP depending on setup
+	Variables			:	ARRAY[0..9] OF ST_EAP_Pub_Variable;		// Array of Published variables
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

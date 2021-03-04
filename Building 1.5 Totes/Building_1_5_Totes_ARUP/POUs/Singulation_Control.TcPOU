@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="Singulation_Control" Id="{3adefe6a-a60a-4c0e-a727-2f0666aff76b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Singulation_Control
+VAR
+	SortSingulation_P2140	:	FB_Singulation;
+	RetryLimit_P2140		:	UINT := 1;
+	ReleaseDist_P2140		:	UINT;
+	
+	SortSingulation_P2150	:	FB_Singulation;
+	RetryLimit_P2150		:	UINT := 1;
+	ReleaseDist_P2150		:	UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SortSingulation_P2140(
+	In_ConveyorRunning := Conveyors.P2140_Status.Sts_IsRunning,
+	In_Grabber_1_Auto := Solenoids.GR2140_01_Status.Sts_EquipmentState.StsAuto,
+	In_Grabber_1_Extended := ProxSensors.In_PX_11141_Extended,
+	In_Grabber_1_Retracted := ProxSensors.In_PX_11161_Retracted,
+	In_Grabber_2_Auto := Solenoids.GR2140_02_Status.Sts_EquipmentState.StsAuto,
+	In_Grabber_2_Extended := ProxSensors.In_PX_11291_Extended,
+	In_Grabber_2_Retracted := ProxSensors.In_PX_11321_Retracted,
+	In_PinStop_Auto := Solenoids.PI2140_01_Status.Sts_EquipmentState.StsAuto,
+	In_PinStop_Extended := ProxSensors.In_PX_11181_Extended,
+	In_PinStop_Retracted := ProxSensors.In_PX_11201_Retracted,
+	In_FaultReset := System.Cnvyr_Reset,
+	In_EncoderCount := GVL_IO.ENC_9091_Raw,
+	In_PE_GrabTrigger:= PhotoEyes.PE_11191.Out_OnFltrd, 
+	In_PE_ToteTrigger:= PhotoEyes.PE_11221.Out_OffFltrd, 
+	In_PE_ClearedTrigger:= PhotoEyes.PE_10081.Out_OffFltrd,
+	Cfg_GappingDistance := ReleaseDist_P2140,
+	Cfg_TimeOutTime:= T#5S,
+	Cfg_RetryLimit:= RetryLimit_P2140, 
+);
+
+SortSingulation_P2150(
+	In_ConveyorRunning := Conveyors.P2150_Status.Sts_IsRunning,
+	In_Grabber_1_Auto := Solenoids.GR2150_01_Status.Sts_EquipmentState.StsAuto,
+	In_Grabber_1_Extended := ProxSensors.In_PX_2181_Extended,
+	In_Grabber_1_Retracted := ProxSensors.In_PX_2201_Retracted,
+	In_Grabber_2_Auto := Solenoids.GR2150_02_Status.Sts_EquipmentState.StsAuto,
+	In_Grabber_2_Extended := ProxSensors.In_PX_2131_Extended,
+	In_Grabber_2_Retracted := ProxSensors.In_PX_2151_Retracted,
+//	In_PinStop_Auto := Solenoids.PS8005_Status.Sts_EquipmentState.StsAuto,
+//	In_PinStop_Extended := ProxSensors.In_PX_22541_Extended,
+//	In_PinStop_Retracted := ProxSensors.In_PX_22521_Retracted,
+	In_FaultReset := System.Cnvyr_Reset,
+	In_EncoderCount := GVL_IO.ENC_9031_Raw,
+	In_PE_GrabTrigger:= PhotoEyes.PE_2101.Out_OnFltrd, 
+	In_PE_ToteTrigger:= PhotoEyes.PE_2331.Out_OffFltrd, 
+	In_PE_ClearedTrigger:= PhotoEyes.PE_2131.Out_OffFltrd,
+	Cfg_GappingDistance := ReleaseDist_P2150,
+	Cfg_TimeOutTime:= T#5S,
+	Cfg_RetryLimit:= RetryLimit_P2150, 
+);]]></ST>
+    </Implementation>
+    <LineIds Name="Singulation_Control">
+      <LineId Id="8" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="51" Count="3" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="92" Count="19" />
+      <LineId Id="91" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

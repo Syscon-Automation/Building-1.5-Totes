@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="E_MergeState" Id="{5ab25a4f-a1e7-4478-82a6-f5ef67d6db7b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE E_MergeState :
+(
+	stStopped := 0,
+	stClearTakeAway := 1,
+	stMergeOperational := 2,
+	stMergeManual := 3
+)INT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

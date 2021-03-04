@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_Flasher" Id="{10201e7e-a4fc-49fa-8a2d-09b7fc7dd09c}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+Function Block to vreate a flashing output.
+If In_Trig goes TRUE the output will begin to blink On and OFF until In_Trig goes FALSE.
+On duration is set by Cfg_OnTime
+Off duration is set by Cfg_OffTime
+*)
+FUNCTION_BLOCK FB_Flasher
+VAR_INPUT
+	In_Trig:	BOOL;		// Input Trigger (1= Flsh output based on configured time intrevals)
+	Cfg_OnTime:	TIME;		// Output On Time
+	Cfg_OffTime:	TIME;	// Output Off Time
+END_VAR
+VAR_OUTPUT
+	Output:	BOOL;		// Flashing Output
+END_VAR
+VAR
+	StartTrig: R_TRIG;		// Rising Trigger
+	OnTmrActive: BOOL;		// ON Timer active
+	OnTmr: TON;				// ON Timer
+	OffTmrActive: BOOL;		// OFF Timer active
+	OffTmr: TON;			// OFF Timer
+	StopTrig: F_TRIG;		// Falling Trigger 
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Start on Rise
+StartTrig(CLK:= In_Trig);
+
+IF StartTrig.Q THEN
+	OnTmrActive := TRUE;
+END_IF
+
+// On timer
+OnTmr(IN:= OnTmrActive, PT:= Cfg_OnTime);
+IF OnTmr.Q THEN
+	OnTmrActive := FALSE;
+	OffTmrActive := TRUE;
+END_IF
+
+// Off Timer 
+OffTmr(IN:= OffTmrActive, PT:= Cfg_OffTime);
+IF OffTmr.Q THEN
+	OnTmrActive := TRUE;
+	OffTmrActive := FALSE;
+END_IF
+
+// Stop Trigger
+StopTrig(CLK:= In_Trig);
+
+IF StopTrig.Q THEN
+	OnTmrActive := FALSE;
+	OffTmrActive := FALSE;
+END_IF
+
+// Set Output
+Output := OnTmrActive AND In_Trig;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Flasher">
+      <LineId Id="9" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="58" Count="2" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="61" Count="3" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

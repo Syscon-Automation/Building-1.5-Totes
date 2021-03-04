@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_LEDModeCtrl" Id="{731f37f5-4044-4be8-beea-fcf388da470e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_LEDModeCtrl
+VAR_INPUT
+	In_Light_Mode:	BYTE;		// Mode the light is in (0=Off,1=Mode 1, 2=Mode 2, ... 10= Random Multi Colors )
+	In_LightConfigArry:	ARRAY [0..10] OF ST_LEDMode;		// Array of the color Setup
+	In_AllModes_Flashing:	BYTE := 0;		// Value (Byte) for all modes to make light flash or not (0=Steady On, 1= Blinking Slow, 2= Blinking Fast) 
+	
+	In_ManualMode:	BOOL;	// Mode to allow LED to Run in Manual
+	In_ManualValues:	ST_RGB;		// Manual RGB Values for the LED output (0=Off, 255= Full ON 100%)
+		
+	CFG_FlshingControl:	BOOL;	// Bit to set where blinking control comes from.  (False = In_FlashingAllModes controls all modes, TRUE = each mode is controled individually from the configuration array) 
+	CFG_BlinkTimeSlowON:	TIME := T#1S;
+	CFG_BlinkTimeSlowOFF:	TIME := T#500MS;
+	CFG_BlinkTimeFastON:	TIME := T#500MS;
+	CFG_BlinkTimeFastOFF:	TIME := T#250MS;
+END_VAR
+VAR_OUTPUT
+	R_Out:	BYTE;	// Red LED output Byte (0=Off, 255= Full ON 100%)
+	G_Out:	BYTE;	// Green LED output Byte (0=Off, 255= Full ON 100%)
+	B_Out:	BYTE;	// Blue LED output Byte (0=Off, 255= Full ON 100%)
+END_VAR
+VAR
+	PulseSlow: FB_Flasher;
+	PulseFast: FB_Flasher;
+	
+	PulseGenerateRandom: TON;
+	x: INT;
+	GenerateRandom_FB: DRAND;
+	RandomNumber: LREAL;
+	RandomHues: ARRAY [1..3] OF BYTE;
+	SlowFlashReq: BOOL;
+	FastFlashReq: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF In_ManualMode THEN
+	R_Out := In_ManualValues.Value_Red;
+	G_Out := In_ManualValues.Value_Green;
+	B_Out := In_ManualValues.Value_Blue;
+
+ELSE
+	// Set up bliking control
+	SlowFlashReq := (CFG_FlshingControl AND (In_LightConfigArry[In_Light_Mode].Flashing = 1)) OR ((NOT CFG_FlshingControl) AND In_AllModes_Flashing = 1);
+	FastFlashReq := (CFG_FlshingControl AND (In_LightConfigArry[In_Light_Mode].Flashing = 2)) OR ((NOT CFG_FlshingControl) AND In_AllModes_Flashing = 2);
+	
+	// Set Up Slow Blink Pulse If Mode is Slow Blink
+	PulseSlow(In_Trig:= SlowFlashReq, Cfg_OnTime:= CFG_BlinkTimeSlowON, Cfg_OffTime:= CFG_BlinkTimeSlowOFF);
+
+	// Set Up Fast Blink Pulse If Mode is Fast Blink
+	PulseFast(In_Trig:= (FastFlashReq), Cfg_OnTime:= CFG_BlinkTimeFastON, Cfg_OffTime:= CFG_BlinkTimeFastOFF);
+		
+	// Set Up Random Twinkling Lights
+	PulseGenerateRandom(IN:= (In_Light_Mode = 10) AND NOT PulseGenerateRandom.Q , PT:= T#250MS); 
+	
+	// Set Light Mode
+	IF (In_Light_Mode <> 10) THEN
+		IF PulseSlow.Output OR PulseFast.Output OR (CFG_FlshingControl AND In_LightConfigArry[In_Light_Mode].Flashing = 0) OR ((NOT CFG_FlshingControl) AND In_AllModes_Flashing =0) THEN
+			R_Out := In_LightConfigArry[In_Light_Mode].Value1.Value_Red;
+			G_Out := In_LightConfigArry[In_Light_Mode].Value1.Value_Green;
+			B_Out := In_LightConfigArry[In_Light_Mode].Value1.Value_Blue;
+		ELSE 
+			R_Out := In_LightConfigArry[In_Light_Mode].Value2.Value_Red;
+			G_Out := In_LightConfigArry[In_Light_Mode].Value2.Value_Green;
+			B_Out := In_LightConfigArry[In_Light_Mode].Value2.Value_Blue;
+		END_IF
+	
+	ELSIF In_Light_Mode = 10 THEN
+		IF PulseGenerateRandom.Q THEN
+			FOR x := 1 TO 3 DO
+				GenerateRandom_FB(Seed:= 0, Num=> RandomNumber );
+				RandomHues[x] := LREAL_TO_BYTE(RandomNumber * 255);
+			END_FOR
+			R_Out := RandomHues[1];
+			G_Out := RandomHues[2];
+			B_Out := RandomHues[3];
+		END_IF
+	 
+	ELSE
+		R_Out := 0;
+		G_Out := 0;
+		B_Out := 0;
+	END_IF
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_LEDModeCtrl">
+      <LineId Id="96" Count="0" />
+      <LineId Id="113" Count="1" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="222" Count="2" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="100" Count="3" />
+      <LineId Id="149" Count="2" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="142" Count="4" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="88" Count="1" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="188" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_EAP_Sub_Variable" Id="{330f04b2-1413-4c0d-96e9-87db77c24dc4}">
+    <Declaration><![CDATA[TYPE ST_EAP_Sub_Variable :
+STRUCT
+	Name				: 	STRING;		// Name of the Variable
+	VarState	AT %I*	:	UINT;		// VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length
+	Quality		AT %I*	:	UINT;		// <>0, Duration the variable is not refreshed (in 100µs)
+	CycleIndex	AT %I*	:	UINT;		// Incremented each publisher cycle
+	VarId		AT %Q*	:	UINT;		// Changable Variable ID
+	VarCtrl		AT %Q*	:	UINT;		// VarCtrl.1 = Ignore Hash/Version
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

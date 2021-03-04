@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_ManageCodes" Id="{0febb775-0271-4969-a4f4-deb375c895cd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ManageCodes
+VAR_IN_OUT
+	aCodeRegister: ARRAY[*] OF UDINT;	// Variable array for Different sizes of Code Registers
+END_VAR
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	nBitIndex : UINT;						// Bit within the Word
+	nArrayIndex : UINT;						// Word within the array
+	nArrayTempIndex : UINT;					// Array Index for processing array
+	nArrayCount : UINT;						// Number of words in the Array
+	nUpdateValue : UDINT;					// Value of the Word to OR/XOR with the 
+	nCheckValue : UDINT;					// Value of the Word to check with
+	nBitCheck : UDINT;						// Word to use to check if a bit is set
+	nLowerBitCheck : UDINT;					// Word to use to check if a lower weighted bit is set
+END_VAR
+
+VAR CONSTANT
+	nBITCOUNT: UINT := 32;	// Number of Bits in each Array Element
+	nBYTECOUNT : UINT := 4;	// Number of Bytes in each array element
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Get the array count
+nArrayCount := (TO_UINT(SIZEOF(aCodeRegister)))/nBYTECOUNT;
+]]></ST>
+    </Implementation>
+    <Method Name="Check" Id="{faf2d96a-9be5-4989-b2ce-cd5bbce7f17c}">
+      <Declaration><![CDATA[METHOD PUBLIC Check : BOOL
+VAR_INPUT
+	nCodeToCheck : UINT;				// Code to Check For
+END_VAR
+VAR_OUTPUT
+	bCodeSet : BOOL;					// Indicates that the Code is Set
+	bHigherPriorityCode : BOOL;			// Indicates that a Higher Priority Code is Set
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+//IF __ISVALIDREF(aCodeRegister) THEN
+	// Test to see if a bit is set
+	nArrayIndex := 0;
+	nBitIndex := 0;
+	// Test for a valid value to test, > 0, < maximum number of available bits
+	IF (nCodeToCheck <> 0) THEN
+		IF nCodeToCheck <= (nArrayCount * nBITCOUNT) THEN
+			// Use integer division to obtain the array index
+			// Subtract 1 to put items in the range of 0-31 bits to use EXPT function to set individual bits (2^bit weight)
+			nArrayIndex := (nCodeToCheck - 1) / nBITCOUNT;
+			// Use modulo division to get the remainder that indicates the bit weight 
+			nBitIndex := (nCodeToCheck - 1) MOD nBITCOUNT;
+			// Calculate the value (2^nBitIndex)
+			nCheckValue := TO_UDINT(EXPT(2,nBitIndex));
+			// Bitwise AND the result with the target.
+			// The AND clears all other bits in the word
+			nBitCheck := aCodeRegister[nArrayIndex] AND nCheckValue;
+			// The only bit that should survive the AND is the one we are checking for
+			bCodeSet := (nBitCheck <> 0); 
+		END_IF
+	ELSE
+		// Clear the Stop Code check when there is no request
+		bCodeSet := 0;
+	END_IF
+	
+	// Only test for a higher priority stop code if the tested stop code exists
+	IF bCodeSet = 1 THEN
+		// Test to see if a lower weighted bit is set
+		nArrayIndex := 0;
+		nBitIndex := 0;
+		// Test for a valid value to test, > 0, < maximum number of available bits
+		IF (nCodeToCheck <> 0) THEN
+			IF nCodeToCheck <= (nArrayCount * nBITCOUNT) THEN
+				// Use integer division to obtain the array index
+				// Subtract 1 to put items in the range of 0-31 bits to use EXPT function to set individual bits (2^bit weight)
+				nArrayIndex := (nCodeToCheck - 1) / nBITCOUNT;
+				// Use modulo division to get the remainder that indicates the bit weight 
+				nBitIndex := (nCodeToCheck - 1) MOD nBITCOUNT;
+				// Calculate the value (2^nBitIndex)
+				nCheckValue := TO_UDINT(EXPT(2,nBitIndex));
+				// Subtract 1 from the bit we are checking, this flips all the less significant bits
+				// E.g. 4 (0100b) - 1 (0001b) = 3 (0011b)
+				// E.g. 21 (10101b) - 1 (00001b) = 20 (10100b)
+				// E.g. 24 (11000b) - 1 (00001b) = 23 (10111b)
+				nCheckValue := nCheckValue - 1; 
+				// The AND masks out all bits above the specified weight, including the one we are testing for
+				//  leaving only bits with a lower bit weight
+				nLowerBitCheck := aCodeRegister[nArrayIndex] AND nCheckValue;
+				// Test the calculated value for a lower bit
+				bHigherPriorityCode := (nLowerBitCheck <> 0); 
+				// Test to see if we are in the lowest array
+				nArrayTempIndex := 0;
+				IF nArrayIndex <> 0 THEN
+					WHILE nArrayTempIndex < nArrayIndex  DO
+						IF aCodeRegister[nArrayTempIndex] <> 0 THEN
+							bHigherPriorityCode := 1;
+						END_IF
+						nArrayTempIndex := nArrayTempIndex + 1;
+					END_WHILE
+				END_IF
+			END_IF
+		END_IF
+	ELSE
+		// Reset the higher priority detected if the Tested Stop Code is not set
+		bHigherPriorityCode := 0;
+	END_IF
+//END_IF
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Clear" Id="{3af03187-73ee-4c69-8063-68f065ab1420}">
+      <Declaration><![CDATA[METHOD PUBLIC Clear
+VAR_INPUT
+	nCodeToClear : UINT;					// Stop Code to Activate
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+//IF __ISVALIDREF(aCodeRegister) THEN
+	// Clear an individual bit
+	// Initialize the index values
+	nArrayIndex := 0;
+	nBitIndex := 0;
+	// Test for a valid value to test, > 0, < maximum number of available bits
+	IF (nCodeToClear <> 0) THEN
+		IF nCodeToClear <= (nArrayCount * nBITCOUNT) THEN
+			// Use integer division to obtain the array index
+			// Subtract 1 to put items in the range of 0-31 bits to use EXPT function to set individual bits (2^bit weight)
+			nArrayIndex := (nCodeToClear - 1) / nBITCOUNT;
+			// Use modulo division to get the remainder that indicates the bit weight 
+			nBitIndex := (nCodeToClear - 1) MOD nBITCOUNT;
+			// Calculate the value (2^nStopCode)
+			nUpdateValue := TO_UDINT(EXPT(2,nBitIndex));
+			// Bitwise OR the result with the target.
+			// The OR leaves all other bits in the word set, even the one to be set if it already is
+			// In this instance, it ensures that the following XOR clears the bit
+			// 0 XOR 0 = 0, 1 XOR 0 = 0, 1 XOR 1 = 0
+			aCodeRegister[nArrayIndex] := aCodeRegister[nArrayIndex] OR nUpdateValue;
+			aCodeRegister[nArrayIndex] := aCodeRegister[nArrayIndex] XOR nUpdateValue; 
+		END_IF
+	END_IF
+//END_IF
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ClearRegister" Id="{24bb9065-1e90-4ee9-bf20-5b93b7c1fcce}">
+      <Declaration><![CDATA[METHOD PUBLIC ClearRegister
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+//IF __ISVALIDREF(aCodeRegister) THEN
+	// aCodeRegister is a Zero based array
+	// The SIZEOF will return the 1 based number of elements
+	// Decrement this by 1 (one) to process the array
+	FOR nArrayIndex := 0 TO (nArrayCount - 1) BY 1 DO
+		// Clear each register
+		aCodeRegister[nArrayIndex] := 0;
+	END_FOR
+//END_IF
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set" Id="{9e212915-4c6e-4877-826d-adcac07382e6}">
+      <Declaration><![CDATA[METHOD PUBLIC Set
+VAR_INPUT
+	nCodeToSet	:	UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Disable the warning regarding invalid Reference from a method for IO_OUT variables
+{warning disable C0371}
+// Test for a Valid reference
+//IF __ISVALIDREF(aCodeRegister) THEN
+	// Set an individual bit
+	// Initialize the index values
+	nArrayIndex := 0;
+	nBitIndex := 0;
+	// Test for a valid value to test, > 0, < maximum number of available bits
+	IF (nCodeToSet <> 0) THEN
+		IF nCodeToSet <= (nArrayCount * nBITCOUNT) THEN
+			// Use integer division to obtain the array index
+			// Subtract 1 to put items in the range of 0-31 bits to use EXPT function to set individual bits (2^bit weight)
+			nArrayIndex := (nCodeToSet - 1) / nBITCOUNT;
+			// Use modulo division to get the remainder that indicates the bit weight 
+			nBitIndex := (nCodeToSet - 1) MOD nBITCOUNT;
+			// Calculate the value (2^nStopCode)
+			nUpdateValue := TO_UDINT(EXPT(2,nBitIndex));
+			// Bitwise OR the result with the target.
+			// The OR leaves all other bits in the word set, even the one to be set if it already is
+			aCodeRegister[nArrayIndex] := aCodeRegister[nArrayIndex] OR nUpdateValue;
+		END_IF
+	END_IF
+//END_IF
+// Restore the warning regarding invalid Reference from a method for IO_OUT variables
+{warning restore C0371}]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_ManageCodes">
+      <LineId Id="13" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ManageCodes.Check">
+      <LineId Id="181" Count="70" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ManageCodes.Clear">
+      <LineId Id="46" Count="27" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ManageCodes.ClearRegister">
+      <LineId Id="6" Count="3" />
+      <LineId Id="31" Count="5" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ManageCodes.Set">
+      <LineId Id="59" Count="24" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

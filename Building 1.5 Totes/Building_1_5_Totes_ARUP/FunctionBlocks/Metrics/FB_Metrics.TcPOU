@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_Metrics" Id="{f134bea0-7339-4ac4-95c8-5fd9a9c43ff7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Metrics
+VAR_IN_OUT
+	Trigger 	: BOOL;
+	HMI_Reset	: BOOL;
+	TimeExpired		: BOOL;
+END_VAR
+VAR_INPUT
+	BarcodeRead		: STRING;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR PERSISTENT
+	LoadsPassed		: DINT;
+	GoodReadCount	: DINT;
+	GoodReadPercent	: REAL;
+	LastBarcodeRead	: STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF Trigger THEN	
+	loadsPassed := loadsPassed + 1;	
+	IF BarcodeRead <> '' THEN
+		GoodReadCount := GoodReadCount + 1;
+	END_IF	
+	GoodReadPercent := (DINT_TO_REAL(GoodReadCount)/DINT_TO_REAL(LoadsPassed))*100;
+	LastBarcodeRead := BarcodeRead;		
+	Trigger := FALSE;	
+END_IF
+
+IF HMI_Reset OR TimeExpired THEN	
+	LoadsPassed 		:= 0;
+	GoodReadCount 		:= 0;
+	GoodReadPercent		:= 0;	
+	IF TimeExpired THEN	
+		TimeExpired := FALSE;
+	END_IF
+	IF HMI_Reset THEN
+		HMI_Reset := FALSE;
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Metrics">
+      <LineId Id="12" Count="1" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="53" Count="3" />
+      <LineId Id="58" Count="2" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="118" Count="2" />
+      <LineId Id="72" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

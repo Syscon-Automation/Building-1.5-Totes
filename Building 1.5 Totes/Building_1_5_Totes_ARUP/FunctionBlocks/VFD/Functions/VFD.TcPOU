@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="VFD" Id="{cfcd9551-0b50-4127-a40a-11e359995efd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK VFD
+FUNCTION_BLOCK VFD
+VAR_INPUT
+	RunVelocity				: INT;
+	RunRequest				: BOOL;
+	PLCFault				: BOOL;
+	Reset					: BOOL;
+	VelocityThreshold		: INT;
+END_VAR
+VAR_OUTPUT
+	ActualVelocity 	AT %I* 	: INT;
+	StatusWord		AT %I* 	: UINT;
+	Run_OK					: BOOL;
+	STO_Active				: BOOL;
+	IsRunning				: BOOL;
+END_VAR
+VAR
+	VFD_State				: DriveState;
+	ControlWord 	AT %Q* 	: UINT;
+	TargetVelocity 	AT %Q*	: INT;
+	StatusWordFiltered		: UINT;
+END_VAR
+VAR CONSTANT
+	SAFETY_TORQUE_OFF_ACTIVE : INT := 15;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[StatusWordFiltered := StatusWord AND 16#006F;
+
+VFD_State(StatusWord := StatusWordFiltered, Run_Drive := RunRequest, ControlWord => ControlWord, PLCFault := PLCFault, ResetFault := Reset);
+
+IF Reset THEN
+	Reset := FALSE;
+END_IF
+
+Run_OK := (StatusWordFiltered = Drive_State.READY_TO_SWITCH_ON) OR (StatusWordFiltered = Drive_State.SWITCHED_ON) OR (StatusWordFiltered = Drive_State.OPERATION_ENABLED);
+
+IF StatusWordFiltered = Drive_State.OPERATION_ENABLED THEN
+	TargetVelocity := RunVelocity;
+ELSE
+	TargetVelocity := 0;	
+END_IF
+
+STO_Active := StatusWord.SAFETY_TORQUE_OFF_ACTIVE;
+ 
+IsRunning := ActualVelocity >= VelocityThreshold;
+]]></ST>
+    </Implementation>
+    <LineIds Name="VFD">
+      <LineId Id="150" Count="18" />
+      <LineId Id="84" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

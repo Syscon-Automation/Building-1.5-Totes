@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_SleepCntrl" Id="{5759c1b2-bd54-4c52-9411-0651e83528be}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+Description:
+	Function Block to control a sleep timer based on In_CrntMtrFeedBack input, In_TrigArry input and a DisableSleepTmr input.
+	Time is configurable with CFG_WaitToSlpTime.
+	Timer is reset if any of the triggers are TRUE.
+	Timer will run if there is no trigger input and feedback is TRUE. 
+	If Timer elapses then the SleepActive output is TRUE until reset by a TRUE in the In_TrigArry
+*) 
+FUNCTION_BLOCK FB_SleepCntrl
+(*
+Version history:
+ +-------------+------------+----------------+----------+-------------------------------------------+
+ |Date         | Version    | created under  | Author   | Remark                                   	|
+ +=============+============+================+==========+===========================================+
+ |2019-06-11   | 1.0.0.0    | V3.1.0.0       | D.J.     | Initial Release                          	|
+ |2019-11-13   | 1.0.0.0    | V3.1.0.0       | D.J.     | Added External Wake trigger              	|
+ |2020-02-19   | 1.0.0.0    | V3.1.0.0       | C.Y.     | Changed from array to UINT to trigger		|
+ +-------------+------------+----------------+----------+-------------------------------------------+
+*)
+  
+VAR_INPUT
+	In_Trigs:	UINT;		// Non-Zero value wakes from sleep 
+	In_ExternalTrig: BOOL;		// An external wake trigger	
+	In_CrntFeedBack: BOOL;		// The current (Motor or Enable) Feedback (Current feedback 0=Off, 1= Running)
+	CFG_WaitToSlpTime:	TIME;		// Time to wait after last trigger before enabling the sleep output
+	DisableSleepTmr:	BOOL;		// Input to disable Sleep Timer
+	In_ConvState:		E_StateCntrl;	// Detect Auto
+END_VAR
+VAR_OUTPUT
+	SleepActive:	BOOL;		// Sleep is Active Output
+END_VAR
+VAR
+	SleepTimerTon: TON;		// Timer
+	ResetTimer: BOOL;		// Internal Flag to reset timer based on input arry
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Set Reset of Timer
+ResetTimer := (In_ExternalTrig OR In_Trigs > 0) OR In_ConvState <> E_StateCntrl.stAuto;
+
+// Timer Call
+SleepTimerTon(IN:= In_CrntFeedBack AND (NOT ResetTimer) AND (NOT DisableSleepTmr) , PT:= CFG_WaitToSlpTime, Q=> );
+
+// Set Output
+IF SleepTimerTon.Q THEN
+	SleepActive := TRUE;
+ELSIF ResetTimer THEN
+	SleepActive := FALSE;
+END_IF;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_SleepCntrl">
+      <LineId Id="47" Count="0" />
+      <LineId Id="116" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="66" Count="2" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

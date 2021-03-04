@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_HMILEDMode" Id="{47447de5-7d66-4463-a2cf-a634c776e568}">
+    <Declaration><![CDATA[TYPE ST_HMILEDMode :
+STRUCT
+	PB_ControlCnvyrsTogether:	BOOL;		// Bit tocontrol all conveyors together (0 = individual control, 1 = All controlled together)
+	PB_SaveLEDConfig:	BOOL;		// Bool to Save current test configuration values to the mode array at indexed item
+	PB_LoadDefaultLEDConfig:	BOOL;		// Bool to Reload default mode value into configuration array at indexed item
+	PB_TestLEDConfig:	BOOL;		// Bit to turn on LED for testing
+	ST_LEDConfig: ST_CnvyrLED;		// Values from HMI to configure LED Hue Values
+	LaneValueLEDConfig:	BYTE;	// Value for mode configuration array index
+	ModeValueLEDConfig:	BYTE;	// Value for mode configuration array index
+	FlashValueLEDConfig:	BYTE;	// Value for flash mode configuration array at indexed item
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

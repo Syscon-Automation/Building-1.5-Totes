@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="MAIN" Id="{ab7dc2f3-ced4-4bc2-b014-faadd6d7bd53}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	// Data persistence configuration
+	rStartPersistentSave 		: R_TRIG; // Rising edge trigger to start persistent data save
+	fbWritePersistentData 		: WritePersistentData;
+	tonPersistentSave	:	TON := (PT := T#1M);
+	tpBroadcastSave		:	TP	:= (PT := T#100MS);
+	PLCPersistentSave			AT %Q*	: BOOL;
+	ADSPort						:	UINT := 0;
+	In_ResetAllMetrics			: 	BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[BarCodeReaders();
+//CommStatus();
+Conveyors();
+//Log_Diverts();
+//MsgControl();
+Photoeyes();
+ProxSensors();
+//ServerControl();
+//Singulation_Control();
+//Solenoids();
+Sorter();
+System();
+SystemSafety();
+GVL_IO.INIT := FALSE;
+
+
+// Reset when Timer is Done
+tonPersistentSave(IN := NOT tonPersistentSave.Q);
+
+// Catch the .Q of the persistent save timer to trigger a save pulse
+tpBroadcastSave(IN := tonPersistentSave.Q);
+// Set the Persistent save outputs to the .Q of the pulse
+PLCPersistentSave := tpBroadcastSave.Q;
+
+// Check for persistent item save
+//rStartPersistentSave(CLK := tpBroadcastSave.Q);
+IF rStartPersistentSave.Q THEN
+	// Execute a Persistent save here
+	// System PORT is 851
+	fbWritePersistentData(netid:= '', PORT:=851, Start:=rStartPersistentSave.Q, tmout:=T#1S);
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="85" Count="29" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

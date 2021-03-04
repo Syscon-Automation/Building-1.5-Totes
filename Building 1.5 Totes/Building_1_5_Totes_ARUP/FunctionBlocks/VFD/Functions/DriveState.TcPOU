@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="DriveState" Id="{92d6b9e9-4a20-4501-a233-75e4b2993e5c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK DriveState
+VAR_INPUT
+	StatusWord : UINT;
+	PLCFault   : BOOL;
+	ResetFault : BOOL;
+	Run_Drive  : BOOL;
+END_VAR
+VAR_OUTPUT
+	ControlWord : UINT;
+	Fault	: BOOL;	
+END_VAR
+VAR
+END_VAR
+VAR CONSTANT 
+	//Status Word Bit Definitions
+	READY_TO_SWITCH_ON 	: INT := 0;
+	SWITCHED_ON			: INT := 1;
+	OPERATION_ENABLED	: INT := 2;
+	FAULT_ACTIVE		: INT := 3;
+	DC_BUS_READY		: INT := 4;
+	QUICK_STOP_INACTIVE	: INT := 5;
+	OPERATION_INHIBITED : INT := 6;
+	WARNING_ACTIVE		: INT := 7;
+	
+	//Control Word Bit Definitions
+	SWITCH_ON			: INT := 0;
+	ESTABLISH_READINESS	: INT := 1;
+	ACTIVATE_QUICK_STOP	: INT := 2;
+	OPERATION_ENABLE 	: INT := 3;
+	RAMP_OUT_ZERO		: INT := 4;
+	RAMP_HOLD			: INT := 5;
+	RAMP_IN_ZERO		: INT := 6;
+	
+	//Bits 4-6 are operating mode dependent and not supported with CiA402 profile
+	RESET_FAULT			: INT := 7;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+CASE StatusWord OF
+	
+	DRIVE_STATE.NOT_READY_TO_SWITCH_ON, DRIVE_STATE.NOT_READY_TO_SWITCH_ON_BIT_5: 
+		//No Control word is needed here because drive will automatically advance as long as it has been initialized properly
+		
+	DRIVE_STATE.SWITCH_ON_INHIBITED, DRIVE_STATE.SWITCH_ON_INHIBITED_BIT_5:	
+		
+		FAULT := FALSE;
+		//GO TO READY TO SWITCH ON
+		ControlWord.SWITCH_ON := 0;
+		ControlWord.ESTABLISH_READINESS := 1;
+		ControlWord.ACTIVATE_QUICK_STOP := 1;
+		ControlWord.RESET_FAULT			:= 0;
+	
+	DRIVE_STATE.READY_TO_SWITCH_ON:
+		
+		IF NOT StatusWord.QUICK_STOP_INACTIVE THEN 
+			//GO TO SWITCH ON INHIBITED
+			ControlWord.ESTABLISH_READINESS := 1;
+			ControlWord.ACTIVATE_QUICK_STOP := 0;
+			ControlWord.RESET_FAULT			:= 0;
+		ELSIF Run_Drive THEN 
+			//GO TO SWITCHED ON
+			ControlWord.SWITCH_ON := 1;
+			ControlWord.ESTABLISH_READINESS := 1;
+			ControlWord.ACTIVATE_QUICK_STOP := 1;
+			ControlWord.OPERATION_ENABLE	:= 0;
+			ControlWord.RESET_FAULT			:= 0;
+			ControlWord.RAMP_OUT_ZERO		:= 1;
+			ControlWord.RAMP_HOLD			:= 1;
+			ControlWord.RAMP_IN_ZERO		:= 1;
+		ELSIF PLCFault THEN
+			//GO TO SWITCH ON INHIBITED
+			ControlWord.ESTABLISH_READINESS := 0;
+			ControlWord.RESET_FAULT			:= 0;
+		END_IF
+	
+	DRIVE_STATE.SWITCHED_ON:
+	
+		IF NOT StatusWord.QUICK_STOP_INACTIVE THEN
+			//GO TO SWITCH ON INHIBITED
+			ControlWord.ESTABLISH_READINESS := 1;
+			ControlWord.ACTIVATE_QUICK_STOP := 0;
+			ControlWord.RESET_FAULT			:= 0;
+		ELSIF RUN_DRIVE THEN
+			//GO TO OPERATION ENABLED
+			ControlWord.SWITCH_ON := 1;
+			ControlWord.ESTABLISH_READINESS := 1;
+			ControlWord.ACTIVATE_QUICK_STOP := 1;
+			ControlWord.OPERATION_ENABLE	:= 1;
+			ControlWord.RESET_FAULT			:= 0;
+		ELSE
+			//GO TO READY TO SWITCH ON
+			ControlWord.SWITCH_ON := 0;
+			ControlWord.ESTABLISH_READINESS := 1;
+			ControlWord.ACTIVATE_QUICK_STOP := 1;
+			ControlWord.RESET_FAULT			:= 0;
+		END_IF
+
+	DRIVE_STATE.OPERATION_ENABLED:
+		
+		IF (NOT StatusWord.QUICK_STOP_INACTIVE) THEN
+			//GO TO QUICK STOP ACTIVE
+			ControlWord.ESTABLISH_READINESS := 1;
+			ControlWord.ACTIVATE_QUICK_STOP := 0;
+			ControlWord.RESET_FAULT			:= 0;
+						
+		ELSIF NOT Run_Drive THEN
+			//GO TO SWITCHED ON
+			ControlWord.SWITCH_ON := 1;
+			ControlWord.ESTABLISH_READINESS := 1;
+			ControlWord.ACTIVATE_QUICK_STOP := 1;
+			ControlWord.OPERATION_ENABLE	:= 0;
+			ControlWord.RESET_FAULT			:= 0;
+			ControlWord.RAMP_OUT_ZERO		:= 0;
+			ControlWord.RAMP_HOLD			:= 0;
+			ControlWord.RAMP_IN_ZERO		:= 0;
+		END_IF
+		
+	DRIVE_STATE.QUICK_STOP_ACTIVE:
+
+		IF Run_Drive THEN
+			//GO TO OPERATION ENABLED
+			ControlWord.SWITCH_ON := 1;
+			ControlWord.ESTABLISH_READINESS := 1;
+			ControlWord.ACTIVATE_QUICK_STOP := 1;
+			ControlWord.OPERATION_ENABLE	:= 1;
+			ControlWord.RESET_FAULT			:= 0;
+		ELSE
+			//GO TO SWITCH ON INHIBITED
+			ControlWord.ESTABLISH_READINESS := 0;
+			ControlWord.RESET_FAULT			:= 0;
+		END_IF	
+		
+	DRIVE_STATE.TROUBLE, DRIVE_STATE.TROUBLE_BIT_5, DRIVE_STATE.FAULT_REACTION_ACTIVE, DRIVE_STATE.FAULT_REACTION_ACTIVE_BIT_5:	
+	
+		FAULT := TRUE;
+			
+		IF ControlWord <> 16#0000 THEN
+			ControlWord := 16#0000;
+		ELSIF ResetFault THEN
+			ControlWord := 16#0080;
+		END_IF;			
+END_CASE
+
+	
+	
+	
+]]></ST>
+    </Implementation>
+    <LineIds Name="DriveState">
+      <LineId Id="757" Count="108" />
+      <LineId Id="229" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_MotionMergeItem" Id="{4114172d-299c-4200-b069-e1b7a7693b53}">
+    <Declaration><![CDATA[TYPE ST_MotionMergeItem :
+STRUCT
+	Count_InductStart	: UDINT;
+	Count_InductEnd	: UDINT;
+	Length	: UDINT;
+	OnConveyor	: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

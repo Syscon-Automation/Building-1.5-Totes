@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_LEDMode" Id="{d72369ef-55d9-45bc-9690-8c2f2cc8f265}">
+    <Declaration><![CDATA[TYPE ST_LEDMode :
+STRUCT
+	Value1:	ST_RGB := (Value_Red := 0, Value_Green := 0, Value_Blue := 0);		// The LED Values for Color 1
+	Value2:	ST_RGB := (Value_Red := 0, Value_Green := 0, Value_Blue := 0);		// The LED Values for Color 2
+	Flashing:	BYTE;		// Value (Byte) to make light flash or not (0=Steady On, 1= Blinking Slow, 2= Blinking Fast)
+	LabelText:	STRING(50);	// Label Text for Configuration Mode	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

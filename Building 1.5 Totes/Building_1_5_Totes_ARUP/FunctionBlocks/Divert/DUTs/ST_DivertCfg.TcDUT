@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_DivertCfg" Id="{5277c023-827e-42f9-afe0-50787740de26}">
+    <Declaration><![CDATA[TYPE ST_DivertCfg :
+STRUCT
+	ID 				: STRING;			// User assined Divert indetifier		
+	Number			: INT;				// Divert number, can be distinct from the Index in the Divert Array
+	Distance		: INT;				// Distance, in encoder counts, from induct photo eye
+	ConfirmDist		: INT;				// Distance from the Divert point to the Confirm PE
+	Direction		: BOOL;				// 0 = Divert to one side, 1 = Divert to the other side 
+	FullTime		: REAL;				// Time, in seconds, that full PE has to be high before the lane is considered full
+	IsDischarge		: BOOL;				// TRUE, process and test for items destined for non-discharge diverts that missed
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

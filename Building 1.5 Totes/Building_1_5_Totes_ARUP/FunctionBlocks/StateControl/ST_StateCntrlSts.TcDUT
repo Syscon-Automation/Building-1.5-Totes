@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_StateCntrlSts" Id="{5a952c10-ed7f-4ad1-b33c-c916f6bf9b45}">
+    <Declaration><![CDATA[TYPE ST_StateCntrlSts :
+STRUCT
+	{attribute 'OPC.UA.DA' := '1'}
+	CrntState:			E_StateCntrl;
+	{attribute 'OPC.UA.DA' := '1'}
+	CrntStateTxt:		STRING(20);				// The current state in text string
+	CrntOperState: 		E_OperStateCntrl;		// The Current Operational state
+	CrntOperStateTxt:	STRING(20);				// The current Operational state in text string
+	EquipType: 			DINT;					// Stores Enumeration type E_EquipType
+	Index: 				DINT;					// Local index assigned to this equipment
+	Label: 				STRING(20); 			// String value assigned to this equipment for status updates
+	RemIndex: 			DINT;					// Remote index assigned to this equipment, for system status monitoring
+	LstState:			E_StateCntrl;
+	LstOperState:		E_OperStateCntrl;
+	stsStopRegister: 	ARRAY[0..1] OF UDINT;	// Stop Register
+	StateRunOK:			BOOL;
+	StateChanged:		BOOL;					// Single scan output to show that state has changed
+	StsOffline:			BOOL;					// Output that shows State is Offline
+	StsAuto:			BOOL;					// Output that shows State is in Auto
+	StsMan:				BOOL;					// Output that shows State is in Manual
+	StsFaulted:			BOOL;					// Output that shows State is Faulted
+	StsHasWarnings: 	BOOL;					// Output that shows the Equipment has Warnings (Alerts)
+	Received:			ST_StateCntrlPB;		// Single scan outputs for possible push button events
+	RcvdFault:			BOOL;					// Single scan output to show input was received
+//	RcvdOffline:		BOOL;					// Single scan output to show input was received
+//	RcvdAuto:			BOOL;					// Single scan output to show input was received
+//	RcvdManual:			BOOL;					// Single scan output to show input was received
+//	RcvdReset:			BOOL;					// Single scan output to show input was received
+//	RcvdStartPB:		BOOL;					// Single scan output to show input was received
+//	RcvdStopPB:			BOOL;					// Single scan output to show input was received
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

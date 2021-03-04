@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="IncIndex" Id="{b01832d5-0bc7-4e64-a640-c1ca7a1a204c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION IncIndex : INT
+VAR_INPUT
+	IDX:	INT;		// Index to be incremented
+	IdxMIN:	INT;		// Min Value for index	
+	IdxMAX:	INT;		// Max Value for index
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF IDX < IdxMAX THEN
+	IncIndex := IDX + 1; 
+ELSIF IDX = IdxMAX THEN
+	IncIndex := IdxMIN;
+ELSIF IDX < IdxMIN OR IDX > IdxMAX THEN
+	 IncIndex := IdxMIN;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="IncIndex">
+      <LineId Id="12" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

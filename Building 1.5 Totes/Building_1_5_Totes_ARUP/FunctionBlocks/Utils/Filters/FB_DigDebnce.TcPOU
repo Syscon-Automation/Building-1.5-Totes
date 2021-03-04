@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_DigDebnce" Id="{0a1a391d-5c92-4c94-8c62-0fa8207e4e53}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+Function Block to filter the ON and OFF of a digital input In
+The normal OK state can be configured with CFG_OKState
+The Times for the On and Off delays are configured by CFG_OnDlyTime and CFG_OffDlyTime
+and can be simulated using the In_Sim input
+If the input In goes true the output OutOnFltrd is set to true after the on delay time has elapsed
+If the input In goes false the output CFG_OffDlyTime will be held on until the off delay time has elapsed
+The output OutOnOffFltrd is delayed for both on and off as described above
+The status outputs Sts_OnDlyActive and Sts_OffDlyActive show that the delays are active
+*)
+FUNCTION_BLOCK FB_DigDebnce
+VAR_INPUT
+	In:	BOOL;	// Digital Input
+	CFG_OKState:	BOOL;		// The OK or ON State of the Input (0 or 1)
+	CFG_OnDlyTime:	TIME;		// Time to delay Output turning On after Input is On
+	CFG_OffDlyTime:	TIME;		// Time to delay Output turning Off after Input is Off
+	In_Sim:	BOOL;		// Simulation Input Bit acts just like the input but can be forced from the program for testing
+END_VAR
+VAR_OUTPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	Out:	BOOL;		// Output Based on ON or OK state
+	OutOnFltrd:	BOOL;		// ON filtered Only Output
+	OutOffFltrd:	BOOL;		// Off filtered Only OutPut
+	OutOnOffFltrd:	BOOL;		// Both On and Off Filtered Output 
+	Sts_OnDlyActive: BOOL;
+	Sts_OffDlyActive: BOOL;
+	Sts_OnOffDlyActive: BOOL;
+END_VAR
+VAR
+	OnDly_Ton: TON;
+	OffDlyTof: TOF;
+	OnOffDlyTof: TOF;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Compare to normal ON state
+Out := (In OR In_Sim) XOR CFG_OKState;
+
+// Setup On Delay
+OnDly_Ton(IN:= Out, PT:= CFG_OnDlyTime , Q=> OutOnFltrd , ET=> );
+Sts_OnDlyActive := Out <> OutOnFltrd;
+
+//Setup Off Delay
+OffDlyTof(IN:= Out , PT:= CFG_OffDlyTime , Q=> OutOffFltrd , ET=> );
+Sts_OffDlyActive := Out <> OutOffFltrd;
+
+//Setup Both On and Off Delayed
+OnOffDlyTof(IN:= OutOnFltrd , PT:= CFG_OffDlyTime , Q=> OutOnOffFltrd , ET=> );
+Sts_OnOffDlyActive := Out <> OutOnOffFltrd;
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_DigDebnce">
+      <LineId Id="39" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="56" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_CfgEvents" Id="{daa09559-af24-4467-aceb-f7a48553fe5f}">
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_CfgEvents :
+STRUCT
+	Description:	STRING(40);		// The Text Description of the Interlock/Event assigned to the corresponding Input
+	DeviceLabel:	STRING(15);		// The Text Description or Label of the Interlock/Event Device assigned to the corresponding Input
+	StopCode:	UINT;				// Stop Code associated with this Event
+	EventDelay:	TIME;				// Allow an event to be delayed before being activated
+	OKState:	BOOL;		// The OK state of the Interlock/Event or the state that is required to be "Alright to Run" (0 or 1)
+	LatchRequired:	BOOL;		// Configuration Bit to set that the Interlock/Event Requires Latching until HMI_Reset (0 = NOT Latching, 1 = Latching)
+	ByPssAllwd:	BOOL;		// Configuration bit to set if the Interlock/Event is able to be bypased or not( 0= Bypass Allowed, 1 = Bypass Not Allowed	
+	HMI_BypassPB:	BOOL;		//Input for Individual Bypass Bits for each Interlock/Event (0= Bypass Not Active, 1 = Bypass Active)
+	FaultWarn:	BOOL;		// // Configuration Bit to set if Event causes a Fault or Warning (0=Warning, 1=Fault) 
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

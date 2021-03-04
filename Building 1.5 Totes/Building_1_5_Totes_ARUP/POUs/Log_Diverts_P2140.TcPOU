@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="Log_Diverts_P2140" Id="{e9fe6440-b139-4cb5-add5-489bd6f224e0}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Log_Diverts_P2140
+VAR
+	r_DivertExtend			: ARRAY [1..16] OF R_TRIG;
+	f_DivertExtend			: ARRAY [1..16] OF F_TRIG;
+	r_ConfirmPE				: ARRAY [1..16] OF R_TRIG;
+	f_ConfirmPE				: ARRAY [1..16] OF F_TRIG;
+	sMessage				: STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Divert 1
+r_DivertExtend[1](CLK := Sorter.aSorterDiverts_P2140[1].Output1);
+f_DivertExtend[1](CLK := Sorter.aSorterDiverts_P2140[1].Output1);
+
+IF r_DivertExtend[1].Q THEN
+	IF .nDivertLogEnable.DIVERT1 THEN
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Extend Divert 1 : %s'
+			, strArg := UDINT_TO_STRING(Sorter.st_SorterEncoder_P2140.CurrentCount)); 
+	END_IF;
+END_IF
+IF f_DivertExtend[1].Q THEN
+	IF .nDivertLogEnable.DIVERT1 THEN
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Retract Divert 1 : %s'
+			, strArg := UDINT_TO_STRING(Sorter.st_SorterEncoder_P2140.CurrentCount)); 
+	END_IF;
+END_IF
+
+// Confirm 1
+r_ConfirmPE[1](CLK := Sorter.aSorterDiverts_P2140[1].ConfirmPE);
+f_ConfirmPE[1](CLK := Sorter.aSorterDiverts_P2140[1].ConfirmPE);
+
+IF r_ConfirmPE[1].Q THEN
+	IF .nDivertLogEnable.CONFIRM1 THEN
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Confirm PE 1 Blocked: %s'
+			, strArg := UDINT_TO_STRING(Sorter.st_SorterEncoder_P2140.CurrentCount)); 
+	END_IF;
+END_IF
+IF f_ConfirmPE[1].Q THEN
+	IF .nDivertLogEnable.CONFIRM1 THEN
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Confirm PE 1 Clear: %s'
+			, strArg := UDINT_TO_STRING(Sorter.st_SorterEncoder_P2140.CurrentCount)); 
+	END_IF;
+END_IF
+
+// Divert 2
+r_DivertExtend[2](CLK := Sorter.aSorterDiverts_P2140[2].Output1);
+f_DivertExtend[2](CLK := Sorter.aSorterDiverts_P2140[2].Output1);
+
+IF r_DivertExtend[2].Q THEN
+	IF .nDivertLogEnable.DIVERT2 THEN
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Extend Divert 2: %s'
+			, strArg := UDINT_TO_STRING(Sorter.st_SorterEncoder_P2140.CurrentCount)); 
+	END_IF;
+END_IF
+IF f_DivertExtend[2].Q THEN
+	IF .nDivertLogEnable.DIVERT2 THEN
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Retract Divert 2: %s'
+			, strArg := UDINT_TO_STRING(Sorter.st_SorterEncoder_P2140.CurrentCount)); 
+	END_IF;
+END_IF
+
+// Confirm 2
+r_ConfirmPE[2](CLK := Sorter.aSorterDiverts_P2140[2].ConfirmPE);
+f_ConfirmPE[2](CLK := Sorter.aSorterDiverts_P2140[2].ConfirmPE);
+
+IF r_ConfirmPE[2].Q THEN
+	IF .nDivertLogEnable.CONFIRM2 THEN
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Confirm PE 2 Blocked: %s'
+			, strArg := UDINT_TO_STRING(Sorter.st_SorterEncoder_P2140.CurrentCount)); 
+	END_IF;
+END_IF
+IF f_ConfirmPE[2].Q THEN
+	IF .nDivertLogEnable.CONFIRM2 THEN
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Confirm PE 2 Clear: %s'
+			, strArg := UDINT_TO_STRING(Sorter.st_SorterEncoder_P2140.CurrentCount)); 
+	END_IF
+END_IF
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="Log_Diverts_P2140">
+      <LineId Id="14" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="6" Count="2" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="18" Count="2" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="45" Count="4" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="50" Count="3" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="55" Count="5" />
+      <LineId Id="23" Count="4" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="28" Count="3" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="33" Count="2" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="95" Count="4" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="100" Count="3" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="105" Count="3" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="146" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

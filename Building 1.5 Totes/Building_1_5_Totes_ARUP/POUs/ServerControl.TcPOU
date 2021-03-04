@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="ServerControl" Id="{c51e2ab7-b59f-4ad1-9a3c-5084036d7114}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM ServerControl
+VAR_INPUT
+	TxMessage: STRING(55);
+	TransmitTrigger : BOOL;
+END_VAR
+VAR
+	sSrvNetID	: T_AmsNetID	:= '';		// TwinCAT TCP/IP server network address
+	bEnable		: BOOL := TRUE;		// TRUE => Enable server data exchange, FALSE => Disable
+	bLog		: BOOL := TRUE;		// TRUE => Enable message/error log, FALSE => Disable
+	
+	fbServer	: FB_Server := ( 	sLocalHost := '0.0.0.0' (*Own (server) IP address! *), 
+									nLocalPort := 49200,(* Own (server) port number! *) 
+									sPrefix := 'SERVER::' );
+
+	fbCloseAll	: FB_SocketCloseAll;
+	{attribute 'OPC.UA.DA' := '1'}
+	bInitialize	: BOOL := TRUE;
+	aTransmitTrigger: ARRAY [1..ServerControl.MAX_CLIENT_CONNECTIONS] OF BOOL;
+END_VAR
+
+VAR CONSTANT	
+	MAX_CLIENT_CONNECTIONS					: UDINT(1..20) := 1;
+	PLCPRJ_BUFFER_SIZE						: UDINT := 1000;		// Max. internal fifo/receiver buffer size
+	PLCPRJ_RECEIVE_POLLING_TIME				: TIME := T#100MS;
+	PLCPRJ_RECEIVE_TIMEOUT					: TIME := T#15M;	// Timeout if no data is received
+
+	// Project specific error codes
+	PLCPRJ_ERROR_RECEIVE_TIMEOUT			: UDINT := 16#8101;		// Receive timeout
+	PLCPRJ_ERROR_SENDFIFO_OVERFLOW			: UDINT := 16#8102;		// Send fifo overflow
+	PLCPRJ_ERROR_RECFIFO_OVERFLOW			: UDINT := 16#8103;		// Receive fifo overflow
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+(* On PLC reset or program download close all created/opened sockets/connections *)
+fbCloseAll( sSrvNetID := sSrvNetID, bExecute:= bInitialize );
+IF fbCloseAll.bBusy OR fbCloseAll.bError THEN
+	RETURN;
+END_IF
+bInitialize := FALSE;
+
+aTransmitTrigger[1] := TransmitTrigger;
+fbServer( TxMessage := TxMessage, aTransmitTrigger := aTransmitTrigger, sSrvNetID := sSrvNetID, bEnable := bEnable, bLog := bLog);
+
+MsgControl();		// Control the messages being sent out via TCP/IP
+
+
+		]]></ST>
+    </Implementation>
+    <LineIds Name="ServerControl">
+      <LineId Id="20" Count="0" />
+      <LineId Id="31" Count="5" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="128" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

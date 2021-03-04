@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <EnumerationTextList Name="E_MessageIds" Id="{0e253860-a70b-46ad-9708-05ab49108d8c}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_MessageIds :
+(
+	NoMessage_00 := 0,
+	TransportCommand_05 := 5,
+	LocationUpdateResponse_07 := 7,
+	EquipmentStatusResponse_08 := 8,
+	KeepAlive_09 := 9,
+	Arrival_23 := 23,
+	TransportResponse_25 := 25,
+	TransportComplete_26 := 26,
+	LocationUpdate_27 := 27,
+	EquipmentStatusUpdate_28 := 28,
+	KeepAliveResponse_29 := 29
+);
+END_TYPE
+]]></Declaration>
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="TextListEnumerationTextListObject">
+          <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"NoMessage_00"</v>
+              <v n="TextDefault">"0"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"TransportCommand_05"</v>
+              <v n="TextDefault">"5"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"LocationUpdateResponse_07"</v>
+              <v n="TextDefault">"7"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"EquipmentStatusResponse_08"</v>
+              <v n="TextDefault">"8"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"KeepAlive_09"</v>
+              <v n="TextDefault">"9"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"Arrival_23"</v>
+              <v n="TextDefault">"23"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"TransportResponse_25"</v>
+              <v n="TextDefault">"25"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"TransportComplete_26"</v>
+              <v n="TextDefault">"26"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"LocationUpdate_27"</v>
+              <v n="TextDefault">"27"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"EquipmentStatusUpdate_28"</v>
+              <v n="TextDefault">"28"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"KeepAliveResponse_29"</v>
+              <v n="TextDefault">"29"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">""</v>
+              <v n="TextDefault">""</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+          </l>
+          <l n="Languages" t="ArrayList" />
+          <v n="GuidInit">{eb3dd038-79a0-4940-8c01-4994d81e1aed}</v>
+          <v n="GuidReInit">{d7558678-ea51-4c44-8d50-442d64a8988e}</v>
+          <v n="GuidExitX">{4225d3d1-97e2-4bf1-9d68-c4ad20bbcfe2}</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="String">System.String</Type>
+        <Type n="TextListEnumerationTextListObject">{4b60233c-f940-4beb-b331-82133b520151}</Type>
+        <Type n="TextListRow">{53da1be7-ad25-47c3-b0e8-e26286dad2e0}</Type>
+      </TypeList>
+    </XmlArchive>
+  </EnumerationTextList>
+</TcPlcObject>

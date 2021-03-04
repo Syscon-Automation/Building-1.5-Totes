@@ -1,0 +1,624 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="Solenoids" Id="{02f07705-3c99-482e-b422-168a6adede53}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Solenoids
+VAR
+nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
+
+//----------------------------------------GR2140_02--------------------------------------------------------------
+   cfgGR2140_02Label:	STRING(20) :=  'GR2140_02';
+   cfgGR2140_02ExtendTODetectTime:	TIME := T#5S;
+   cfgGR2140_02RetractTODetectTime:	TIME := T#5S;
+   GR2140_02			: FB_Solenoid_SA;
+   GR2140_02_StatePB	: ST_StateCntrlPB;
+   GR2140_02_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------PI2140_01--------------------------------------------------------------
+   cfgPI2140_01Label:	STRING(20) :=  'PI2140_01';
+   cfgPI2140_01ExtendTODetectTime:	TIME := T#5S;
+   cfgPI2140_01RetractTODetectTime:	TIME := T#5S;
+   PI2140_01			: FB_Solenoid_DA;
+   PI2140_01_StatePB	: ST_StateCntrlPB;
+   PI2140_01_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------GR2140_01--------------------------------------------------------------
+   cfgGR2140_01Label:	STRING(20) :=  'GR2140_01';
+   cfgGR2140_01ExtendTODetectTime:	TIME := T#5S;
+   cfgGR2140_01RetractTODetectTime:	TIME := T#5S;
+   GR2140_01			: FB_Solenoid_SA;
+   GR2140_01_StatePB	: ST_StateCntrlPB;
+   GR2140_01_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------PL2140_01--------------------------------------------------------------
+   cfgPL2140_01Label:	STRING(20) :=  'PL2140_01';
+   cfgPL2140_01ExtendTODetectTime:	TIME := T#5S;
+   cfgPL2140_01RetractTODetectTime:	TIME := T#5S;
+   PL2140_01			: FB_Solenoid_SA;
+   PL2140_01_StatePB	: ST_StateCntrlPB;
+   PL2140_01_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------GR2150_01--------------------------------------------------------------
+   cfgGR2150_01Label:	STRING(20) :=  'GR2150_01';
+   cfgGR2150_01ExtendTODetectTime:	TIME := T#5S;
+   cfgGR2150_01RetractTODetectTime:	TIME := T#5S;
+   GR2150_01			: FB_Solenoid_SA;
+   GR2150_01_StatePB	: ST_StateCntrlPB;
+   GR2150_01_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------GR2150_02--------------------------------------------------------------
+   cfgGR2150_02Label:	STRING(20) :=  'GR2150_02';
+   cfgGR2150_02ExtendTODetectTime:	TIME := T#5S;
+   cfgGR2150_02RetractTODetectTime:	TIME := T#5S;
+   GR2150_02			: FB_Solenoid_SA;
+   GR2150_02_StatePB	: ST_StateCntrlPB;
+   GR2150_02_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------PU2150_01--------------------------------------------------------------
+   cfgPU2150_01Label:	STRING(20) :=  'PU2150_01';
+   cfgPU2150_01ExtendTODetectTime:	TIME := T#5S;
+   cfgPU2150_01RetractTODetectTime:	TIME := T#5S;
+   PU2150_01			: FB_Solenoid_SA;
+   PU2150_01_StatePB	: ST_StateCntrlPB;
+   PU2150_01_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------PU2150_02--------------------------------------------------------------
+   cfgPU2150_02Label:	STRING(20) :=  'PU2150_02';
+   cfgPU2150_02ExtendTODetectTime:	TIME := T#5S;
+   cfgPU2150_02RetractTODetectTime:	TIME := T#5S;
+   PU2150_02			: FB_Solenoid_SA;
+   PU2150_02_StatePB	: ST_StateCntrlPB;
+   PU2150_02_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------PU2150_03--------------------------------------------------------------
+   cfgPU2150_03Label:	STRING(20) :=  'PU2150_03';
+   cfgPU2150_03ExtendTODetectTime:	TIME := T#5S;
+   cfgPU2150_03RetractTODetectTime:	TIME := T#5S;
+   PU2150_03			: FB_Solenoid_SA;
+   PU2150_03_StatePB	: ST_StateCntrlPB;
+   PU2150_03_Status	: ST_EquipmentStatus;		// Gripper State 
+
+//----------------------------------------PU2150_04--------------------------------------------------------------
+   cfgPU2150_04Label:	STRING(20) :=  'PU2150_04';
+   cfgPU2150_04ExtendTODetectTime:	TIME := T#5S;
+   cfgPU2150_04RetractTODetectTime:	TIME := T#5S;
+   PU2150_04			: FB_Solenoid_SA;
+   PU2150_04_StatePB	: ST_StateCntrlPB;
+   PU2150_04_Status	: ST_EquipmentStatus;		// Gripper State 
+END_VAR
+
+VAR PERSISTENT
+//----------------------------------------GR2140_02--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgGR2140_02IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2140' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgGR2140_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'GR2140_02', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'GR2140_02', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2140', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   (Description := 'System Estop', DeviceLabel := 'System', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'RIO3171 Comm Fault', DeviceLabel := 'RIO3171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
+   9(())];
+//----------------------------------------PI2140_01--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgPI2140_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2140' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgPI2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'PI2140_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'PI2140_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2140', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   10(())];
+//----------------------------------------GR2140_01--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgGR2140_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2140' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgGR2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'GR2140_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'GR2140_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2140', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   (Description := 'System Estop', DeviceLabel := 'System', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'RIO11171 Comm Fault', DeviceLabel := 'RIO11171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
+   10(())];
+//----------------------------------------PL2140_01--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgPL2140_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2140' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgPL2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'PL2140_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'PL2140_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2140', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   (Description := 'RIO11171 Comm Fault', DeviceLabel := 'RIO11171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
+   11(())];
+//----------------------------------------GR2150_01--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgGR2150_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgGR2150_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'GR2150_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'GR2150_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   11(())];
+//----------------------------------------GR2150_02--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgGR2150_02IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgGR2150_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'GR2150_02', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'GR2150_02', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   11(())];
+//----------------------------------------PU2150_01--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgPU2150_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgPU2150_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'PU2150_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'PU2150_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   11(())];
+//----------------------------------------PU2150_02--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgPU2150_02IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgPU2150_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'PU2150_02', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'PU2150_02', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   11(())];
+//----------------------------------------PU2150_03--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgPU2150_03IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgPU2150_03EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'PU2150_03', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'PU2150_03', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   (Description := 'RIO4141 Comm Fault', DeviceLabel := 'RIO3171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
+   10(())];
+//----------------------------------------PU2150_04--------------------------------------------------------------
+{attribute 'OPC.UA.DA' := '1'}
+cfgPU2150_04IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
+   (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
+   14(())];
+{attribute 'OPC.UA.DA' := '1'}
+cfgPU2150_04EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
+   (Description := 'Extend To', DeviceLabel := 'PU2150_04', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'Retract TO', DeviceLabel := 'PU2150_04', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
+   (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
+   (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
+   (Description := 'RIO4141 Comm Fault', DeviceLabel := 'RIO4141', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
+   10(())];	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//----------------------------------------GR2140_02--------------------------------------------------------------
+GR2140_02_StatePB.AutoPB := System.Cnvyr_Auto;
+GR2140_02_StatePB.ManPB := System.Cnvyr_Manual;
+GR2140_02_StatePB.ResetPB := System.Cnvyr_Reset;
+GR2140_02_StatePB.OfflinePB := System.Cnvyr_Offline;
+GR2140_02_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+GR2140_02_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+GR2140_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+GR2140_02.In_EquipEvents.2:= System.SysEventsAllOk;
+GR2140_02.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+GR2140_02.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+GR2140_02.In_EquipEvents.5:= CommStatus.RIO11171_CommFault.Out;
+
+// Function Call
+GR2140_02(
+   In_p_EquipStatePB:= GR2140_02_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2140.Out_Grabber_2_Ext,
+   In_EquipRtrcdFdbck := ProxSensors.PX_11291_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_11321_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgGR2140_02Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgGR2140_02IntlksArry,
+   Cfg_EquipEvntsArry:= cfgGR2140_02EvntsArry,
+   Cfg_ExtendDetectTime:= cfgGR2140_02ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgGR2140_02RetractTODetectTime,
+   Sts_EquipState := GR2140_02_Status,
+   Out_ExtendCrntSV => GVL_IO.GR2140_02_Extend); 
+//----------------------------------------PI2140_01--------------------------------------------------------------
+PI2140_01_StatePB.AutoPB := System.Cnvyr_Auto;
+PI2140_01_StatePB.ManPB := System.Cnvyr_Manual;
+PI2140_01_StatePB.ResetPB := System.Cnvyr_Reset;
+PI2140_01_StatePB.OfflinePB := System.Cnvyr_Offline;
+PI2140_01_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+PI2140_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_DA;
+
+// Interlocks
+PI2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+PI2140_01.In_EquipEvents.2:= System.SysEventsAllOk;
+PI2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+PI2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+PI2140_01.In_EquipEvents.5:= CommStatus.RIO11171_CommFault.Out;
+
+// Function Call
+PI2140_01(
+   In_p_EquipStatePB:= PI2140_01_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2140.In_PinStop_Extended,
+   In_P_SVReqRetract:= Singulation_Control.SortSingulation_P2140.Out_PinStop_Ret,
+   In_EquipRtrcdFdbck := ProxSensors.PX_11181_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_11201_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgPI2140_01Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,   Cfg_EquipIntlksArry:= cfgPI2140_01IntlksArry,
+   Cfg_EquipEvntsArry:= cfgPI2140_01EvntsArry,
+   Cfg_ExtendDetectTime:= cfgPI2140_01ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgPI2140_01RetractTODetectTime,
+   Sts_EquipState := PI2140_01_Status,
+   Out_ExtendCrntSV => GVL_IO.PI2140_01_Extend,  
+   Out_RetractCrntSV => GVL_IO.PI2140_01_Retract); 
+//----------------------------------------GR2140_01--------------------------------------------------------------
+GR2140_01_StatePB.AutoPB := System.Cnvyr_Auto;
+GR2140_01_StatePB.ManPB := System.Cnvyr_Manual;
+GR2140_01_StatePB.ResetPB := System.Cnvyr_Reset;
+GR2140_01_StatePB.OfflinePB := System.Cnvyr_Offline;
+GR2140_01_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+GR2140_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+GR2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+GR2140_01.In_EquipEvents.2:= System.SysEventsAllOk;
+GR2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+GR2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+GR2140_01.In_EquipEvents.5:= CommStatus.RIO11171_CommFault.Out;
+
+// Function Call
+GR2140_01(
+   In_p_EquipStatePB:= GR2140_01_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2140.Out_Grabber_1_Ext,
+   In_EquipRtrcdFdbck := ProxSensors.PX_11141_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_11161_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgGR2140_01Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgGR2140_01IntlksArry,
+   Cfg_EquipEvntsArry:= cfgGR2140_01EvntsArry,
+   Cfg_ExtendDetectTime:= cfgGR2140_01ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgGR2140_01RetractTODetectTime,
+   Sts_EquipState := GR2140_01_Status,
+   Out_ExtendCrntSV => GVL_IO.GR2140_01_Extend); 
+//----------------------------------------PL2140_01--------------------------------------------------------------
+PL2140_01_StatePB.AutoPB := System.Cnvyr_Auto;
+PL2140_01_StatePB.ManPB := System.Cnvyr_Manual;
+PL2140_01_StatePB.ResetPB := System.Cnvyr_Reset;
+PL2140_01_StatePB.OfflinePB := System.Cnvyr_Offline;
+PL2140_01_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+PL2140_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+PL2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+PL2140_01.In_EquipEvents.2:= System.SysEventsAllOk;
+PL2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+PL2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+PL2140_01.In_EquipEvents.5:= CommStatus.RIO10161_CommFault.Out;
+
+// Function Call
+PL2140_01(
+   In_p_EquipStatePB:= PL2140_01_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2140[2].Output2,
+   In_EquipRtrcdFdbck := ProxSensors.PX_10211_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_10231_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgPL2140_01Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgPL2140_01IntlksArry,
+   Cfg_EquipEvntsArry:= cfgPL2140_01EvntsArry,
+   Cfg_ExtendDetectTime:= cfgPL2140_01ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgPL2140_01RetractTODetectTime,
+   Sts_EquipState := PL2140_01_Status,
+   Out_ExtendCrntSV => GVL_IO.PL2140_01_Extend); 
+//----------------------------------------GR2150_01--------------------------------------------------------------
+GR2150_01_StatePB.AutoPB := System.Cnvyr_Auto;
+GR2150_01_StatePB.ManPB := System.Cnvyr_Manual;
+GR2150_01_StatePB.ResetPB := System.Cnvyr_Reset;
+GR2150_01_StatePB.OfflinePB := System.Cnvyr_Offline;
+GR2150_01_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+GR2150_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+GR2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+GR2150_01.In_EquipEvents.2:= System.SysEventsAllOk;
+GR2150_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+GR2150_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+GR2150_02.In_EquipEvents.5:= CommStatus.RIO3171_CommFault.Out;
+
+// Function Call
+GR2150_01(
+   In_p_EquipStatePB:= GR2150_01_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2150.Out_Grabber_1_Ext,
+   In_EquipRtrcdFdbck := ProxSensors.PX_2181_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_2201_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgGR2150_01Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgGR2150_01IntlksArry,
+   Cfg_EquipEvntsArry:= cfgGR2150_01EvntsArry,
+   Cfg_ExtendDetectTime:= cfgGR2150_01ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgGR2150_01RetractTODetectTime,
+   Sts_EquipState := GR2150_01_Status,
+   Out_ExtendCrntSV => GVL_IO.GR2150_01_Extend); 
+//----------------------------------------GR2150_02--------------------------------------------------------------
+GR2150_02_StatePB.AutoPB := System.Cnvyr_Auto;
+GR2150_02_StatePB.ManPB := System.Cnvyr_Manual;
+GR2150_02_StatePB.ResetPB := System.Cnvyr_Reset;
+GR2150_02_StatePB.OfflinePB := System.Cnvyr_Offline;
+GR2150_02_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+GR2150_02_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+GR2150_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+GR2150_02.In_EquipEvents.2:= System.SysEventsAllOk;
+GR2150_02.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+GR2150_02.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+GR2150_02.In_EquipEvents.5:= CommStatus.RIO3171_CommFault.Out;
+
+// Function Call
+GR2150_02(
+   In_p_EquipStatePB:= GR2150_02_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2150.Out_Grabber_2_Ext,
+   In_EquipRtrcdFdbck := ProxSensors.PX_2131_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_2151_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgGR2150_02Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgGR2150_02IntlksArry,
+   Cfg_EquipEvntsArry:= cfgGR2150_02EvntsArry,
+   Cfg_ExtendDetectTime:= cfgGR2150_02ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgGR2150_02RetractTODetectTime,
+   Sts_EquipState := GR2150_02_Status,
+   Out_ExtendCrntSV => GVL_IO.GR2150_02_Extend); 
+//----------------------------------------PU2150_01--------------------------------------------------------------
+PU2150_01_StatePB.AutoPB := System.Cnvyr_Auto;
+PU2150_01_StatePB.ManPB := System.Cnvyr_Manual;
+PU2150_01_StatePB.ResetPB := System.Cnvyr_Reset;
+PU2150_01_StatePB.OfflinePB := System.Cnvyr_Offline;
+PU2150_01_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+PU2150_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+PU2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+PU2150_01.In_EquipEvents.2:= System.SysEventsAllOk;
+PU2150_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+PU2150_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+
+// Function Call
+PU2150_01(
+   In_p_EquipStatePB:= PU2150_01_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[1].Output1,
+   In_EquipRtrcdFdbck := ProxSensors.PX_3301_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_3331_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgPU2150_01Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgPU2150_01IntlksArry,
+   Cfg_EquipEvntsArry:= cfgPU2150_01EvntsArry,
+   Cfg_ExtendDetectTime:= cfgPU2150_01ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgPU2150_01RetractTODetectTime,
+   Sts_EquipState := PU2150_01_Status,
+   Out_ExtendCrntSV => GVL_IO.PU2150_01_Extend); 
+//----------------------------------------PU2150_02--------------------------------------------------------------
+PU2150_02_StatePB.AutoPB := System.Cnvyr_Auto;
+PU2150_02_StatePB.ManPB := System.Cnvyr_Manual;
+PU2150_02_StatePB.ResetPB := System.Cnvyr_Reset;
+PU2150_02_StatePB.OfflinePB := System.Cnvyr_Offline;
+PU2150_02_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+PU2150_02_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+PU2150_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+PU2150_02.In_EquipEvents.2:= System.SysEventsAllOk;
+PU2150_02.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+PU2150_02.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+
+// Function Call
+PU2150_02(
+   In_p_EquipStatePB:= PU2150_02_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[2].Output1,
+   In_EquipRtrcdFdbck := ProxSensors.PX_3171_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_3191_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgPU2150_02Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgPU2150_02IntlksArry,
+   Cfg_EquipEvntsArry:= cfgPU2150_02EvntsArry,
+   Cfg_ExtendDetectTime:= cfgPU2150_02ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgPU2150_02RetractTODetectTime,
+   Sts_EquipState := PU2150_02_Status,
+   Out_ExtendCrntSV => GVL_IO.PU2150_02_Extend); 
+//----------------------------------------PU2150_03--------------------------------------------------------------
+PU2150_03_StatePB.AutoPB := System.Cnvyr_Auto;
+PU2150_03_StatePB.ManPB := System.Cnvyr_Manual;
+PU2150_03_StatePB.ResetPB := System.Cnvyr_Reset;
+PU2150_03_StatePB.OfflinePB := System.Cnvyr_Offline;
+PU2150_03_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+PU2150_03_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+PU2150_03.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+PU2150_03.In_EquipEvents.2:= System.SysEventsAllOk;
+PU2150_03.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+PU2150_03.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+PU2150_03.In_EquipEvents.5:= CommStatus.RIO4141_CommFault.Out;
+
+// Function Call
+PU2150_03(
+   In_p_EquipStatePB:= PU2150_03_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[3].Output1,
+   In_EquipRtrcdFdbck := ProxSensors.PX_4291_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_4311_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgPU2150_03Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgPU2150_03IntlksArry,
+   Cfg_EquipEvntsArry:= cfgPU2150_03EvntsArry,
+   Cfg_ExtendDetectTime:= cfgPU2150_03ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgPU2150_03RetractTODetectTime,
+   Sts_EquipState := PU2150_03_Status,
+   Out_ExtendCrntSV => GVL_IO.PU2150_03_Extend);
+//----------------------------------------PU2150_04--------------------------------------------------------------
+PU2150_04_StatePB.AutoPB := System.Cnvyr_Auto;
+PU2150_04_StatePB.ManPB := System.Cnvyr_Manual;
+PU2150_04_StatePB.ResetPB := System.Cnvyr_Reset;
+PU2150_04_StatePB.OfflinePB := System.Cnvyr_Offline;
+PU2150_04_StatePB.StopPB := System.Cnvyr_Manual;
+
+// Initialize the Equipment Type
+PU2150_04_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
+
+// Interlocks
+PU2150_04.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//Events
+PU2150_04.In_EquipEvents.2:= System.SysEventsAllOk;
+PU2150_04.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
+PU2150_04.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+PU2150_04.In_EquipEvents.5:= CommStatus.RIO4141_CommFault.Out;
+
+// Function Call
+PU2150_04(
+   In_p_EquipStatePB:= PU2150_04_StatePB,
+   In_SimActive:= System.Sys_SimActive,
+   In_EquipInit:= GVL_IO.INIT,
+   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[4].Output1,
+   In_EquipRtrcdFdbck := ProxSensors.PX_4151_Extended.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_4171_Retracted.Out,
+   Cfg_EquipIndex := nEquipIndex,
+   Cfg_EquipLabel := cfgPU2150_04Label,
+   Cfg_EquipDefState:= System.ConvDefaultState,
+   Cfg_EquipIntlksArry:= cfgPU2150_04IntlksArry,
+   Cfg_EquipEvntsArry:= cfgPU2150_04EvntsArry,
+   Cfg_ExtendDetectTime:= cfgPU2150_04ExtendTODetectTime,
+   Cfg_RetractDetectTime:= cfgPU2150_04RetractTODetectTime,
+   Sts_EquipState := PU2150_04_Status,
+   Out_ExtendCrntSV => GVL_IO.PU2150_04_Extend);
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="Solenoids">
+      <LineId Id="819" Count="15" />
+      <LineId Id="1380" Count="0" />
+      <LineId Id="835" Count="5" />
+      <LineId Id="1607" Count="0" />
+      <LineId Id="841" Count="26" />
+      <LineId Id="1379" Count="0" />
+      <LineId Id="868" Count="5" />
+      <LineId Id="1608" Count="1" />
+      <LineId Id="874" Count="26" />
+      <LineId Id="1381" Count="0" />
+      <LineId Id="901" Count="5" />
+      <LineId Id="1610" Count="0" />
+      <LineId Id="907" Count="26" />
+      <LineId Id="1378" Count="0" />
+      <LineId Id="934" Count="5" />
+      <LineId Id="1611" Count="0" />
+      <LineId Id="940" Count="26" />
+      <LineId Id="1369" Count="0" />
+      <LineId Id="967" Count="5" />
+      <LineId Id="1612" Count="0" />
+      <LineId Id="973" Count="26" />
+      <LineId Id="1366" Count="0" />
+      <LineId Id="1000" Count="5" />
+      <LineId Id="1613" Count="0" />
+      <LineId Id="1006" Count="32" />
+      <LineId Id="1614" Count="0" />
+      <LineId Id="1039" Count="32" />
+      <LineId Id="1615" Count="0" />
+      <LineId Id="1072" Count="26" />
+      <LineId Id="1372" Count="0" />
+      <LineId Id="1099" Count="5" />
+      <LineId Id="1616" Count="0" />
+      <LineId Id="1105" Count="26" />
+      <LineId Id="1375" Count="0" />
+      <LineId Id="1132" Count="5" />
+      <LineId Id="1617" Count="0" />
+      <LineId Id="1138" Count="10" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

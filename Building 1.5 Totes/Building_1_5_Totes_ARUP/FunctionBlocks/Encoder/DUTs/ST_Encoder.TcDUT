@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_Encoder" Id="{8a06c2fd-0252-422c-b402-efb402ba5a10}">
+    <Declaration><![CDATA[TYPE ST_Encoder :
+STRUCT
+	EncoderRawCount : UDINT;	// Raw encoder Count, acommodates 16 and 32 bit encoder resoultions
+	CurrentCount : UDINT;		// Current Pulse Count
+	BitMaskSize	: UINT;			// Number of bits to mask into the CurrentCount from the Actual Encoder Pulses
+	EncoderString	: STRING;	// Encoder pulses formatted as string
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

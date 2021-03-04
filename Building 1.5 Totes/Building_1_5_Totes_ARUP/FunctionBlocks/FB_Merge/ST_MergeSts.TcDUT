@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_MergeSts" Id="{4206b753-1541-4612-be4c-5659e32128e5}">
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_MergeSts :
+STRUCT
+	MergeEnabled			: 	BOOL;		// Merge is enabled 
+	MergeTakeAwayMtrActive	:	BOOL;		// Output for Merge take away motor
+	MergeSubState			:	E_MergeState;
+	MergeSubStateTxt		:	STRING(20);
+	MergeJammed				:	BOOL;		// Merge is Jammed
+	InletCount				:	INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

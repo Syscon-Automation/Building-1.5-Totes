@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="BinderX_ReleaseControl" Id="{32de5e55-360a-4bfd-ba6c-ae86acf0895a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM BinderX_ReleaseControl
+VAR
+	BinderHoldFB: FB_Binder_SingulateHold;
+	Binder_Pusher: FB_BinderPusher;
+
+	{attribute 'OPC.UA.DA' := '1'}
+	Binder		:	ST_Binder;
+
+	BinderDataIn AT %I*: ST_FromBinder;
+	BinderDataOut AT %Q*: ST_ToBinder;
+	BinderState AT %I*: ST_BinderState;
+	
+	// Dummy Points for Compiling
+	dummyIn		:	BOOL;
+	dummyOut	:	BOOL;
+	OCRHoldFB: INT;
+END_VAR
+
+VAR_OUTPUT
+	Online	AT %Q*	: BOOL; // Send Online state to Safety
+END_VAR
+
+VAR CONSTANT
+	GRABBER1_OCCUPIED:	UINT  := 1;
+	GRABBER2_OCCUPIED: 	UINT  := 2;
+	HOLDER_OCCUPIED:		UINT  := 3;
+	PINSTOP_OUT:			UINT  := 4;
+	
+	PAUSED:						UINT  := 0;
+	PRODUCT_PRESENT:			UINT  := 1;
+	PRODUCT_ENTERING_OCR:		UINT  := 2;
+	PRODUCT_READY_TO_PROCESS:	UINT  := 3;
+	OCR_FINISHED:				UINT  := 4;	
+	PRODUCT_EXITING_OCR:		UINT  := 5;
+	RETURN_CONVEYOR_CLEARING:	UINT  := 6;
+	RETURN_CONVEYOR_BUSY:		UINT  := 7;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+	Commented lines indicate what type of data item should be used for the signaling
+*)
+
+BinderHoldFB(
+	In_Pause:= NOT Binder.FromBinder.Online,
+//	In_ConveyorRunning := Conveyors.P8030_VFD.IsRunning,
+	In_ReturnConveyorClearTime:= T#250MS, 
+//	In_Grabber_Auto := Solenoids.GR8030_1_Status.Sts_EquipmentState.StsAuto,
+//	In_GrabberExtended := ProxSensors.PX_23661_Extended.Out,
+//	In_GrabberRetracted := ProxSensors.PX_23641_Retracted.Out,
+//	In_SV_GrabberExtend := GVL_IO.SOL_10_Extend,
+//	In_SV_GrabberRetract := GVL_IO.SOL_10_Retract,
+//	In_PinStop_1_Auto := Solenoids.PS8030_1_Status.Sts_EquipmentState.StsAuto,
+//	In_PinStop_1_Extended := ProxSensors.PX_23701_Extended.Out,
+//	In_PinStop_1_Retracted := ProxSensors.PX_23681_Retracted.Out,
+//	In_SV_PinStop_1_Extend := GVL_IO.SOL_11_Extend,
+//	In_SV_PinStop_1_Retract := GVL_IO.SOL_11_Retract,
+//	In_Holder_Auto := Solenoids.PS8030_2_Status.Sts_EquipmentState.StsAuto,
+//	In_HolderExtended := ProxSensors.PX_23501_Extended.Out,
+//	In_HolderRetracted := ProxSensors.PX_23481_Retracted.Out,
+//	In_SV_HolderExtend := GVL_IO.SOL_13_Extend,
+//	In_SV_HolderRetract := GVL_IO.SOL_13_Retract,
+//	In_PinStop_2_Auto := Solenoids.PS8030_2_Status.Sts_EquipmentState.StsAuto,
+//	In_PinStop_2_Extended := ProxSensors.PX_23541_Extended.Out,
+//	In_PinStop_2_Retracted := ProxSensors.PX_23521_Retracted.Out,
+//	In_SV_PinStop_2_Extend := GVL_IO.SOL_12_Extend,
+//	In_SV_PinStop_2_Retract := GVL_IO.SOL_12_Retract,
+	IN_Binder_Finished:= BinderDataIn.ProcessingComplete, 
+//	PE_Grabber:= PhotoEyes.PE_23241.Out_OnOffFltrd, 
+//	PE_PinStop_1:= PhotoEyes.PE_23461.Out_OnOffFltrd, 
+//	PE_Holder:= PhotoEyes.PE_23521.Out_OnOffFltrd, 
+//	PE_BinderExit := PhotoEyes.PE_23621.Out_OffFltrd, 
+//	PE_ReturnConveyorOccupied:= PhotoEyes.PE_23741.Out_OffFltrd, 
+	Status=> BinderDataOut.StatusSingulator, 
+	Status_Output=> );
+
+// Update variable to OCR that product is held and ready to be processed
+//BinderDataOut.ProductHeld := BinderHoldFB.Status.PRODUCT_READY_TO_PROCESS AND GVL_IO.SOL_13_Extend AND ProxSensors.PX_23501_Extended.OutOnFltrd;;
+
+// Push product out  
+//Binder_Pusher(PE_Pusher:= (GVL_IO.P8030_Status.Sts_IsRunning) AND (PhotoEyes.PE_23621.Out) AND BinderHoldFB.Status.PRODUCT_EXITING_OCR,
+//	PushTime:= T#250MS, 
+//	);
+
+//Binder.State.VlvBankPower := GVL_IO.OCRVlvBankPwr;
+//Binder.State.DumpValve := GVL_IO.BinderAirDump; 
+//Binder.State.SystemEstopOK := GVL_IO.SystemEstopsOK;
+Binder.FromBinder := BinderDataIn;
+Binder.ToBinder := BinderDataOut;
+
+Online := BinderDataIn.Online;]]></ST>
+    </Implementation>
+    <LineIds Name="BinderX_ReleaseControl">
+      <LineId Id="1461" Count="0" />
+      <LineId Id="1464" Count="0" />
+      <LineId Id="1463" Count="0" />
+      <LineId Id="1462" Count="0" />
+      <LineId Id="1412" Count="43" />
+      <LineId Id="1457" Count="2" />
+      <LineId Id="1371" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

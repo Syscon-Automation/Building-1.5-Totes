@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_DivertFullMonitor" Id="{61f277c4-19da-4b53-b17c-0567be4f20bc}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertFullMonitor
+
+VAR_IN_OUT
+	Divert 			: ST_Divert;
+END_VAR
+
+VAR
+	LastFullTime	: REAL;
+	nFullTime : UINT;
+	Cfg_FullTime: TIME := T#2S;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Calculate and set the merge clear timer
+IF LastFullTime <> Divert.Config.FullTime THEN
+	LastFullTime := Divert.Config.FullTime;
+	nFullTime := REAL_TO_UINT(LastFullTime * 1000); 
+	Cfg_FullTime := UINT_TO_TIME(nFullTime);
+END_IF
+
+// Set the Full time, according to the Full-Time
+Divert.FullTimer(PT := Cfg_FullTime);
+
+// Test for Full
+Divert.FullTimer(IN := Divert.FullPE);
+
+IF Divert.FullTimer.Q THEN
+	Divert.Full := TRUE;
+ELSE
+	Divert.Full := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_DivertFullMonitor">
+      <LineId Id="135" Count="5" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="100" Count="2" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

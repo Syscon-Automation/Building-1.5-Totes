@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_ConfirmCheck" Id="{292012a5-c6f1-4846-b7d2-d1154be0ca6c}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+	Each confirm location needs its own instance of this FunctionBlock in order to allow the LastDest to corretly detect sorted items
+	
+	No faults are set in this routine, it just checks for items at confirm PE's when they are expected/not expected
+
+	DetecetedItem is set when the item has blocked and then cleared the confirm PE
+*)
+FUNCTION_BLOCK FB_ConfirmCheck
+VAR_IN_OUT
+	ConfirmItem 		: ST_Item;
+END_VAR
+
+VAR_INPUT
+	ConfirmPE			: BOOL;
+	DivertIndex 		: DINT;
+	bIsDischarge		: BOOL;
+	bLog				: BOOL;
+END_VAR
+
+VAR_OUTPUT
+	DetectedItem		: ST_Item;
+END_VAR
+
+VAR
+	UpdateLog 			: FB_UpdateLog;
+	LastDest 			: DINT;	
+	aDivertLog			: ST_ItemLogBuffer;
+	fbDivertLog			: FB_ItemLogBuffer;
+	ItemToLog			: ST_Item;
+	sMessage			: STRING;
+	BlankItem			: ST_Item := (ID := ''
+										, UniqueID := 0
+										, Destination := 0
+										, Status := E_StatusCode.No_Status
+										, ExtStatus := E_StatusCode.No_Status
+										, DeviceID := ''
+										, MessageType := E_MessageIds.NoMessage_00);
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Clear the Detected Item each iteration to ensure that it only has a item assigned after the confirm PE has been cleared
+DetectedItem := BlankItem;
+
+// Check Confirm item. If it was marked diverting
+// Only check if the item is valid
+IF ConfirmPE THEN 
+	IF (ConfirmItem.Status >= E_StatusCode.Diverting AND ConfirmItem.Status <= E_StatusCode.Divert_Complete)
+	   AND ConfirmItem.UniqueID <> 0 THEN
+		// Set the Status to Divert_Detected, because we see the item
+		//	ProcesBuffer will propogate that status
+		ConfirmItem.Status := E_StatusCode.Divert_Detected;
+		// The first time around, create a log item
+		IF LastDest = 0 THEN
+			UpdateLog(Status := ConfirmItem.Status, ItemID := ConfirmItem.UniqueID);
+			ItemToLog := ConfirmItem;
+			ItemToLog.Length := DivertIndex;
+			fbDivertLog.AddItem(ItemToLog);
+		END_IF
+	END_IF
+ELSE
+	// If we had a valid item, because we have a LastDest, set the Divert_Success to true under certain conditions
+	//	And write to the log
+	IF LastDest > 0 THEN
+		IF ConfirmItem.Status = E_StatusCode.Divert_Detected THEN
+			ConfirmItem.Status := E_StatusCode.Divert_Success;
+			DetectedItem := ConfirmItem;
+			// Set a divert missed status if this is a discharge and the destination does not match the index
+			IF bIsDischarge THEN
+				IF DetectedItem.Destination <> DivertIndex AND ConfirmItem.ExtStatus = 0 THEN
+					ConfirmItem.ExtStatus := E_StatusCode.Divert_Missed;
+				END_IF
+			END_IF
+			// Log when the item clears the confirm PE
+			UpdateLog(Status := DetectedItem.Status, ItemID := DetectedItem.UniqueID);
+			ItemToLog := DetectedItem;
+			ItemToLog.Length := DivertIndex;
+			fbDivertLog.AddItem(ItemToLog);
+		END_IF
+	END_IF
+END_IF
+
+// Capture the Current item destination before exiting the function block to test against the next run
+LastDest := ConfirmItem.Destination;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ConfirmCheck">
+      <LineId Id="1036" Count="0" />
+      <LineId Id="1034" Count="1" />
+      <LineId Id="702" Count="0" />
+      <LineId Id="716" Count="0" />
+      <LineId Id="1044" Count="0" />
+      <LineId Id="703" Count="0" />
+      <LineId Id="846" Count="0" />
+      <LineId Id="1090" Count="1" />
+      <LineId Id="707" Count="0" />
+      <LineId Id="1092" Count="0" />
+      <LineId Id="1088" Count="0" />
+      <LineId Id="711" Count="3" />
+      <LineId Id="1089" Count="0" />
+      <LineId Id="1047" Count="0" />
+      <LineId Id="1045" Count="0" />
+      <LineId Id="1093" Count="1" />
+      <LineId Id="1046" Count="0" />
+      <LineId Id="1078" Count="1" />
+      <LineId Id="1111" Count="0" />
+      <LineId Id="1118" Count="0" />
+      <LineId Id="1113" Count="1" />
+      <LineId Id="1116" Count="1" />
+      <LineId Id="1115" Count="0" />
+      <LineId Id="1108" Count="0" />
+      <LineId Id="1104" Count="3" />
+      <LineId Id="1109" Count="0" />
+      <LineId Id="715" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="1043" Count="0" />
+      <LineId Id="1041" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

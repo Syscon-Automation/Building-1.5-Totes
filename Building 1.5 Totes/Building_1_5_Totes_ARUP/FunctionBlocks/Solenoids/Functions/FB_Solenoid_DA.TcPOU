@@ -1,0 +1,320 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_Solenoid_DA" Id="{9f3d2ba8-f451-4f4c-a193-0395d73d189a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Solenoid_DA
+
+(* Double-Acting solenoid Set up,
+	Uses Interlocks. No common interlocks
+	Doesn't use Start Conditions or the horn delay  
+	Uses Events and has 5 that can be uassigned that are location specific and a common events for the Actuator Extended/Retracted Time-out faults 
+
+	Regardless of the travel of the actuator, the following define the extended and retracted positions
+		Extended is the position expected when the solenoid valve is actuated
+		Retracted is the position expected when the solenoid valve is resting
+*)
+
+VAR_IN_OUT
+	CFG_EquipIndex				: DINT;	// Index used for local Equipment status array
+	Sts_EquipState					: ST_EquipmentStatus;		// State Status
+END_VAR
+VAR_INPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	In_o_EquipStatePB				: ST_StateCntrlPB;		// Hmi push buttons to change states
+	In_p_EquipStatePB				: ST_StateCntrlPB;		// programming to change states
+	In_P_SVReqExtend			: BOOL;		// Input to extend actuator if in auto and conditions are met
+	In_P_SVReqRetract			: BOOL;		// Input to retract actuator if in auto and conditions are met
+	In_SimActive				: BOOL;
+	In_EquipInit					: BOOL;		// Initialise;
+	{attribute 'OPC.UA.DA' := '1'}
+	In_EquipExtdFdbck			: BOOL := FALSE;	// Actuator Extended Feedback (1 = Extended)
+	{attribute 'OPC.UA.DA' := '1'}
+	In_EquipRtrcdFdbck			: BOOL := FALSE;	// Actuator Retracted Feedback (1 = Retracted)
+	Cfg_EquipDefState				: E_StateCntrl;
+	{attribute 'OPC.UA.DA' := '1'}
+	Cfg_EquipLabel					: STRING(20);		// Label of the Solenoid
+	Cfg_UseExtedFdbc			: BOOL := FALSE;	// Use Feedback from actuator for Extended state, otherwise, use output 
+
+	// Events
+	// This is the system interlock, but could be something different
+	In_EquipEvents					: UINT;		// Event that is specific to the instance of the solenoid/actuator
+(*
+//	In_SVEvent0					: BOOL;		// Event that is specific to the instance of the solenoid/actuator
+	In_SVEvent1					: BOOL;		// Event that is specific to the instance of the solenoid/actuator
+	In_SVEvent2					: BOOL;		// Event that is specific to the instance of the solenoid/actuator
+	In_SVEvent3					: BOOL;		// Event that is specific to the instance of the solenoid/actuator
+	In_SVEvent4					: BOOL;		// Event that is specific to the instance of the solenoid/actuator
+	In_SVEvent5					: BOOL;		// Event that is specific to the instance of the solenoid/actuator
+	In_SVEvent6					: BOOL;		// Event that is specific to the instance of the solenoid/actuator
+	In_SVEvent7					: BOOL;		// Event that is specific to the instance of the solenoid/actuator
+*)
+	Cfg_EquipEvntsArry				: ARRAY [0..15] OF ST_CfgEvents;
+	Cfg_ExtendDetectTime		: TIME;
+	Cfg_RetractDetectTime		: TIME;
+	
+	// Interlocks that can be Instance Specific
+	In_EquipIntlks					: UINT;		// Interlock that is specific to the instance of the solenoid/actuator
+(*
+	In_SVIntlk0					: BOOL;		// Interlock that is specific to the instance of the solenoid/actuator
+	// This is the system interlock, but could be something different
+//	In_SVIntlk1					: BOOL;		// Interlock that is specific to the instance of the solenoid/actuator
+	In_SVIntlk2					: BOOL;		// Interlock that is specific to the instance of the solenoid/actuator
+	In_SVIntlk3					: BOOL;		// Interlock that is specific to the instance of the solenoid/actuator
+	In_SVIntlk4					: BOOL;		// Interlock that is specific to the instance of the solenoid/actuator
+	In_SVIntlk5					: BOOL;		// Interlock that is specific to the instance of the solenoid/actuator
+	In_SVIntlk6					: BOOL;		// Interlock that is specific to the instance of the solenoid/actuator
+	In_SVIntlk7					: BOOL;		// Interlock that is specific to the instance of the solenoid/actuator
+*)
+	Cfg_EquipIntlksArry			: ARRAY [0..15] OF ST_CfgEvents;		// Descriptions of the Interlock 
+	
+END_VAR
+VAR_OUTPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_ExtendCrntSV			: BOOL;		// Extend command for the current solenoid/actuator
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_ExtendCrntSV			: BOOL;		// Status showing that current solenoid/actuator is extended/extending
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_RetractCrntSV			: BOOL;		// Retract command for the current solenoid/actuator
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_RetractCrntSV			: BOOL;		// Status showing that current solenoid/actuator is retracteded/retractinging
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_All_Intlks_OK			: BOOL;		// Status bit to show that all interloks are good to Run 
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_FaultActive				: BOOL;	// Status Bit Showing that a fault is present (0= No Active Faults, 1= Fault Active)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_WarnActive				: BOOL;	// Status Bit Showing that a warning is present (0= No Active Warnings, 1= Warning Active)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_All_Evnts_OK			: BOOL;		// Status Bit Showing that ALL Events are OK to RUN (0= Event Present, 1= OK to Run)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_IntlksArry				: ARRAY[0..15] OF ST_EventSts;		// Interlock status 0 to 15 Input
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_FaultsArry				: ARRAY[0..15] OF ST_EventSts;	// Status of each Fault Event State (0= OFF, 1=ON)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_WarnsArry				: ARRAY[0..15] OF ST_EventSts;		// Status of each Warning Event State (0= OFF, 1=ON)
+	{attribute 'OPC.UA.DA' := '1'}
+	Sts_EvntsArry				: ARRAY[0..15] OF ST_EventSts; 	// Status of each Event State (0= OFF, 1=ON)
+END_VAR
+VAR
+	SV_fbIntrlks				: FB_Intlks_Latch;
+	SV_IntlksArry				: ARRAY[0..15] OF BOOL;
+	SV_fbEquipCntrl				: FB_EquipCntrl;
+	SV_EventManager				: FB_EventMngr;
+	SV_ExtendFault				: FB_JamDetect;			// This FB can also detect when it takes to long to extend an actuator
+	SV_RetractFault				: FB_JamDetect;			// This FB can also detect when it takes to long to retract an actuator
+	SV_EventArry				: ARRAY[0..15] OF BOOL;
+	
+	SV_LatchIgnore				: BOOL := FALSE;		// Put as a place holder for ease of future use
+	SV_LatchReset				: BOOL := FALSE;		//Put as a place holder for ease of future use
+	SV_IntlkBypassed			: ARRAY [0..15] OF BOOL;		//Put as a place holder for ease of future use
+	SV_MoveEnabled				: BOOL;					// TRUE = Enable the SV/Actuator to operate
+	SV_StartEnabled				: BOOL;					// TRUE = Start Motion for SV/actuator
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Set Up Common Single-Acting solenoid Interlocks and inputs for interlocks that are specific for the configuration instance
+SV_IntlksArry[0] := In_EquipIntlks.0;
+SV_IntlksArry[1] := System.SysIntlksAllOk; 
+SV_IntlksArry[2] := In_EquipIntlks.2;
+SV_IntlksArry[3] := In_EquipIntlks.3;
+SV_IntlksArry[4] := In_EquipIntlks.4;
+SV_IntlksArry[5] := In_EquipIntlks.5;
+SV_IntlksArry[6] := In_EquipIntlks.6;
+SV_IntlksArry[7] := In_EquipIntlks.7;
+SV_IntlksArry[8] := In_EquipIntlks.8;
+SV_IntlksArry[9] := In_EquipIntlks.9; 
+SV_IntlksArry[10] := In_EquipIntlks.10;
+SV_IntlksArry[11] := In_EquipIntlks.11;
+SV_IntlksArry[12] := In_EquipIntlks.12;
+SV_IntlksArry[13] := In_EquipIntlks.13;
+SV_IntlksArry[14] := In_EquipIntlks.14;
+SV_IntlksArry[15] := In_EquipIntlks.15;
+	
+// Call Interlock block
+SV_fbIntrlks(
+	In_Intlks:= SV_IntlksArry,
+	CFG_IntlksArry:= Cfg_EquipIntlksArry, 
+	HMI_LatchIgnore:= SV_LatchIgnore, 
+	HMI_LatchReset:= SV_LatchReset, 
+	All_Intlk_OK=> Sts_All_Intlks_OK, 
+	STS_Intlks=> Sts_IntlksArry);
+	
+// Set Up Common Solenoid Events and inputs for events that are specific for the configuration instance
+SV_EventArry[0]:= SV_ExtendFault.JamDetected;	// Even though this is a JamDetected output, it is really a Extend time-out fault
+SV_EventArry[1]:= SV_RetractFault.JamDetected;	// Even though this is a JamDetected output, it is really a retract time-out fault
+SV_EventArry[2]:= In_EquipEvents.2;
+SV_EventArry[3]:= In_EquipEvents.3;
+SV_EventArry[4]:= In_EquipEvents.4;
+SV_EventArry[5]:= In_EquipEvents.5;
+SV_EventArry[6]:= In_EquipEvents.6;
+SV_EventArry[7]:= In_EquipEvents.7;
+SV_EventArry[8]:= In_EquipEvents.8;
+SV_EventArry[9]:= In_EquipEvents.9;
+SV_EventArry[10]:= In_EquipEvents.10;
+SV_EventArry[11]:= In_EquipEvents.11;
+SV_EventArry[12]:= In_EquipEvents.12;
+SV_EventArry[13]:= In_EquipEvents.13;
+SV_EventArry[14]:= In_EquipEvents.14;
+SV_EventArry[15]:= In_EquipEvents.15;
+
+// Event Manager
+SV_EventManager(
+	sEquipStateCntrlSts := Sts_EquipState.Sts_EquipmentState,
+	In_EventsArry := SV_EventArry ,  
+	CFG_EvntsArry:= Cfg_EquipEvntsArry, 
+	HMI_LatchReset:= In_o_EquipStatePB.ResetPB OR In_p_EquipStatePB.ResetPB,
+	Out_FaultActive=> Sts_FaultActive, 
+	Out_WarnActive=> Sts_WarnActive, 
+	Sts_All_Evnts_OK=> Sts_All_Evnts_OK, 
+	Sts_FaultsArry=> Sts_FaultsArry, 
+	Sts_WarnsArry=> Sts_WarnsArry, 
+	Sts_EvntsArry=> Sts_EvntsArry);
+	
+(*
+	Set up individual Events that are common for this configuration
+ 	For the Extend Fault, use one of two conditions
+		1 - If the SV is configured to use Extended feedback, check the input
+		2 - If the SV is not configured to use Extedned feedback, check that the output is on and the retracted input is not on
+*)
+SV_ExtendFault.In_PE := (Cfg_UseExtedFdbc AND NOT In_EquipExtdFdbck) OR (NOT Cfg_UseExtedFdbc AND (Out_ExtendCrntSV AND In_EquipRtrcdFdbck));
+SV_ExtendFault(
+	In_Status:= NOT In_o_EquipStatePB.ResetPB AND Out_ExtendCrntSV, 
+	CFG_PEOKState:= 0, 
+	JamDetTime:= cfg_ExtendDetectTime);
+	
+(*
+ 	For the Retract Fault, use the following condition
+		Retracted Output is ON and the actuator is not in the retracted condition
+*)
+SV_RetractFault.In_PE := Out_RetractCrntSV AND NOT In_EquipRtrcdFdbck;
+SV_RetractFault(
+	In_Status:= NOT In_o_EquipStatePB.ResetPB AND Out_RetractCrntSV, 
+	CFG_PEOKState:= 0, 
+	JamDetTime:= cfg_RetractDetectTime);
+
+//Call Equipment FB to control current SV/Actuator	
+// XOR the Extend and Retract. The interlocks/events must be prefixed with the extend or retract command 
+SV_fbEquipCntrl(
+	CFG_EquipIndex := cfg_EquipIndex,
+	CFG_EquipLabel := Cfg_EquipLabel,
+	CFG_UseStrtCnd:= FALSE, 
+	CFG_UseIntrlks:= TRUE, 
+	CFG_UseHrnDly:= FALSE, 
+	CFG_EquipDefState:= Cfg_EquipDefState, 
+	In_IntlksOK:= Sts_All_Intlks_OK, 
+	In_SimActive:= In_SimActive, 
+	In_Init:= In_EquipInit, 
+	o_EquipStatePB:= In_o_EquipStatePB, 
+	p_EquipStatePB:= In_p_EquipStatePB, 
+	P_EquipReqRun:= In_P_SVReqExtend XOR In_P_SVReqRetract, 
+	In_EquipFaults:= Sts_FaultActive, 
+	Out_EquipRun=> , 
+	Out_Horn=> , 
+	Sts_EquipState:= Sts_EquipState.Sts_EquipmentState);	
+
+// Process the SV_MoveEnabled signal
+SV_MoveEnabled := SV_fbEquipCntrl.Out_EquipRun;
+
+SV_StartEnabled := SV_MoveEnabled;	
+
+// Actuate the SV based on the results of the Equipment Control state
+IF Sts_EquipState.Sts_EquipmentState.CrntState = E_StateCntrl.stAuto THEN
+	IF (In_P_SVReqExtend AND NOT In_P_SVReqRetract)
+	   THEN
+		Out_RetractCrntSV := FALSE;
+		Out_ExtendCrntSV := SV_StartEnabled;
+		// Set Solenoid Actuation Status
+		Sts_ExtendCrntSV := (Out_ExtendCrntSV) OR (In_SimActive AND SV_fbEquipCntrl.RunApproved);
+		Sts_RetractCrntSV := FALSE;
+	END_IF
+	IF In_P_SVReqRetract THEN
+		Out_RetractCrntSV := SV_StartEnabled;
+		Out_ExtendCrntSV := FALSE;
+		// Set Solenoid Actuation Status
+		Sts_RetractCrntSV := (Out_RetractCrntSV) OR (In_SimActive AND SV_fbEquipCntrl.RunApproved);
+		Sts_ExtendCrntSV := FALSE;
+	END_IF
+ELSE
+	IF (In_o_EquipStatePB.ManExtendPB AND NOT In_o_EquipStatePB.ManRetractPB)
+	   THEN
+		Out_RetractCrntSV := FALSE;
+		Out_ExtendCrntSV := SV_StartEnabled;
+		// Set Solenoid Actuation Status
+		Sts_ExtendCrntSV := (Out_ExtendCrntSV) OR (In_SimActive AND SV_fbEquipCntrl.RunApproved);
+		Sts_RetractCrntSV := FALSE;
+	END_IF
+	IF In_o_EquipStatePB.ManRetractPB THEN
+		Out_RetractCrntSV := SV_StartEnabled;
+		Out_ExtendCrntSV := FALSE;
+		// Set Solenoid Actuation Status
+		Sts_RetractCrntSV := (Out_RetractCrntSV) OR (In_SimActive AND SV_fbEquipCntrl.RunApproved);
+		Sts_ExtendCrntSV := FALSE;
+	END_IF
+END_IF
+
+// Turn OFF Extend and Retract when a stop is issued
+IF In_p_EquipStatePB.StopPB OR In_o_EquipStatePB.StopPB THEN
+	Out_ExtendCrntSV := FALSE;
+	Out_RetractCrntSV := FALSE;
+	Sts_ExtendCrntSV := FALSE;
+	Sts_RetractCrntSV := FALSE;
+END_IF
+
+// Capture the Operation state of the Solenoid/actuator
+IF Sts_ExtendCrntSV THEN
+	// Solenoid Actuating/Entending
+	Sts_EquipState.Sts_EquipmentState.CrntOperState := E_OperStateCntrl.extending;
+	// Solenoid Extended
+	IF (Cfg_UseExtedFdbc AND In_EquipExtdFdbck) OR (NOT Cfg_UseExtedFdbc AND (Out_ExtendCrntSV AND NOT In_EquipRtrcdFdbck)) THEN
+		Sts_EquipState.Sts_EquipmentState.CrntOperState := E_OperStateCntrl.extended;
+	END_IF
+END_IF
+IF Sts_RetractCrntSV THEN
+	// Solenoid Retracting
+	Sts_EquipState.Sts_EquipmentState.CrntOperState := E_OperStateCntrl.retracting;
+	// Solenoid Retracted
+	IF In_EquipRtrcdFdbck THEN
+		Sts_EquipState.Sts_EquipmentState.CrntOperState := E_OperStateCntrl.retracted;
+	END_IF
+END_IF
+IF NOT Sts_ExtendCrntSV
+   AND NOT Sts_RetractCrntSV 
+   AND NOT In_EquipRtrcdFdbck
+   AND NOT (Cfg_UseExtedFdbc AND In_EquipExtdFdbck) OR (NOT Cfg_UseExtedFdbc AND (Out_ExtendCrntSV AND NOT In_EquipRtrcdFdbck)) 
+   THEN
+	Sts_EquipState.Sts_EquipmentState.CrntOperState := E_OperStateCntrl.unknown;
+END_IF
+// Solenoid control and state
+CASE Sts_EquipState.Sts_EquipmentState.CrntOperState OF
+	E_OperStateCntrl.extended:
+			Sts_EquipState.Sts_IsExtended := TRUE;
+			Sts_EquipState.Sts_IsExtending := FALSE;
+			Sts_EquipState.Sts_IsRetracted := FALSE;
+			Sts_EquipState.Sts_IsRetracting := FALSE;
+	E_OperStateCntrl.extending:
+			Sts_EquipState.Sts_IsExtended := FALSE;
+			Sts_EquipState.Sts_IsExtending := TRUE;
+			Sts_EquipState.Sts_IsRetracted := FALSE;
+			Sts_EquipState.Sts_IsRetracting := FALSE;
+	E_OperStateCntrl.retracted:
+			Sts_EquipState.Sts_IsExtended := FALSE;
+			Sts_EquipState.Sts_IsExtending := FALSE;
+			Sts_EquipState.Sts_IsRetracted := TRUE;
+			Sts_EquipState.Sts_IsRetracting := FALSE;
+	E_OperStateCntrl.retracting:
+			Sts_EquipState.Sts_IsExtended := FALSE;
+			Sts_EquipState.Sts_IsExtending := FALSE;
+			Sts_EquipState.Sts_IsRetracted := FALSE;
+			Sts_EquipState.Sts_IsRetracting := TRUE;
+END_CASE
+
+// Populate the Sts Output Variables
+Sts_EquipState.Sts_All_Intlks_OK  := Sts_All_Intlks_OK;
+Sts_EquipState.Sts_All_Evnts_OK  := Sts_All_Evnts_OK;
+Sts_EquipState.Sts_FaultActive := Sts_FaultActive;
+Sts_EquipState.Sts_WarnActive := Sts_WarnActive;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Solenoid_DA">
+      <LineId Id="7703" Count="199" />
+      <LineId Id="4466" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

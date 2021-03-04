@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_DivertDecision" Id="{f1effae8-ec79-4e78-bb87-c5d8f21259a3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertDecision
+VAR_IN_OUT
+	Output1Item 		: ST_Item;
+	Output2Item			: ST_Item;
+	Divert 				: ST_Divert;
+END_VAR
+
+VAR_INPUT
+	DivertIndex 		: DINT;
+	bLog				: BOOL;
+END_VAR
+
+VAR
+	DivertController	: FB_DivertControl;
+	Output1Activate 	: BOOL := 0;
+	Output2Activate 	: BOOL := 0;	
+	UpdateLog 			: FB_UpdateLog;
+	LastDest 			: DINT;	
+	aDivertLog			: ST_ItemLogBuffer;
+	fbDivertLog			: FB_ItemLogBuffer;
+	ItemToLog			: ST_Item;
+	sMessage			: STRING;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbDivertLog(st_BufferData := aDivertLog);
+
+//Divert this item if this divert is this item's intended destination
+IF DivertIndex = Output1Item.Destination THEN
+	// Check this only once, then set the Status accordingly
+	IF Divert.Status = E_StatusCode.Divert_Idle THEN
+		IF Divert.Full THEN
+			Divert.Status := E_StatusCode.Divert_Full;
+		else
+			Divert.Status := E_StatusCode.Diverting;
+		END_IF
+		IF bLog THEN
+			sMessage := CONCAT(' Item: ', Output1Item.ID);
+			sMessage := CONCAT(sMessage,' Dest: ');
+			sMessage := CONCAT(sMessage, DINT_TO_STRING(Output1Item.Destination));
+			sMessage := CONCAT(sMessage,' Status: ');
+			sMessage := CONCAT(sMessage, DINT_TO_STRING(Divert.Status));
+			// Write to the Error List
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Divert Initiated: %s'
+				, strArg := sMessage);
+		END_IF
+	END_IF;
+	IF Divert.Status = E_StatusCode.Diverting THEN
+		Output1Activate := 1;
+		Divert.Item := Output1Item;
+		//Energize Output2 after SorterCode.CFG_Output2Offset has passed 
+		IF DivertIndex = Output2Item.Destination THEN
+			Output2Activate := 1;
+		END_IF
+		DivertController( Output1Activate	:= Output1Activate
+				, Output2Activate	:= Output2Activate
+				, Output1Item		:= Output1Item
+				, Output2Item		:= Output2Item
+				, Divert			:= Divert
+				);		
+	ELSIF Divert.Status = E_StatusCode.Divert_Full THEN
+		Output1Item.ExtStatus := E_StatusCode.Divert_Full;
+	END_IF				
+//	Output1Item.Status := Divert.Status; 
+	ItemToLog := Output1Item;
+	ItemToLog.Length := DivertIndex;
+	fbDivertLog.AddItem(ItemToLog);
+ELSE
+	//Turn off output if dest does not equal divert index
+	Output1Activate := 0;
+	//Keep Output2 energized for SorterCode.CFG_Output2Offset distance
+	IF DivertIndex <> Output2Item.Destination THEN
+		// Set and Idle status for the divert
+		Divert.Status := E_StatusCode.Divert_Idle;
+		Output2Activate := 0;
+	ELSE
+		Output2Activate := 1;	
+	END_IF	
+
+	DivertController( Output1Activate	:= Output1Activate
+				, Output2Activate	:= Output2Activate
+				, Output1Item		:= Output1Item
+				, Output2Item		:= Output2Item
+				, Divert			:= Divert
+				);
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_DivertDecision">
+      <LineId Id="653" Count="10" />
+      <LineId Id="760" Count="0" />
+      <LineId Id="816" Count="0" />
+      <LineId Id="763" Count="1" />
+      <LineId Id="839" Count="1" />
+      <LineId Id="765" Count="3" />
+      <LineId Id="792" Count="0" />
+      <LineId Id="664" Count="2" />
+      <LineId Id="738" Count="0" />
+      <LineId Id="667" Count="9" />
+      <LineId Id="841" Count="0" />
+      <LineId Id="843" Count="0" />
+      <LineId Id="677" Count="22" />
+      <LineId Id="52" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

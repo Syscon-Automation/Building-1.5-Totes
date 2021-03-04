@@ -1,0 +1,283 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="ProxSensors" Id="{b29aba82-bcfc-4c96-80d9-9aa69ddf8845}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM ProxSensors
+VAR
+DebounceOnTime:	TIME := T#5MS;     // Default Value
+DebounceOffTime:	TIME := T#500MS;     // Default Value
+JamDetectTime:	TIME := T#5S;     // Default Value
+
+In_PX_2131_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_2131_Extended:  FB_DigDebnce;		// GR2150-02 "BELT" GRIPPER EXTENDED PROX
+
+In_PX_2151_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_2151_Retracted:  FB_DigDebnce;		// GR2150-02 "BELT" GRIPPER RETRACTED PROX
+
+In_PX_2181_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_2181_Extended:  FB_DigDebnce;		// GR2150-01 "BELT" GRIPPER EXTENDED PROX
+
+In_PX_2201_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_2201_Retracted:  FB_DigDebnce;		// GR2150-01 "BELT" GRIPPER RETRACTED PROX
+
+In_PX_3171_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_3171_Extended:  FB_DigDebnce;		// PU2150-02 PUSH DIVERT EXTENDED PROX
+
+In_PX_3191_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_3191_Retracted:  FB_DigDebnce;		// PU2150-02 PUSH DIVERT RETRACTED PROX
+
+In_PX_3301_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_3301_Extended:  FB_DigDebnce;		// PU2150-01 PUSH DIVERT EXTENDED PROX
+
+In_PX_3331_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_3331_Retracted:  FB_DigDebnce;		// PU2150-01 PUSH DIVERT RETRACTED PROX
+
+In_PX_4151_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_4151_Extended:  FB_DigDebnce;		// PU2150-04 PUSH DIVERT EXTENDED PROX
+
+In_PX_4171_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_4171_Retracted:  FB_DigDebnce;		// PU2150-04 PUSH DIVERT RETRACTED PROX
+
+In_PX_4291_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_4291_Extended:  FB_DigDebnce;		// PU2150-03 PUSH DIVERT EXTENDED PROX
+
+In_PX_4311_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_4311_Retracted:  FB_DigDebnce;		// PU2150-03 PUSH DIVERT RETRACTED PROX
+
+In_PX_10181_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_10181_Extended:  FB_DigDebnce;		// PL2140 PLOW DIVERT PISTON PROX EXTENDED PROX
+
+In_PX_10211_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_10211_Extended:  FB_DigDebnce;		// PL2140 PLOW DIVERT EXTENDED PROX
+
+In_PX_10231_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_10231_Retracted:  FB_DigDebnce;		// PL2140 PLOW DIVERT RETRACTED PROX
+
+In_PX_11181_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_11181_Extended:  FB_DigDebnce;		// PI2140 PIN STOP EXTENDED PROX
+
+In_PX_11201_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_11201_Retracted:  FB_DigDebnce;		// PI2140 PIN STOP RETRACTED PROX
+
+In_PX_11291_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_11291_Extended:  FB_DigDebnce;		// GR2140-02 "D" GRIPPER EXTENDED PROX
+
+In_PX_11321_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_11321_Retracted:  FB_DigDebnce;		// GR2140-02 "D" GRIPPER RETRACTED PROX
+
+In_PX_11141_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_11141_Extended:  FB_DigDebnce;		// GR2140-01 "D" GRIPPER EXTENDED PROX
+
+In_PX_11161_Retracted AT %I* : BOOL;      // Mapped IO input for PX
+PX_11161_Retracted:  FB_DigDebnce;		// GR2140-01 "D" GRIPPER RETRACTED PROX
+
+In_PX_12151_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_12151_Extended:  FB_DigDebnce;		// P2130 PROX BREAK AWAY EXTENDED PROX
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// GR2150-02 "BELT" GRIPPER Extended
+PX_2131_Extended(
+	In:= In_PX_2131_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// GR2150-02 "BELT" GRIPPER Retracted
+PX_2151_Retracted(
+	In:= In_PX_2151_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// GR2150-01 "BELT" GRIPPER Extended
+PX_2181_Extended(
+	In:= In_PX_2181_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// GR2150-01 "BELT" GRIPPER Retracted
+PX_2201_Retracted(
+	In:= In_PX_2201_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PU2150-02 PUSH DIVERT Extended
+PX_3171_Extended(
+	In:= In_PX_3171_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PU2150-02 PUSH DIVERT Retracted
+PX_3191_Retracted(
+	In:= In_PX_3191_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PU2150-01 PUSH DIVERT Extended
+PX_3301_Extended(
+	In:= In_PX_3301_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PU2150-01 PUSH DIVERT Retracted
+PX_3331_Retracted(
+	In:= In_PX_3331_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PU2150-04 PUSH DIVERT Extended
+PX_4151_Extended(
+	In:= In_PX_4151_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PU2150-04 PUSH DIVERT Retracted
+PX_4171_Retracted(
+	In:= In_PX_4171_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PU2150-03 PUSH DIVERT Extended
+PX_4291_Extended(
+	In:= In_PX_4291_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PU2150-03 PUSH DIVERT Retracted
+PX_4311_Retracted(
+	In:= In_PX_4311_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PL2140 PLOW DIVERT PISTON PROX Extended
+PX_10181_Extended(
+	In:= In_PX_10181_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PL2140 PLOW DIVERT Extended
+PX_10211_Extended(
+	In:= In_PX_10211_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PL2140 PLOW DIVERT Retracted
+PX_10231_Retracted(
+	In:= In_PX_10231_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PI2140 PIN STOP Extended
+PX_11181_Extended(
+	In:= In_PX_11181_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// PI2140 PIN STOP Retracted
+PX_11201_Retracted(
+	In:= In_PX_11201_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// GR2140-02 "D" GRIPPER Extended
+PX_11291_Extended(
+	In:= In_PX_11291_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// GR2140-02 "D" GRIPPER Retracted
+PX_11321_Retracted(
+	In:= In_PX_11321_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// GR2140-01 "D" GRIPPER Extended
+PX_11141_Extended(
+	In:= In_PX_11141_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// GR2140-01 "D" GRIPPER Retracted
+PX_11161_Retracted(
+	In:= In_PX_11161_Retracted,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+// P2130 PROX BREAK AWAY Extended
+PX_12151_Extended(
+	In:= In_PX_12151_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="ProxSensors">
+      <LineId Id="10" Count="197" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

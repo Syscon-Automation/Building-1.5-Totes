@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_MotionMergeConfig" Id="{6532b1ed-1b8f-43bb-8d93-0984ceb81f56}">
+    <Declaration><![CDATA[TYPE ST_MotionMergeConfig :
+STRUCT
+	MergeDistance: 			UINT;	// The distance from the induct PE to the merge point (Merge start location)
+	MergeClearDistance: 	UINT;	// The distance from the induct PE to a cleared point past the merge (Merge end location)
+	MergeOpening_Min: 		UINT;	// The minimum window size to allow a merge
+	Item_ExtendFwd:			UINT;	// The distance to Extend the Item lead edge
+	Item_ExtendRev:			UINT;	// The distance to Extend teh Item Trail edge
+	MergeClearTime: 		REAL;	// The time, in seconds, to declare the merge clear
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
