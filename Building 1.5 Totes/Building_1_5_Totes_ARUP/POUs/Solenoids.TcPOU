@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="Solenoids" Id="{02f07705-3c99-482e-b422-168a6adede53}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Solenoids
 VAR
@@ -11,6 +11,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgGR2140_02RetractTODetectTime:	TIME := T#5S;
    GR2140_02			: FB_Solenoid_SA;
    GR2140_02_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    GR2140_02_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------PI2140_01--------------------------------------------------------------
@@ -19,6 +20,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgPI2140_01RetractTODetectTime:	TIME := T#5S;
    PI2140_01			: FB_Solenoid_DA;
    PI2140_01_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    PI2140_01_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------GR2140_01--------------------------------------------------------------
@@ -27,6 +29,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgGR2140_01RetractTODetectTime:	TIME := T#5S;
    GR2140_01			: FB_Solenoid_SA;
    GR2140_01_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    GR2140_01_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------PL2140_01--------------------------------------------------------------
@@ -35,6 +38,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgPL2140_01RetractTODetectTime:	TIME := T#5S;
    PL2140_01			: FB_Solenoid_SA;
    PL2140_01_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    PL2140_01_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------GR2150_01--------------------------------------------------------------
@@ -43,6 +47,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgGR2150_01RetractTODetectTime:	TIME := T#5S;
    GR2150_01			: FB_Solenoid_SA;
    GR2150_01_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    GR2150_01_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------GR2150_02--------------------------------------------------------------
@@ -51,6 +56,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgGR2150_02RetractTODetectTime:	TIME := T#5S;
    GR2150_02			: FB_Solenoid_SA;
    GR2150_02_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    GR2150_02_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------PU2150_01--------------------------------------------------------------
@@ -59,6 +65,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgPU2150_01RetractTODetectTime:	TIME := T#5S;
    PU2150_01			: FB_Solenoid_SA;
    PU2150_01_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    PU2150_01_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------PU2150_02--------------------------------------------------------------
@@ -67,6 +74,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgPU2150_02RetractTODetectTime:	TIME := T#5S;
    PU2150_02			: FB_Solenoid_SA;
    PU2150_02_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    PU2150_02_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------PU2150_03--------------------------------------------------------------
@@ -75,6 +83,7 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgPU2150_03RetractTODetectTime:	TIME := T#5S;
    PU2150_03			: FB_Solenoid_SA;
    PU2150_03_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    PU2150_03_Status	: ST_EquipmentStatus;		// Gripper State 
 
 //----------------------------------------PU2150_04--------------------------------------------------------------
@@ -83,17 +92,16 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
    cfgPU2150_04RetractTODetectTime:	TIME := T#5S;
    PU2150_04			: FB_Solenoid_SA;
    PU2150_04_StatePB	: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    PU2150_04_Status	: ST_EquipmentStatus;		// Gripper State 
 END_VAR
 
 VAR PERSISTENT
 //----------------------------------------GR2140_02--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgGR2140_02IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2140' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgGR2140_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'GR2140_02', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'GR2140_02', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -103,12 +111,10 @@ cfgGR2140_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'RIO3171 Comm Fault', DeviceLabel := 'RIO3171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    9(())];
 //----------------------------------------PI2140_01--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgPI2140_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2140' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgPI2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'PI2140_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'PI2140_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -116,12 +122,10 @@ cfgPI2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air', DeviceLabel := 'P2140', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
    10(())];
 //----------------------------------------GR2140_01--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgGR2140_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2140' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgGR2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'GR2140_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'GR2140_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -131,12 +135,10 @@ cfgGR2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'RIO11171 Comm Fault', DeviceLabel := 'RIO11171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    10(())];
 //----------------------------------------PL2140_01--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgPL2140_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2140' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgPL2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'PL2140_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'PL2140_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -145,12 +147,10 @@ cfgPL2140_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'RIO11171 Comm Fault', DeviceLabel := 'RIO11171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    11(())];
 //----------------------------------------GR2150_01--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgGR2150_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgGR2150_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'GR2150_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'GR2150_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -158,12 +158,10 @@ cfgGR2150_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
    11(())];
 //----------------------------------------GR2150_02--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgGR2150_02IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgGR2150_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'GR2150_02', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'GR2150_02', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -171,12 +169,10 @@ cfgGR2150_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
    11(())];
 //----------------------------------------PU2150_01--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgPU2150_01IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgPU2150_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'PU2150_01', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'PU2150_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -184,12 +180,10 @@ cfgPU2150_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
    11(())];
 //----------------------------------------PU2150_02--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgPU2150_02IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgPU2150_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'PU2150_02', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'PU2150_02', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -197,12 +191,10 @@ cfgPU2150_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
    11(())];
 //----------------------------------------PU2150_03--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgPU2150_03IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgPU2150_03EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'PU2150_03', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'PU2150_03', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
@@ -211,12 +203,10 @@ cfgPU2150_03EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'RIO4141 Comm Fault', DeviceLabel := 'RIO3171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    10(())];
 //----------------------------------------PU2150_04--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgPU2150_04IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
    (Description := 'System Interlocks OK' , DeviceLabel := 'SYSTEM', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    14(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgPU2150_04EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Extend To', DeviceLabel := 'PU2150_04', LatchRequired := TRUE, OKState := FALSE, FaultWarn:= TRUE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'Retract TO', DeviceLabel := 'PU2150_04', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),

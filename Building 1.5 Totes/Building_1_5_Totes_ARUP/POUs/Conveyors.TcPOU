@@ -17,6 +17,7 @@ VAR
    P2130SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2130: FB_CnvyrCnfig_1;
    P2130_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P2130_Status : ST_EquipmentStatus;
 //Transport
 //----------------------------------------P2135--------------------------------------------------------------
@@ -26,7 +27,8 @@ VAR
    P2135SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2135: FB_CnvyrCnfig_1;
    P2135_StatePB: ST_StateCntrlPB;
-   P2135_Status : ST_EquipmentStatus;
+ 	{attribute 'OPC.UA.DA' := '0'}
+  P2135_Status : ST_EquipmentStatus;
 //Transport
 //----------------------------------------P2140--------------------------------------------------------------
    cfgP2140Label:	STRING(20) :=  'P2140';
@@ -35,6 +37,7 @@ VAR
    P2140SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2140: FB_CnvyrCnfig_1;
    P2140_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P2140_Status : ST_EquipmentStatus;
 //Transport
 //----------------------------------------P2143--------------------------------------------------------------
@@ -44,6 +47,7 @@ VAR
    P2143SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2143: FB_CnvyrCnfig_1;
    P2143_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P2143_Status : ST_EquipmentStatus;
 //Spiral
 //----------------------------------------P2141--------------------------------------------------------------
@@ -53,6 +57,7 @@ VAR
    P2141SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2141: FB_CnvyrCnfig_1;
    P2141_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P2141_Status : ST_EquipmentStatus;
    P2141_VFD	:	VFD;
    Test_VFD_P2141: BOOL;
@@ -64,6 +69,7 @@ VAR
    P2142SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2142: FB_CnvyrCnfig_1;
    P2142_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P2142_Status : ST_EquipmentStatus;
 //Transport
 //----------------------------------------P2145--------------------------------------------------------------
@@ -73,7 +79,8 @@ VAR
    P2145SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2145: FB_CnvyrCnfig_1;
    P2145_StatePB: ST_StateCntrlPB;
-   P2145_Status : ST_EquipmentStatus;
+	{attribute 'OPC.UA.DA' := '0'}
+  P2145_Status : ST_EquipmentStatus;
 //Spiral
 //----------------------------------------P2146--------------------------------------------------------------
    cfgP2146Label:	STRING(20) :=  'P2146';
@@ -82,6 +89,7 @@ VAR
    P2146SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2146: FB_CnvyrCnfig_1;
    P2146_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P2146_Status : ST_EquipmentStatus;
    P2146_VFD	:	VFD;
    Test_VFD_P2146: BOOL;
@@ -93,6 +101,7 @@ VAR
    P2150SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2150: FB_CnvyrCnfig_1;
    P2150_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P2150_Status : ST_EquipmentStatus;
    
 //Conveyors Incoming 3000 (Green line)
@@ -104,6 +113,7 @@ VAR
    P3080SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P3080: FB_CnvyrCnfig_1;
    P3080_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P3080_Status : ST_EquipmentStatus;
    P3080_VFD	:	VFD;
    Test_VFD_P3080: BOOL;
@@ -116,6 +126,7 @@ VAR
    P3085SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P3085: FB_CnvyrCnfig_1;
    P3085_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P3085_Status : ST_EquipmentStatus;
 //Transport
 //----------------------------------------P3090--------------------------------------------------------------
@@ -125,6 +136,7 @@ VAR
    P3090SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P3090: FB_CnvyrCnfig_1;
    P3090_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P3090_Status : ST_EquipmentStatus;
 //Transport
 //----------------------------------------P3095--------------------------------------------------------------
@@ -134,6 +146,7 @@ VAR
    P3095SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P3095: FB_CnvyrCnfig_1;
    P3095_StatePB: ST_StateCntrlPB;
+	{attribute 'OPC.UA.DA' := '0'}
    P3095_Status : ST_EquipmentStatus;
    
  	ComStatus: INT;
@@ -143,13 +156,11 @@ END_VAR
 //Conveyors Incoming 2000 (Purple line)
 //Transport   
 //----------------------------------------P2130--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2130IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Motor Faulted', DeviceLabel := 'P2130', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2130EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -159,13 +170,11 @@ cfgP2130EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    11(())];
 //Transport
 //----------------------------------------P2135--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2135IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Motor Faulted', DeviceLabel := 'P2135', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2135EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -175,7 +184,6 @@ cfgP2135EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    11(())];
 //Transport
 //----------------------------------------P2140--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2140IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
@@ -185,7 +193,6 @@ cfgP2140IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'PI2140-01 Auto', DeviceLabel := 'PI2140-01', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
    (Description := 'PL2140-01 Auto', DeviceLabel := 'PU2140-01', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
    9(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2140EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -197,13 +204,11 @@ cfgP2140EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    9(())];
 //Transport
 //----------------------------------------P2143--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2143IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Motor Faulted', DeviceLabel := 'P2143', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2143EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -214,13 +219,11 @@ cfgP2143EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    9(())];
 //Spiral
 //----------------------------------------P2141--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2141IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'VFD State Not OK', DeviceLabel := 'P2141', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2141EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -230,13 +233,11 @@ cfgP2141EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    11(())];
 //Transport
 //----------------------------------------P2142--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2142IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Motor Faulted', DeviceLabel := 'P2142', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2142EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -246,13 +247,11 @@ cfgP2142EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    11(())];
 //Transport
 //----------------------------------------P2145--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2145IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Motor Faulted', DeviceLabel := 'P2145', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2145EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -262,13 +261,11 @@ cfgP2145EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    11(())];
 //Spiral
 //----------------------------------------P2146--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2146IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'VFD State Not OK', DeviceLabel := 'P2146', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2146EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -278,7 +275,6 @@ cfgP2146EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    11(())];
 //Sorter
 //----------------------------------------P2150--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2150IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
@@ -290,7 +286,6 @@ cfgP2150IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'PU2150-03 Auto', DeviceLabel := 'PU2150-03', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
    (Description := 'PU2150-04 Auto', DeviceLabel := 'PU2150-04', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
    7(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP2150EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -304,13 +299,11 @@ cfgP2150EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
 //Conveyors Incoming 3000 (Green line)
 //Spiral
 //----------------------------------------P3080--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP3080IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'VFD State Not OK', DeviceLabel := 'P3080', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP3080EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -322,13 +315,11 @@ cfgP3080EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    9(())];
 //Transport
 //----------------------------------------P3085--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP3085IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Motor Faulted', DeviceLabel := 'P3085', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP3085EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -338,13 +329,11 @@ cfgP3085EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    11(())];
 //Transport
 //----------------------------------------P3090--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP3090IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Motor Faulted', DeviceLabel := 'P3090', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP3090EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -354,13 +343,11 @@ cfgP3090EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    11(())];
 //Transport
 //----------------------------------------P3095--------------------------------------------------------------
-{attribute 'OPC.UA.DA' := '1'}
 cfgP3095IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Motor Faulted', DeviceLabel := 'P3095', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
    12(())];
-{attribute 'OPC.UA.DA' := '1'}
 cfgP3095EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),

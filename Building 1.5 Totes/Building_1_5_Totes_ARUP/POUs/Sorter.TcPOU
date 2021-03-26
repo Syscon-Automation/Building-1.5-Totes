@@ -24,6 +24,7 @@ VAR
 
 	DivertToCommission_P2140			: UINT := 0;	// Non-zero value will send all items to this divert
 
+	{attribute 'OPC.UA.DA' := '0'}
 	P2140_SorterLog				:	FB_SorterLog;
 	P2140_DivertLog				:	FB_DivertLog;	
 
@@ -50,6 +51,7 @@ VAR
 
 	DivertToCommission_P2150			: UINT := 0;	// Non-zero value will send all items to this divert
 
+	{attribute 'OPC.UA.DA' := '0'}
 	P2150_SorterLog				:	FB_SorterLog;
 	P2150_DivertLog				:	FB_DivertLog;	
 END_VAR

@@ -167,7 +167,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{9DD1BB04-677E-9B11-BAF5-0F59A039FFCF}" AutoDeleteType="true">ST_StateCntrlSts</Name>
+			<Name GUID="{DEEC7D0B-65B0-6DBE-3609-B0E9411342B6}" AutoDeleteType="true">ST_StateCntrlSts</Name>
 			<BitSize>896</BitSize>
 			<SubItem>
 				<Name>CrntState</Name>
@@ -200,6 +200,12 @@
 				<Comment><![CDATA[ The Current Operational state]]></Comment>
 				<BitSize>16</BitSize>
 				<BitOffs>192</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>CrntOperStateTxt</Name>
@@ -207,6 +213,12 @@
 				<Comment><![CDATA[ The current Operational state in text string]]></Comment>
 				<BitSize>168</BitSize>
 				<BitOffs>208</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>EquipType</Name>
@@ -214,6 +226,12 @@
 				<Comment><![CDATA[ Stores Enumeration type E_EquipType]]></Comment>
 				<BitSize>32</BitSize>
 				<BitOffs>384</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>Index</Name>
@@ -221,6 +239,12 @@
 				<Comment><![CDATA[ Local index assigned to this equipment]]></Comment>
 				<BitSize>32</BitSize>
 				<BitOffs>416</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>Label</Name>
@@ -228,6 +252,12 @@
 				<Comment><![CDATA[ String value assigned to this equipment for status updates]]></Comment>
 				<BitSize>168</BitSize>
 				<BitOffs>448</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>RemIndex</Name>
@@ -235,18 +265,36 @@
 				<Comment><![CDATA[ Remote index assigned to this equipment, for system status monitoring]]></Comment>
 				<BitSize>32</BitSize>
 				<BitOffs>640</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>LstState</Name>
 				<Type GUID="{3960C317-6EDC-5F00-4C7B-F8FAD8AA8743}">E_StateCntrl</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>672</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>LstOperState</Name>
 				<Type GUID="{DF0EE7B8-94B8-2210-4603-CDBA0E2B1058}">E_OperStateCntrl</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>688</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>stsStopRegister</Name>
@@ -258,12 +306,24 @@
 				<Comment><![CDATA[ Stop Register]]></Comment>
 				<BitSize>64</BitSize>
 				<BitOffs>704</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>StateRunOK</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
 				<BitOffs>768</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>StateChanged</Name>
@@ -271,6 +331,12 @@
 				<Comment><![CDATA[ Single scan output to show that state has changed]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>776</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>StsOffline</Name>
@@ -278,6 +344,12 @@
 				<Comment><![CDATA[ Output that shows State is Offline]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>784</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>StsAuto</Name>
@@ -285,6 +357,12 @@
 				<Comment><![CDATA[ Output that shows State is in Auto]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>792</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>StsMan</Name>
@@ -292,6 +370,12 @@
 				<Comment><![CDATA[ Output that shows State is in Manual]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>800</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>StsFaulted</Name>
@@ -299,6 +383,12 @@
 				<Comment><![CDATA[ Output that shows State is Faulted]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>808</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>StsHasWarnings</Name>
@@ -306,6 +396,12 @@
 				<Comment><![CDATA[ Output that shows the Equipment has Warnings (Alerts)]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>816</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>Received</Name>
@@ -313,6 +409,12 @@
 				<Comment><![CDATA[ Single scan outputs for possible push button events]]></Comment>
 				<BitSize>64</BitSize>
 				<BitOffs>824</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<SubItem>
 				<Name>RcvdFault</Name>
@@ -320,24 +422,35 @@
 				<Comment><![CDATA[ Single scan output to show input was received]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>888</BitOffs>
+				<Properties>
+					<Property>
+						<Name>OPC.UA.DA</Name>
+						<Value>0</Value>
+					</Property>
+				</Properties>
 			</SubItem>
 			<Hides>
-				<Hide GUID="{45893F60-17ED-F8B3-C0FA-66300A1E1DF8}"/>
+				<Hide GUID="{589AD45F-8244-9755-1BB0-D2494EF48CCE}"/>
 			</Hides>
 		</DataType>
 		<DataType>
 			<Name IecBaseType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
 			<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
 			<BitSize>8960</BitSize>
-			<BaseType GUID="{9DD1BB04-677E-9B11-BAF5-0F59A039FFCF}">ST_StateCntrlSts</BaseType>
+			<BaseType GUID="{DEEC7D0B-65B0-6DBE-3609-B0E9411342B6}">ST_StateCntrlSts</BaseType>
 			<ArrayInfo>
 				<LBound>1</LBound>
 				<Elements>10</Elements>
 			</ArrayInfo>
 		</DataType>
 	</DataTypes>
-	<Project ProjectGUID="{E877F035-030B-4581-87B2-77F141422BE0}" Target64Bit="true" ShowHideConfigurations="#x106">
+	<Project ProjectGUID="{E877F035-030B-4581-87B2-77F141422BE0}" TargetNetId="172.16.40.53.1.1" Target64Bit="true" ShowHideConfigurations="#x106">
 		<System>
+			<Licenses>
+				<Target>
+					<ManualSelect>{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</ManualSelect>
+				</Target>
+			</Licenses>
 			<Tasks>
 				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">
 					<Name>PlcTask</Name>
@@ -734,161 +847,6 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>Photoeyes.PE_11241.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_10081.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_10091.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_10151.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_10291.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_10302.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_11191.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_11221.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_12091.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_12121.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_12171.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_12181.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_12271.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_2101.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_2131.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_2201.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_2231.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_2301.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_2331.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_3111.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_3231.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_4091.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_4161.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_4201.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_8131.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_8141.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_8161.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_9141.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_9161.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_9191.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Photoeyes.PE_9221.In_PE</Name>
-							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>SystemSafety.System_SafetyState.ComErr</Name>
 							<Type>BOOL</Type>
 						</Var>
@@ -903,11 +861,6 @@
 						<Var>
 							<Name>SystemSafety.System_SafetyState.InRun</Name>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
-							<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
-							<Type GUID="{E6B6B3B8-5AC6-8635-2FF4-F830805BA92F}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.PB_SysStart</Name>
@@ -1153,6 +1106,166 @@
 							<Comment><![CDATA[ Ethernet Adapter State]]></Comment>
 							<Type>UINT</Type>
 						</Var>
+						<Var>
+							<Name>Photoeyes.PE_11241.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_10081.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_10091.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_10151.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_10291.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_10302.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_11191.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_11221.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_12091.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_12121.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_12171.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_12181.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_12271.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_2101.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_2131.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_2201.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_2231.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_2301.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_2331.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_3111.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_3231.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_4091.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_4161.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_4201.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_8131.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_8141.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_8161.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_9141.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_9161.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_9191.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Photoeyes.PE_9221.In_PE</Name>
+							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
+							<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
+							<Type GUID="{A58B75B7-5808-709A-A308-478061711456}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcTask Outputs</Name>
@@ -1244,6 +1357,11 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>System.ConvDefaultState</Name>
+							<Comment><![CDATA[ The default state of all conveyors]]></Comment>
+							<Type GUID="{3960C317-6EDC-5F00-4C7B-F8FAD8AA8743}">E_StateCntrl</Type>
+						</Var>
+						<Var>
 							<Name>Conveyors.P2146_VFD.ControlWord</Name>
 							<Type>UINT</Type>
 						</Var>
@@ -1252,22 +1370,9 @@
 							<Type>INT</Type>
 						</Var>
 						<Var>
-							<Name>System.ConvDefaultState</Name>
-							<Comment><![CDATA[ The default state of all conveyors]]></Comment>
-							<Type GUID="{3960C317-6EDC-5F00-4C7B-F8FAD8AA8743}">E_StateCntrl</Type>
-						</Var>
-						<Var>
 							<Name>System.Cnvyr_Auto</Name>
 							<Comment><![CDATA[ Bit to send to all conveyors to put them in Auto mode]]></Comment>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P3080_VFD.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P3080_VFD.TargetVelocity</Name>
-							<Type>INT</Type>
 						</Var>
 						<Var>
 							<Name>System.Cnvyr_Manual</Name>
@@ -1285,6 +1390,14 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>Conveyors.P3080_VFD.ControlWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P3080_VFD.TargetVelocity</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
 							<Name>SystemSafety.System_SafetyState.Reset</Name>
 							<Type>BOOL</Type>
 						</Var>
@@ -1299,16 +1412,6 @@
 						<Var>
 							<Name>SystemSafety.System_SafetyState.CommErrAck</Name>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.nEquip_Count</Name>
-							<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
-							<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
-							<Type GUID="{E6B6B3B8-5AC6-8635-2FF4-F830805BA92F}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.HornMainPanel</Name>
@@ -1364,6 +1467,11 @@
 							<Name>GVL_IO.LT_10161_Red</Name>
 							<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL_EquipArrays.nEquip_Count</Name>
+							<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
+							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.LT_10171_Yellow</Name>
@@ -1479,6 +1587,11 @@
 							<Name>GVL_IO.PU2150_04_Extend</Name>
 							<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
+							<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
+							<Type GUID="{A58B75B7-5808-709A-A308-478061711456}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 						</Var>
 					</Vars>
 					<Contexts>

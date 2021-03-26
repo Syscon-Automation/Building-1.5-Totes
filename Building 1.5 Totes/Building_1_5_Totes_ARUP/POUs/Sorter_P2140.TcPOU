@@ -7,7 +7,9 @@ VAR_IN_OUT
 	In_ItemToInduct					: ST_Item;
 	In_InductingItem				: ST_Item;
 	st_tempItem						: ST_ItemTemporary;	// Temporary record used when barcode not yet received
+	{attribute 'OPC.UA.DA' := '0'}
 	st_Sorter						: ST_Sorter;
+	{attribute 'OPC.UA.DA' := '0'}
 	aDiverts						: ARRAY[Sorter.DIVERTMIN_P2140..Sorter.NUMBEROFDIVERTS_P2140] OF ST_DIVERT;
 	aItems 							: ARRAY[Sorter.SORTERENCODERMIN_P2140..Sorter.SORTERENCODERMAX_P2140] OF ST_Item;
 END_VAR
@@ -40,7 +42,9 @@ VAR
 	inductindex 		: DINT;
 	
 	//Divert Variables
+	{attribute 'OPC.UA.DA' := '0'}
 	fb_DivertDecision 		: FB_DivertDecision;
+	{attribute 'OPC.UA.DA' := '0'}
 	fb_DivertFullMonitor  	: FB_DivertFullMonitor;
 	DivertIndex				: DINT;
 	Divertoffset			: INT;

@@ -6,7 +6,9 @@ VAR_IN_OUT
 	st_NextToInduct					: ST_ItemTemporary;
 	st_UpdateItem					: ST_ItemTemporary;
 	st_TempInductItem				: ST_ItemTemporary;
+	{attribute 'OPC.UA.DA' := '0'}
 	st_Sorter						: ST_Sorter;
+	{attribute 'OPC.UA.DA' := '0'}
 	aDiverts						: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF ST_DIVERT;
 	aItems 							: ARRAY[Sorter.SORTERENCODERMIN_P2150..Sorter.SORTERENCODERMAX_P2150] OF ST_Item;
 END_VAR
@@ -55,6 +57,7 @@ VAR
 	fb_DefaultDestination	: FB_FindDestination;
 	fb_RecircDestination	: FB_FindDestination;
 	// Created to allow the aDiverts to be used in the FB_FindDestination Function Block
+	{attribute 'OPC.UA.DA' := '0'}
 	aTempDiverts			: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF ST_DIVERT;
 END_VAR]]></Declaration>
     <Implementation>

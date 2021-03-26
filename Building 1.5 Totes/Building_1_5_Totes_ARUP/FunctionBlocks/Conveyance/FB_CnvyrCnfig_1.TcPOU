@@ -47,10 +47,12 @@ VAR_INPUT
 	
 	// Events
 	In_EquipEvents				: UINT;		// Events that are specific to the instance of the conveyor
+	{attribute 'OPC.UA.DA' := '0'}
 	Cfg_EquipEvntsArry			: ARRAY [0..15] OF ST_CfgEvents;
 	
 	// Interlocks that can be Instance Specific
 	In_EquipIntlks				: UINT;		// Interlock that is specific to the instance of the conveyor
+	{attribute 'OPC.UA.DA' := '0'}
 	Cfg_EquipIntlksArry			: ARRAY [0..15] OF ST_CfgEvents;		// Descriptions of the Interlock 
 	
 	// Sleep Timer	
@@ -82,12 +84,16 @@ VAR_OUTPUT
 	Sts_FaultsArry				: ARRAY[0..15] OF ST_EventSts;	// Status of each Fault Event State (0= OFF, 1=ON)
 	{attribute 'OPC.UA.DA' := '1'}
 	Sts_WarnsArry				: ARRAY[0..15] OF ST_EventSts;		// Status of each Warning Event State (0= OFF, 1=ON)
+	{attribute 'OPC.UA.DA' := '0'}
 	Sts_EvntsArry				: ARRAY[0..15] OF ST_EventSts; 	// Status of each Event State (0= OFF, 1=ON)
 END_VAR
 VAR
+	{attribute 'OPC.UA.DA' := '0'}
 	Conv_fbIntrlks				: FB_Intlks_Latch;
 	Conv_IntlksArry				: ARRAY[0..15] OF BOOL;
+	{attribute 'OPC.UA.DA' := '0'}
 	Conv_fbEquipCntrl			: FB_EquipCntrl;
+	{attribute 'OPC.UA.DA' := '0'}
 	Conv_EventManager			: FB_EventMngr;
 	Conv_CrrntExitPEJamDetctd	: FB_JamDetect;
 	Conv_EventArry				: ARRAY[0..15] OF BOOL;
