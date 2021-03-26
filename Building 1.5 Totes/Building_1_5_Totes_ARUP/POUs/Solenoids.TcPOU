@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="Solenoids" Id="{02f07705-3c99-482e-b422-168a6adede53}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Solenoids
 VAR
@@ -178,7 +178,8 @@ cfgPU2150_01EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Retract TO', DeviceLabel := 'PU2150_01', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
-   11(())];
+   (Description := 'RIO3171 Comm Fault', DeviceLabel := 'RIO3171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
+   10(())];
 //----------------------------------------PU2150_02--------------------------------------------------------------
 cfgPU2150_02IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
@@ -189,7 +190,8 @@ cfgPU2150_02EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Retract TO', DeviceLabel := 'PU2150_02', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
-   11(())];
+   (Description := 'RIO3171 Comm Fault', DeviceLabel := 'RIO3171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
+   10(())];
 //----------------------------------------PU2150_03--------------------------------------------------------------
 cfgPU2150_03IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air' , DeviceLabel := 'P2150' , OKState := TRUE, StopCode := E_StopCodes.LowAir),
@@ -200,7 +202,7 @@ cfgPU2150_03EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Retract TO', DeviceLabel := 'PU2150_03', LatchRequired := TRUE, FaultWarn:= TRUE, OKState := FALSE, StopCode := E_StopCodes.ActuatorTO),
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
-   (Description := 'RIO4141 Comm Fault', DeviceLabel := 'RIO3171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
+   (Description := 'RIO4141 Comm Fault', DeviceLabel := 'RIO4141', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    10(())];
 //----------------------------------------PU2150_04--------------------------------------------------------------
 cfgPU2150_04IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
@@ -233,7 +235,7 @@ GR2140_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 GR2140_02.In_EquipEvents.2:= System.SysEventsAllOk;
 GR2140_02.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 GR2140_02.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
-GR2140_02.In_EquipEvents.5:= CommStatus.RIO11171_CommFault.Out;
+GR2140_02.In_EquipEvents.5:= NOT CommStatus.RIO11171_CommFault.Out;
 
 // Function Call
 GR2140_02(
@@ -268,7 +270,7 @@ PI2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 PI2140_01.In_EquipEvents.2:= System.SysEventsAllOk;
 PI2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PI2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
-PI2140_01.In_EquipEvents.5:= CommStatus.RIO11171_CommFault.Out;
+PI2140_01.In_EquipEvents.5:= NOT CommStatus.RIO11171_CommFault.Out;
 
 // Function Call
 PI2140_01(
@@ -304,7 +306,7 @@ GR2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 GR2140_01.In_EquipEvents.2:= System.SysEventsAllOk;
 GR2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 GR2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
-GR2140_01.In_EquipEvents.5:= CommStatus.RIO11171_CommFault.Out;
+GR2140_01.In_EquipEvents.5:= NOT CommStatus.RIO11171_CommFault.Out;
 
 // Function Call
 GR2140_01(
@@ -339,7 +341,7 @@ PL2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 PL2140_01.In_EquipEvents.2:= System.SysEventsAllOk;
 PL2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PL2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
-PL2140_01.In_EquipEvents.5:= CommStatus.RIO10161_CommFault.Out;
+PL2140_01.In_EquipEvents.5:= NOT CommStatus.RIO10161_CommFault.Out;
 
 // Function Call
 PL2140_01(
@@ -374,7 +376,7 @@ GR2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 GR2150_01.In_EquipEvents.2:= System.SysEventsAllOk;
 GR2150_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 GR2150_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
-GR2150_02.In_EquipEvents.5:= CommStatus.RIO3171_CommFault.Out;
+GR2150_02.In_EquipEvents.5:= NOT CommStatus.RIO3171_CommFault.Out;
 
 // Function Call
 GR2150_01(
@@ -409,7 +411,7 @@ GR2150_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 GR2150_02.In_EquipEvents.2:= System.SysEventsAllOk;
 GR2150_02.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 GR2150_02.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
-GR2150_02.In_EquipEvents.5:= CommStatus.RIO3171_CommFault.Out;
+GR2150_02.In_EquipEvents.5:= NOT CommStatus.RIO3171_CommFault.Out;
 
 // Function Call
 GR2150_02(
@@ -444,6 +446,7 @@ PU2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 PU2150_01.In_EquipEvents.2:= System.SysEventsAllOk;
 PU2150_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PU2150_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+PU2150_01.In_EquipEvents.5:= NOT CommStatus.RIO3171_CommFault.Out;
 
 // Function Call
 PU2150_01(
@@ -478,6 +481,7 @@ PU2150_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 PU2150_02.In_EquipEvents.2:= System.SysEventsAllOk;
 PU2150_02.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PU2150_02.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
+PU2150_02.In_EquipEvents.5:= NOT CommStatus.RIO3171_CommFault.Out;
 
 // Function Call
 PU2150_02(
@@ -512,7 +516,7 @@ PU2150_03.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 PU2150_03.In_EquipEvents.2:= System.SysEventsAllOk;
 PU2150_03.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PU2150_03.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
-PU2150_03.In_EquipEvents.5:= CommStatus.RIO4141_CommFault.Out;
+PU2150_03.In_EquipEvents.5:= NOT CommStatus.RIO4141_CommFault.Out;
 
 // Function Call
 PU2150_03(
@@ -547,7 +551,7 @@ PU2150_04.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 PU2150_04.In_EquipEvents.2:= System.SysEventsAllOk;
 PU2150_04.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PU2150_04.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
-PU2150_04.In_EquipEvents.5:= CommStatus.RIO4141_CommFault.Out;
+PU2150_04.In_EquipEvents.5:= NOT CommStatus.RIO4141_CommFault.Out;
 
 // Function Call
 PU2150_04(
@@ -594,9 +598,13 @@ PU2150_04(
       <LineId Id="1366" Count="0" />
       <LineId Id="1000" Count="5" />
       <LineId Id="1613" Count="0" />
-      <LineId Id="1006" Count="32" />
+      <LineId Id="1006" Count="26" />
+      <LineId Id="1833" Count="0" />
+      <LineId Id="1033" Count="5" />
       <LineId Id="1614" Count="0" />
-      <LineId Id="1039" Count="32" />
+      <LineId Id="1039" Count="26" />
+      <LineId Id="1832" Count="0" />
+      <LineId Id="1066" Count="5" />
       <LineId Id="1615" Count="0" />
       <LineId Id="1072" Count="26" />
       <LineId Id="1372" Count="0" />

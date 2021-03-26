@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="System" Id="{741af542-e67c-4e6c-b125-8937dbba14b1}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM System
 VAR
@@ -194,25 +194,49 @@ END_IF
 GVL_IO.LT_MainPanelStack_Green := FALSE;
 GVL_IO.LT_MainPanelStack_Yellow := FALSE;
 GVL_IO.LT_MainPanelStack_Red := FALSE;
+GVL_IO.LT_10161_Red := FALSE;
+GVL_IO.LT_3131_Red := FALSE;
+GVL_IO.LT_8181_Red := FALSE;
+GVL_IO.LT_10171_Yellow := FALSE;
+GVL_IO.LT_3151_Yellow := FALSE;
+GVL_IO.LT_8191_Yellow := FALSE;
+GVL_IO.LT_10201_Green := FALSE;
+GVL_IO.LT_3201_Green := FALSE;
+GVL_IO.LT_8231_Green := FALSE;
 	
 IF ConveyorHasFault OR NOT SystemSafety.Safety_SystemEstopsOK THEN
 	// Red light SOLID ON
 	GVL_IO.LT_MainPanelStack_Red := TRUE;
+	GVL_IO.LT_10161_Red := TRUE;
+	GVL_IO.LT_3131_Red := TRUE;
+	GVL_IO.LT_8181_Red := TRUE;
 ELSE
 	IF ConveyorHasWarn THEN
 		// Orange Light SOLID ON
 		GVL_IO.LT_MainPanelStack_Yellow := TRUE;
+		GVL_IO.LT_10171_Yellow := TRUE;
+		GVL_IO.LT_3151_Yellow := TRUE;
+		GVL_IO.LT_8191_Yellow := TRUE;
 	ELSE
 		IF ConveyorInAuto THEN
 			// Green Light SOLID ON
 			GVL_IO.LT_MainPanelStack_Green := TRUE;
+			GVL_IO.LT_10201_Green := TRUE;
+			GVL_IO.LT_3201_Green := TRUE;
+			GVL_IO.LT_8231_Green := TRUE;
 		ELSE
 			GVL_IO.LT_MainPanelStack_Green := SysShrtPulseTmr.Output;
+			GVL_IO.LT_10201_Green :=  SysShrtPulseTmr.Output;
+			GVL_IO.LT_3201_Green :=  SysShrtPulseTmr.Output;
+			GVL_IO.LT_8231_Green :=  SysShrtPulseTmr.Output;
 		END_IF
 	END_IF
 	IF GVL_IO.HornMainPanel THEN
 		// Orange Light FLASHING ON
 		GVL_IO.LT_MainPanelStack_Yellow := SysShrtPulseTmr.Output;
+		GVL_IO.LT_10171_Yellow := SysShrtPulseTmr.Output;
+		GVL_IO.LT_3151_Yellow := SysShrtPulseTmr.Output;
+		GVL_IO.LT_8191_Yellow := SysShrtPulseTmr.Output;
 	END_IF;
 END_IF
 ]]></ST>
@@ -240,7 +264,27 @@ END_IF
       <LineId Id="991" Count="0" />
       <LineId Id="749" Count="18" />
       <LineId Id="992" Count="0" />
-      <LineId Id="768" Count="28" />
+      <LineId Id="768" Count="7" />
+      <LineId Id="1059" Count="1" />
+      <LineId Id="1058" Count="0" />
+      <LineId Id="1065" Count="1" />
+      <LineId Id="1064" Count="0" />
+      <LineId Id="1068" Count="1" />
+      <LineId Id="1067" Count="0" />
+      <LineId Id="776" Count="3" />
+      <LineId Id="1043" Count="1" />
+      <LineId Id="1061" Count="0" />
+      <LineId Id="780" Count="3" />
+      <LineId Id="1046" Count="2" />
+      <LineId Id="784" Count="3" />
+      <LineId Id="1049" Count="2" />
+      <LineId Id="788" Count="1" />
+      <LineId Id="1053" Count="1" />
+      <LineId Id="1052" Count="0" />
+      <LineId Id="790" Count="4" />
+      <LineId Id="1056" Count="1" />
+      <LineId Id="1055" Count="0" />
+      <LineId Id="795" Count="1" />
       <LineId Id="419" Count="0" />
     </LineIds>
   </POU>

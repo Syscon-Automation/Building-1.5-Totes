@@ -12,7 +12,10 @@ VAR
 	ADSPort						:	UINT := 0;
 	In_ResetAllMetrics			: 	BOOL;
 END_VAR
-]]></Declaration>
+VAR PERSISTENT
+	EAP_205 : ST_EAP_DEVICE ;
+	
+END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[BarCodeReaders();
 CommStatus();
@@ -21,7 +24,7 @@ Conveyors();
 //MsgControl();
 Photoeyes();
 ProxSensors();
-ServerControl();
+//ServerControl();
 Singulation_Control();
 Solenoids();
 Sorter();

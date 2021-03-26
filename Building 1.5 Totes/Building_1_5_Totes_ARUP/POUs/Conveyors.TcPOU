@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="Conveyors" Id="{45030522-56d5-456c-b3e8-15b2c12a1718}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Conveyors
 VAR
@@ -372,11 +372,11 @@ P2130SleepWakeTrig[1] := TRUE; //EAP Wakeup bits
 P2130_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2130.In_EquipIntlks.2:= GVL_IO.P2130_Faulted;
+P2130.In_EquipIntlks.2:= NOT GVL_IO.P2130_Faulted;
 //Events
 P2130.In_EquipEvents.2:= GVL_IO.DS_P2130;
 P2130.In_EquipEvents.3:= System.SysEventsAllOk;
-P2130.In_EquipEvents.4:= CommStatus.RIO12182_CommFault.Out;
+P2130.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
 
 // Function Call
 P2130(
@@ -412,11 +412,11 @@ P2135SleepWakeTrig[1] := Photoeyes.PE_12171.Out;
 P2135_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2135.In_EquipIntlks.2:= GVL_IO.P2135_Faulted;
+P2135.In_EquipIntlks.2:= NOT GVL_IO.P2135_Faulted;
 //Events
 P2135.In_EquipEvents.2:= GVL_IO.DS_P2135;
 P2135.In_EquipEvents.3:= System.SysEventsAllOk;
-P2135.In_EquipEvents.4:= CommStatus.RIO10161_CommFault.Out;
+P2135.In_EquipEvents.4:= NOT CommStatus.RIO10161_CommFault.Out;
 
 // Function Call
 P2135(
@@ -452,7 +452,7 @@ P2140SleepWakeTrig[2] := Photoeyes.PE_12171.Out;
 P2140_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2140.In_EquipIntlks.2:= GVL_IO.P2140_Faulted;
+P2140.In_EquipIntlks.2:= NOT GVL_IO.P2140_Faulted;
 P2140.In_EquipIntlks.3:= Solenoids.GR2140_01_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.4:= Solenoids.GR2140_02_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.5:= Solenoids.PI2140_01_Status.Sts_EquipmentState.StsAuto;
@@ -460,8 +460,8 @@ P2140.In_EquipIntlks.6:= Solenoids.PL2140_01_Status.Sts_EquipmentState.StsAuto;
 //Events
 P2140.In_EquipEvents.2:= GVL_IO.DS_P2140;
 P2140.In_EquipEvents.3:= System.SysEventsAllOk;
-P2140.In_EquipEvents.4:= CommStatus.RIO10161_CommFault.Out;
-P2140.In_EquipEvents.5:= CommStatus.BCR_S2140_01_CommFault.Out;
+P2140.In_EquipEvents.4:= NOT CommStatus.RIO10161_CommFault.Out;
+P2140.In_EquipEvents.5:= NOT CommStatus.BCR_S2140_01_CommFault.Out;
 P2140.In_EquipEvents.6:= Photoeyes.PE_10151.JamDetected AND Solenoids.PL2140_01.Out_ExtendCrntSV;
 
 // Function Call
@@ -498,12 +498,12 @@ P2143SleepWakeTrig[2] := Photoeyes.PE_12171.Out;
 P2143_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2143.In_EquipIntlks.2:= GVL_IO.P2143_Faulted;
+P2143.In_EquipIntlks.2:= NOT GVL_IO.P2143_Faulted;
 //Events
 P2143.In_EquipEvents.2:= GVL_IO.DS_P2143;
 P2143.In_EquipEvents.3:= System.SysEventsAllOk;
-P2143.In_EquipEvents.4:= CommStatus.RIO8171_CommFault.Out;
-P2143.In_EquipEvents.5:= CommStatus.BCR_S2141_01_CommFault.Out;
+P2143.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
+P2143.In_EquipEvents.5:= NOT CommStatus.BCR_S2141_01_CommFault.Out;
 
 // Function Call
 P2143(
@@ -543,7 +543,7 @@ P2141.In_EquipIntlks.2:= P2141_VFD.Run_OK;
 //Events
 P2141.In_EquipEvents.2:= GVL_IO.DS_P2141;
 P2141.In_EquipEvents.3:= System.SysEventsAllOk;
-P2142.In_EquipEvents.4:= CommStatus.RIO8171_CommFault.Out;
+P2142.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
 
 // Function Call
 P2141(
@@ -584,11 +584,11 @@ P2142SleepWakeTrig[2] := Photoeyes.PE_8161.Out;
 P2142_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2142.In_EquipIntlks.2:= GVL_IO.P2142_Faulted;
+P2142.In_EquipIntlks.2:= NOT GVL_IO.P2142_Faulted;
 //Events
 P2142.In_EquipEvents.2:= GVL_IO.DS_P2142;
 P2142.In_EquipEvents.3:= System.SysEventsAllOk;
-P2142.In_EquipEvents.4:= CommStatus.RIO8171_CommFault.Out;
+P2142.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
 
 // Function Call
 P2142(
@@ -625,11 +625,11 @@ P2145SleepWakeTrig[2] := PhotoEyes.PE_10291.Out_OffFltrd;
 P2145_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2145.In_EquipIntlks.2:= GVL_IO.P2145_Faulted;
+P2145.In_EquipIntlks.2:= NOT GVL_IO.P2145_Faulted;
 //Events
 P2145.In_EquipEvents.2:= GVL_IO.DS_P2145;
 P2145.In_EquipEvents.3:= System.SysEventsAllOk;
-P2145.In_EquipEvents.4:= CommStatus.RIO2151_CommFault.Out;
+P2145.In_EquipEvents.4:= NOT CommStatus.RIO2151_CommFault.Out;
 
 // Function Call
 P2145(
@@ -669,7 +669,7 @@ P2146.In_EquipIntlks.2:= P2146_VFD.Run_OK;
 //Events
 P2146.In_EquipEvents.2:= GVL_IO.DS_P2146;
 P2146.In_EquipEvents.3:= System.SysEventsAllOk;
-P2146.In_EquipEvents.4:= CommStatus.RIO2151_CommFault.Out;
+P2146.In_EquipEvents.4:= NOT CommStatus.RIO2151_CommFault.Out;
 
 // Function Call
 P2146(
@@ -710,7 +710,7 @@ P2150SleepWakeTrig[2] := PhotoEyes.PE_2231.Out_OffFltrd;
 P2150_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2150.In_EquipIntlks.2:= GVL_IO.P2150_Faulted;
+P2150.In_EquipIntlks.2:= NOT GVL_IO.P2150_Faulted;
 P2150.In_EquipIntlks.3:= Solenoids.GR2150_01_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.4:= Solenoids.GR2150_02_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.5:= Solenoids.PU2150_01_Status.Sts_EquipmentState.StsAuto;
@@ -720,10 +720,10 @@ P2150.In_EquipIntlks.8:= Solenoids.PU2150_04_Status.Sts_EquipmentState.StsAuto;
 //Events
 P2150.In_EquipEvents.2:= GVL_IO.DS_P2150;
 P2150.In_EquipEvents.3:= System.SysEventsAllOk;
-P2150.In_EquipEvents.4:= CommStatus.RIO2151_CommFault.Out;
-P2150.In_EquipEvents.5:= CommStatus.RIO3171_CommFault.Out;
-P2150.In_EquipEvents.6:= CommStatus.RIO4141_CommFault.Out;
-P2150.In_EquipEvents.7:= CommStatus.BCR_S2150_01_CommFault.Out;
+P2150.In_EquipEvents.4:= NOT CommStatus.RIO2151_CommFault.Out;
+P2150.In_EquipEvents.5:= NOT CommStatus.RIO3171_CommFault.Out;
+P2150.In_EquipEvents.6:= NOT CommStatus.RIO4141_CommFault.Out;
+P2150.In_EquipEvents.7:= NOT CommStatus.BCR_S2150_01_CommFault.Out;
 
 
 // Function Call
@@ -762,12 +762,12 @@ P3080SleepWakeTrig[1] := TRUE; //Conveyor doesn't sleep they may want to change 
 P3080_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3080.In_EquipIntlks.2:= P3080_VFD.Run_OK;
+P3080.In_EquipIntlks.2:= NOT P3080_VFD.Run_OK;
 //Events
 P3080.In_EquipEvents.2:= GVL_IO.DS_P3080;
 P3080.In_EquipEvents.3:= System.SysEventsAllOk;
-P3080.In_EquipEvents.4:= CommStatus.RIO9191_CommFault.Out;
-P3080.In_EquipEvents.5:= CommStatus.BCR_S2150_01_CommFault.Out;
+P3080.In_EquipEvents.4:= NOT CommStatus.RIO9191_CommFault.Out;
+P3080.In_EquipEvents.5:= NOT CommStatus.BCR_S2150_01_CommFault.Out;
 P3080.In_EquipEvents.6:= Photoeyes.PE_9221.Out;
 
 // Function Call
@@ -809,11 +809,11 @@ P3085SleepWakeTrig[1] := Photoeyes.PE_9191.out;
 P3085_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3085.In_EquipIntlks.2:= GVL_IO.P3085_Faulted;
+P3085.In_EquipIntlks.2:= NOT GVL_IO.P3085_Faulted;
 //Events
 P3085.In_EquipEvents.2:= GVL_IO.DS_P3085;
 P3085.In_EquipEvents.3:= System.SysEventsAllOk;
-P3085.In_EquipEvents.4:= CommStatus.RIO12182_CommFault.Out;
+P3085.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
 
 // Function Call
 P3085(
@@ -849,11 +849,11 @@ P3090SleepWakeTrig[2] := Photoeyes.PE_9191.out;
 P3090_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3090.In_EquipIntlks.2:= GVL_IO.P3090_Faulted;
+P3090.In_EquipIntlks.2:= NOT GVL_IO.P3090_Faulted;
 //Events
 P3090.In_EquipEvents.2:= GVL_IO.DS_P3090;
 P3090.In_EquipEvents.3:= System.SysEventsAllOk;
-P3090.In_EquipEvents.4:= CommStatus.RIO12182_CommFault.Out;
+P3090.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
 
 // Function Call
 P3090(
@@ -889,11 +889,11 @@ P3095SleepWakeTrig[2] := Photoeyes.PE_12091.out;
 P3095_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3095.In_EquipIntlks.2:= GVL_IO.P3095_Faulted;
+P3095.In_EquipIntlks.2:= NOT GVL_IO.P3095_Faulted;
 //Events
 P3095.In_EquipEvents.2:= GVL_IO.DS_P3095;
 P3095.In_EquipEvents.3:= System.SysEventsAllOk;
-P3095.In_EquipEvents.4:= CommStatus.RIO12182_CommFault.Out;
+P3095.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
 
 // Function Call
 P3095(
