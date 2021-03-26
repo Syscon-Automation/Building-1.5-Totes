@@ -211,7 +211,7 @@ cfgP2143EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO8171 Comm Fault', DeviceLabel := 'RIO8171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'BCR_S2141_01 Comm Fault', DeviceLabel := 'BCR_S2141_011', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   10(())];
 //Spiral
 //----------------------------------------P2141--------------------------------------------------------------
 {attribute 'OPC.UA.DA' := '1'}
@@ -319,7 +319,7 @@ cfgP3080EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'RIO9191 Comm Fault', DeviceLabel := 'RIO9191', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'BCR_S2150_01 Comm Fault', DeviceLabel := 'BCR_S2150_01', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'Height Check', DeviceLabel := 'PE_12261', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.OverHeightFLT),
-   11(())];
+   9(())];
 //Transport
 //----------------------------------------P3085--------------------------------------------------------------
 {attribute 'OPC.UA.DA' := '1'}

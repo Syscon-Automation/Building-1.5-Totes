@@ -15,15 +15,14 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[BarCodeReaders();
-//CommStatus();
+CommStatus();
 Conveyors();
-//Log_Diverts();
 //MsgControl();
 Photoeyes();
 ProxSensors();
-//ServerControl();
-//Singulation_Control();
-//Solenoids();
+ServerControl();
+Singulation_Control();
+Solenoids();
 Sorter();
 System();
 SystemSafety();
@@ -47,7 +46,8 @@ IF rStartPersistentSave.Q THEN
 END_IF]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="85" Count="29" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="89" Count="25" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

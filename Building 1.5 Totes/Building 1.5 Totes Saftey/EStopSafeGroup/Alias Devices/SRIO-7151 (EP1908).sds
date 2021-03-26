@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<SafetyDeviceDesc Crc="1363669044" FileFormatVersion="1.6">
+<SafetyDeviceDesc Crc="1238735271" FileFormatVersion="1.6">
   <AliasDeviceType>
     <Type>4</Type>
     <SubType>524478</SubType>
@@ -7,7 +7,7 @@
   </AliasDeviceType>
   <SDSID>25</SDSID>
   <SafetyAliasDevice>
-    <ObjectId>0</ObjectId>
+    <ObjectId>50921476</ObjectId>
     <LinkingMode>Automatic</LinkingMode>
     <ConnectionId>25</ConnectionId>
     <ConnectionMode>master</ConnectionMode>
@@ -17,7 +17,7 @@
     <MapOutputs>false</MapOutputs>
     <MapState>false</MapState>
     <ModuleFaultIsComErr>false</ModuleFaultIsComErr>
-    <SafeAddress>0</SafeAddress>
+    <SafeAddress>6</SafeAddress>
     <Watchdog>100</Watchdog>
     <ComErrAck Type="Unset" />
     <Params>
