@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <DUT Name="ST_StateCntrlSts" Id="{5a952c10-ed7f-4ad1-b33c-c916f6bf9b45}">
     <Declaration><![CDATA[TYPE ST_StateCntrlSts :
 STRUCT
@@ -7,23 +7,41 @@ STRUCT
 	CrntState:			E_StateCntrl;
 	{attribute 'OPC.UA.DA' := '1'}
 	CrntStateTxt:		STRING(20);				// The current state in text string
+	{attribute 'OPC.UA.DA' := '0'}
 	CrntOperState: 		E_OperStateCntrl;		// The Current Operational state
+	{attribute 'OPC.UA.DA' := '0'}
 	CrntOperStateTxt:	STRING(20);				// The current Operational state in text string
+	{attribute 'OPC.UA.DA' := '0'}
 	EquipType: 			DINT;					// Stores Enumeration type E_EquipType
+	{attribute 'OPC.UA.DA' := '0'}
 	Index: 				DINT;					// Local index assigned to this equipment
+	{attribute 'OPC.UA.DA' := '0'}
 	Label: 				STRING(20); 			// String value assigned to this equipment for status updates
+	{attribute 'OPC.UA.DA' := '0'}
 	RemIndex: 			DINT;					// Remote index assigned to this equipment, for system status monitoring
+	{attribute 'OPC.UA.DA' := '0'}
 	LstState:			E_StateCntrl;
+	{attribute 'OPC.UA.DA' := '0'}
 	LstOperState:		E_OperStateCntrl;
+	{attribute 'OPC.UA.DA' := '0'}
 	stsStopRegister: 	ARRAY[0..1] OF UDINT;	// Stop Register
+	{attribute 'OPC.UA.DA' := '0'}
 	StateRunOK:			BOOL;
+	{attribute 'OPC.UA.DA' := '0'}
 	StateChanged:		BOOL;					// Single scan output to show that state has changed
+	{attribute 'OPC.UA.DA' := '0'}
 	StsOffline:			BOOL;					// Output that shows State is Offline
+	{attribute 'OPC.UA.DA' := '0'}
 	StsAuto:			BOOL;					// Output that shows State is in Auto
+	{attribute 'OPC.UA.DA' := '0'}
 	StsMan:				BOOL;					// Output that shows State is in Manual
+	{attribute 'OPC.UA.DA' := '0'}
 	StsFaulted:			BOOL;					// Output that shows State is Faulted
+	{attribute 'OPC.UA.DA' := '0'}
 	StsHasWarnings: 	BOOL;					// Output that shows the Equipment has Warnings (Alerts)
+	{attribute 'OPC.UA.DA' := '0'}
 	Received:			ST_StateCntrlPB;		// Single scan outputs for possible push button events
+	{attribute 'OPC.UA.DA' := '0'}
 	RcvdFault:			BOOL;					// Single scan output to show input was received
 //	RcvdOffline:		BOOL;					// Single scan output to show input was received
 //	RcvdAuto:			BOOL;					// Single scan output to show input was received

@@ -1,19 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <DUT Name="ST_SorterConfig" Id="{9ce3f4df-7db1-4bfa-b8ac-5118da50235f}">
-    <Declaration><![CDATA[TYPE ST_SorterConfig :
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_SorterConfig :
 STRUCT
 	Name				: STRING[5];
+	EquipID				: STRING[5];
 	Length				: UINT;
 	InductWindow		: UINT;
 	MinimumLength		: UINT;
 	TailEndLength 		: UINT;
 	Output2Offset		: UINT;
-	DefaultDestination 	: UINT;
-	RecircDestination 	: UINT;
+	DefaultDestination 	: DINT;
+	DefaultDestIdx		: DINT;
+	RecircDestination 	: DINT;
+	RecircDestIdx 		: DINT;
 	RecircUsed			: BOOL;
 	RetainOnRestart		: BOOL;
 	DivertCount			: DINT;
+	RoundRobin			: ST_RoundRobin;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

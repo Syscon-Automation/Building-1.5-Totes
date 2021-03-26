@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="FB_ItemLogBuffer" Id="{aea9445b-cfe1-4155-97a9-34c3230f0c6b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_ItemLogBuffer
 VAR_IN_OUT
@@ -14,11 +14,14 @@ VAR
 	nOutPointer		:	UDINT;				// OutPointer use to detect items in the buffer
 	nBufferSizeTemp : 	UDINT;				// Calculate buffer size from Byte count
 	nBufferSize : 	UDINT;					// Buffer Size in total elements
-	st_Blank	:	ST_Item :=  (ID := '',
-									UniqueID := 0,
-									Destination := 0,
-									Status := E_StatusCode.No_Status,
-									DeviceID := '');
+	st_Blank	:	ST_Item :=  (ID := ''
+								, UniqueID := 0
+								, Destination := 0
+								, DestinationIdx := 0
+								, Status := E_StatusCode.No_Status
+								, ExtStatus := E_StatusCode.No_Status
+								, DeviceID := ''
+								, MessageType := E_MessageIds.NoMessage_00);
 	nInit		:	UDINT;					// Used to initialize the Array on Start-up
 	nItemExtSize	:	UDINT;				// Size of ST_ItemExt in Bytes
 	bInitDone	: BOOL := FALSE;			// Set if Init occurred outside of FB_init

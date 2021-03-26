@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <GVL Name="GVL_IO" Id="{c1c3ca00-a4ff-4270-a218-a7754a85e85c}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
@@ -8,58 +8,98 @@ VAR_GLOBAL
 // ------ Note:	All Photo Eyes are defined and linked in the Photo Eye Function Block in PhotoEyes.PRG
 // ------ Note:	All Prox Switches are defined and linked in the ProxSensors.PRG
 
+	{attribute 'OPC.UA.DA' := '1'}
 	PB_SysStart AT %I* 		:BOOL;		//System Start Button
+	{attribute 'OPC.UA.DA' := '1'}
 	PB_SysStop	AT %I*		:BOOL;		//System Stop Button
+	{attribute 'OPC.UA.DA' := '1'}
 	PB_SysReset	AT %I* 		:BOOL; 		//System Reset Button
+	{attribute 'OPC.UA.DA' := '1'}
 	PB_RemoteReset_3211 AT %I*		: BOOL;	//P2150 Reset Button
+	{attribute 'OPC.UA.DA' := '1'}
 	PB_RemoteReset_8251 AT %I*		: BOOL;	//P2150 Reset Button
+	{attribute 'OPC.UA.DA' := '1'}
 	PB_RemoteReset_10221 AT %I*		: BOOL;	//P2140 Reset Button
 	
 	
+	{attribute 'OPC.UA.DA' := '1'}
 	SystemAirPressure AT %I*	:BOOL;
 
 	
+	{attribute 'OPC.UA.DA' := '1'}
 	HornMainPanel				AT %Q* 	:BOOL;	//Panel Tower Horn
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_MainPanelStack_Red		AT %Q*	:BOOL;	//Panel	Tower Red Light
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_MainPanelStack_Yellow	AT %Q*	:BOOL;	//Panel	Tower Yellow Light
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_MainPanelStack_Green		AT %Q*	:BOOL;	//Panel	Tower Green Light
 	
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_3131_Red	    AT %Q*	:BOOL;	//Panel	Tower Red Light
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_3151_Yellow	AT %Q*	:BOOL;	//Panel	Tower Yellow Light
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_3201_Green	AT %Q*	:BOOL;	//Panel	Tower Green Light
 	
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_8181_Red	    AT %Q*	:BOOL;	//Panel	Tower Red Light
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_8191_Yellow	AT %Q*	:BOOL;	//Panel	Tower Yellow Light
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_8231_Green	AT %Q*	:BOOL;	//Panel	Tower Green Light
 	
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_10161_Red	    AT %Q*	:BOOL;	//Panel	Tower Red Light
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_10171_Yellow	AT %Q*	:BOOL;	//Panel	Tower Yellow Light
+	{attribute 'OPC.UA.DA' := '1'}
 	LT_10201_Green	AT %Q*	:BOOL;	//Panel	Tower Green Light
 	
 	
 //---------------------------------Motor Outputs-------------------------------------------------
+	{attribute 'OPC.UA.DA' := '1'}
 	P2130_RUN            AT %Q*   :BOOL;    //P2130 Run Command
+	{attribute 'OPC.UA.DA' := '1'}
 	P2135_RUN            AT %Q*   :BOOL;    //P2135 Run Command
+	{attribute 'OPC.UA.DA' := '1'}
 	P2140_RUN            AT %Q*   :BOOL;    //P2140 Run Command
+	{attribute 'OPC.UA.DA' := '1'}
 	P2143_RUN            AT %Q*   :BOOL;    //P2143 Run Command
+	{attribute 'OPC.UA.DA' := '1'}
 	P2142_RUN            AT %Q*   :BOOL;    //P2142 Run Command
+	{attribute 'OPC.UA.DA' := '1'}
 	P2145_RUN            AT %Q*   :BOOL;    //P2145 Run Command
+	{attribute 'OPC.UA.DA' := '1'}
 	P2150_RUN            AT %Q*   :BOOL;    //P2150 Run Command
 	
+	{attribute 'OPC.UA.DA' := '1'}
 	P3085_RUN            AT %Q*   :BOOL;    //P3085 Run Command
+	{attribute 'OPC.UA.DA' := '1'}
 	P3090_RUN            AT %Q*   :BOOL;    //P3090 Run Command
+	{attribute 'OPC.UA.DA' := '1'}
 	P3095_RUN            AT %Q*   :BOOL;    //P3095 Run Command	
 //---------------------------------Motor Feedback-------------------------------------------------
+	{attribute 'OPC.UA.DA' := '1'}
 	P2130_Faulted            AT %I*   :BOOL;    //P2130 Faulted 
+	{attribute 'OPC.UA.DA' := '1'}
 	P2135_Faulted            AT %I*   :BOOL;    //P2135 Faulted 
+	{attribute 'OPC.UA.DA' := '1'}
 	P2140_Faulted            AT %I*   :BOOL;    //P2140 Faulted 
+	{attribute 'OPC.UA.DA' := '1'}
 	P2143_Faulted            AT %I*   :BOOL;    //P2143 Faulted 
+	{attribute 'OPC.UA.DA' := '1'}
 	P2142_Faulted            AT %I*   :BOOL;    //P2142 Faulted 
+	{attribute 'OPC.UA.DA' := '1'}
 	P2145_Faulted            AT %I*   :BOOL;    //P2145 Faulted
  
+	{attribute 'OPC.UA.DA' := '1'}
 	P2150_Faulted            AT %I*   :BOOL;    //P2150 Faulted 
+	{attribute 'OPC.UA.DA' := '1'}
 	P3085_Faulted            AT %I*   :BOOL;    //P3085 Faulted 
+	{attribute 'OPC.UA.DA' := '1'}
 	P3090_Faulted            AT %I*   :BOOL;    //P3090 Faulted 
+	{attribute 'OPC.UA.DA' := '1'}
 	P3095_Faulted            AT %I*   :BOOL;    //P3095 Faulted 
 //---------------------------------Disconnect Status------------------------------------------------- 
 	{attribute 'OPC.UA.DA' := '1'}
@@ -89,47 +129,76 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
 	DS_P3095            AT %I*  :BOOL;  //P3095 Disconnect
 //---------------------------------Solenoid Valves------------------------------------------------- 
+	{attribute 'OPC.UA.DA' := '1'}
    GR2140_01_Extend        AT %Q*:    BOOL; // P2140 Solenoid Extend   
+	{attribute 'OPC.UA.DA' := '1'}
    GR2140_02_Extend        AT %Q*:    BOOL; // P2140 Solenoid Extend
+	{attribute 'OPC.UA.DA' := '1'}
    PI2140_01_Extend        AT %Q*:    BOOL; // P2140 Solenoid Extend
+	{attribute 'OPC.UA.DA' := '1'}
    PI2140_01_Retract       AT %Q*:    BOOL; // P2140 Solenoid Retract
+	{attribute 'OPC.UA.DA' := '1'}
    PL2140_01_Extend        AT %Q*:    BOOL; // P2140 Solenoid Extend
+	{attribute 'OPC.UA.DA' := '1'}
    GR2150_01_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
+	{attribute 'OPC.UA.DA' := '1'}
    GR2150_02_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
+	{attribute 'OPC.UA.DA' := '1'}
    PU2150_01_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
+	{attribute 'OPC.UA.DA' := '1'}
    PU2150_02_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
+	{attribute 'OPC.UA.DA' := '1'}
    PU2150_03_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
+	{attribute 'OPC.UA.DA' := '1'}
    PU2150_04_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
 //---------------------------------Encoder------------------------------------------------- 
 	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9031_Raw	AT %I*:	UINT;	// Raw Encoder Value
 	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9031_OK			: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9031_Period	AT %I*:	UDINT;	// Encoder Period, channel 1, 100ns resolution
 	
-		{attribute 'OPC.UA.DA' := '1'}
+	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9091_Raw	AT %I*:	UINT;	// Raw Encoder Value
 	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9091_OK			: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9091_Period	AT %I*:	UDINT;	// Encoder Period, channel 1, 100ns resolution
 	
 	Sorter_P2140Name				: STRING[5];
 	Sorter_P2150Name				: STRING[5];
 //---------------------------------WcStates-------------------------------------------------
+	{attribute 'OPC.UA.DA' := '1'}
  	RIO1151_WcState AT %I*				: BOOL;		// Remote IO Block 1151
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO2151_WcState AT %I*				: BOOL;		// Remote IO Block 2151
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO3171_WcState AT %I*				: BOOL;		// Remote IO Block 3171
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO4141_WcState AT %I*				: BOOL;		// Remote IO Block 4141
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO7151_WcState AT %I*				: BOOL;		// Remote IO Block 7151
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO8171_WcState AT %I*				: BOOL;		// Remote IO Block 8171
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO9191_WcState AT %I*				: BOOL;		// Remote IO Block 9191
+	{attribute 'OPC.UA.DA' := '1'}
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO10161_WcState AT %I*				: BOOL;		// Remote IO Block 10161
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO11171_WcState AT %I*				: BOOL;		// Remote IO Block 11171
+	{attribute 'OPC.UA.DA' := '1'}
 	RIO12182_WcState AT %I*				: BOOL;		// Remote IO Block 12812
+	{attribute 'OPC.UA.DA' := '1'}
 	BCR_S2140_01_WcState AT %I*			: BOOL;		// Barcode Reader S2140_01
+	{attribute 'OPC.UA.DA' := '1'}
 	BCR_S2141_01_WcState AT %I*			: BOOL;		// Barcode Reader S2141_01
+	{attribute 'OPC.UA.DA' := '1'}
 	BCR_S2150_01_WcState AT %I*			: BOOL;		// Barcode Reader S2150_01
+	{attribute 'OPC.UA.DA' := '1'}
 	BCR_S3080_01_WcState AT %I*			: BOOL;		// Barcode Reader S3080_01
+	{attribute 'OPC.UA.DA' := '1'}
 	EthernetAdapter_State AT %I*	    : UINT;		// Ethernet Adapter State
  //---------------------------------EAP-------------------------------------------------
 //Published

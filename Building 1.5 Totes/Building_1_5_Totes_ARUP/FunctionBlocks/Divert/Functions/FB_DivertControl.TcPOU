@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="FB_DivertControl" Id="{06e3e34a-7606-44cd-af9d-fd06b2e51262}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertControl
 VAR_IN_OUT
@@ -30,6 +30,7 @@ IF Output1Activate THEN
 	Test := 1;
 	IF Output1Item.Status < E_StatusCode.Diverting THEN
 		Output1Item.Status := E_StatusCode.Diverting;
+		Output1Item.DeviceID := Divert.Config.EquipID;
 	END_IF
 ELSE
 	Divert.Output1 := 0;
@@ -39,6 +40,7 @@ IF Output2Activate THEN
 	Divert.Output2 := 1;	
 	IF Output2Item.Status < E_StatusCode.Diverting THEN
 		Output2Item.Status := E_StatusCode.Diverting;
+		Output2Item.DeviceID := Divert.Config.EquipID;
 	END_IF
 ELSE
 	Divert.Output2 := 0;				
@@ -48,10 +50,12 @@ END_IF]]></ST>
       <LineId Id="374" Count="8" />
       <LineId Id="409" Count="0" />
       <LineId Id="383" Count="0" />
+      <LineId Id="429" Count="0" />
       <LineId Id="410" Count="0" />
       <LineId Id="384" Count="5" />
       <LineId Id="411" Count="0" />
       <LineId Id="390" Count="0" />
+      <LineId Id="430" Count="0" />
       <LineId Id="412" Count="0" />
       <LineId Id="391" Count="1" />
       <LineId Id="293" Count="0" />

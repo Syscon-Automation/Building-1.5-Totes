@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <DUT Name="ST_ItemLogBuffer" Id="{e3356e34-585a-4f77-8b1f-db0d645cc59d}">
     <Declaration><![CDATA[TYPE ST_ItemLogBuffer :
 STRUCT

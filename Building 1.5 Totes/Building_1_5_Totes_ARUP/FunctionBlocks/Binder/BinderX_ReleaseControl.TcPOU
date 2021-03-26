@@ -1,12 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="BinderX_ReleaseControl" Id="{32de5e55-360a-4bfd-ba6c-ae86acf0895a}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM BinderX_ReleaseControl
 VAR
 	BinderHoldFB: FB_Binder_SingulateHold;
 	Binder_Pusher: FB_BinderPusher;
 
-	{attribute 'OPC.UA.DA' := '1'}
 	Binder		:	ST_Binder;
 
 	BinderDataIn AT %I*: ST_FromBinder;

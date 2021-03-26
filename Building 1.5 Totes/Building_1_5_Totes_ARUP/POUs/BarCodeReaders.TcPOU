@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="BarCodeReaders" Id="{6db726c2-b8f2-4f56-a606-779b1afe45e4}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM BarCodeReaders
 VAR
@@ -13,9 +13,6 @@ VAR
 	P2140_LastArrival_Item		: ST_Item;		// Last Output Item (Bar code read) To Sort PLC
 	ReadID_P2140_Old		: UDINT;
 
-	st_SorterArrivalBuffer_P2140 AT %Q*	: ST_ItemBuffer;		// Output from the Barcode Reader to the sorter
-	st_ArrivalFdbkIn_P2140 AT %I*			: ST_ItemBufferFdbk;
-	st_ArrivalFdbkOut_P2140 				: ST_ItemBufferFdbk;
 	fb_SorterArrivalBuffer_P2140			: FB_ItemBuffer;	// Function to Process the SorterArrivalBuffer
 	
 	sBcr2140Log			: STRING;
@@ -31,9 +28,6 @@ VAR
 	P2150_LastArrival_Item		: ST_Item;		// Last Output Item (Bar code read) To Sort PLC
 	ReadID_P2150_Old		: UDINT;
 
-	st_SorterArrivalBuffer_P2150 AT %Q*	: ST_ItemBuffer;		// Output from the Barcode Reader to the sorter
-	st_ArrivalFdbkIn_P2150 AT %I*			: ST_ItemBufferFdbk;
-	st_ArrivalFdbkOut_P2150 				: ST_ItemBufferFdbk;
 	fb_SorterArrivalBuffer_P2150			: FB_ItemBuffer;	// Function to Process the SorterArrivalBuffer
 
 	sBcr2150Log			: STRING;
@@ -57,10 +51,10 @@ END_VAR
 fb_SorterArrivalBuffer_P2140.Master := TRUE;
 
 // Setup Logging
-fb_SorterArrivalBuffer_P2140.LogEntries := .nItemBufferLogEnable.ARRIVALS;
+fb_SorterArrivalBuffer_P2140.LogEntries := .nItemBufferLogEnable.ARRIVALS OR .nItemBufferLogEnableP2140.ARRIVALS;
 
 // Setup Buffer Name for Logging
-fb_SorterArrivalBuffer_P2140.Name := 'SYS ARRIVAL';
+fb_SorterArrivalBuffer_P2140.Name := 'P2140 SYS ARRIVAL';
 
 fb_SorterArrivalBuffer_P2140(st_BufferData := st_SorterArrivalBuffer_P2140
 					, st_BufferFdbkIn := st_ArrivalFdbkIn_P2140
@@ -74,10 +68,10 @@ END_IF
 fb_SorterArrivalBuffer_P2150.Master := TRUE;
 
 // Setup Logging
-fb_SorterArrivalBuffer_P2150.LogEntries := .nItemBufferLogEnable.ARRIVALS;
+fb_SorterArrivalBuffer_P2150.LogEntries := .nItemBufferLogEnable.ARRIVALS OR .nItemBufferLogEnableP2150.ARRIVALS;
 
 // Setup Buffer Name for Logging
-fb_SorterArrivalBuffer_P2150.Name := 'SYS ARRIVAL';
+fb_SorterArrivalBuffer_P2150.Name := 'P2150 SYS ARRIVAL';
 
 fb_SorterArrivalBuffer_P2150(st_BufferData := st_SorterArrivalBuffer_P2150
 					, st_BufferFdbkIn := st_ArrivalFdbkIn_P2150
@@ -99,8 +93,8 @@ END_IF
 //----------------------------------------BCR_S2140_01--------------------------------------------------------------
 //Divert
 // Set up Bar Code Readers
-	BCR_S2140_01.LogEntries := .nBarcodeLogEnable.BCR_S2140_01_LOG;
-	BCR_S2140_01(
+BCR_S2140_01.LogEntries := .nBarcodeLogEnable.BCR_S2140_01_LOG;
+BCR_S2140_01(
 	In_ReadTrig:= PhotoEyes.PE_10081.Out_OnFltrd, 
 	In_ResetCounts:= , 
 	In_TriggerOnTime := T#20MS ,
@@ -121,8 +115,8 @@ tpBcr2140Trig(
 rSorter2140PE(CLK:= PhotoEyes.PE_10081.Out, Q =>);
 fSorter2140PE(CLK:= PhotoEyes.PE_10081.Out, Q =>);
 
-// Log the rising edge of the Trigger
-IF rSorter2140PE.Q THEN
+// Log the rising/falling edge of the Trigger
+IF rSorter2140PE.Q OR fSorter2140PE.Q THEN
 	IF nBarcodeLogEnable.TRIGGER_PE THEN
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG,
@@ -132,38 +126,29 @@ IF rSorter2140PE.Q THEN
 	END_IF
 END_IF
 
-// Log the falling edge of the Trigger
-IF fSorter2140PE.Q THEN
-	IF nBarcodeLogEnable.TRIGGER_PE THEN
-		// Write to the Error List
-		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG,
-			msgFmtStr := 'Sort BCR PE Blocked : %s',
-		strArg := BOOL_TO_STRING(PhotoEyes.PE_10081.Out)
-		);
-	END_IF
-END_IF
 // Send Read Information to Sorter	
 //	Creates Arrival message at sorter
 IF ReadID_P2140_Old <> BarCodeReaders.BCR_S2140_01.GoodreadCount THEN
 	P2140_Arrival_Item.UniqueID := BCR_S2140_01.Out_ResultID;
 	P2140_Arrival_Item.ID := BCR_S2140_01.Out_ReadString;
 	P2140_Arrival_Item.Status := E_StatusCode.UpdateRequested;
-	P2140_Arrival_Item.DeviceID := GVL_IO.Sorter_P2140Name;
+	P2140_Arrival_Item.DeviceID := BCR_S2140_01.In_EquipID;
 	P2140_Arrival_Item.MessageType := E_MessageIds.Arrival_23;
-	P2140_Arrival_Item.Destination := MsgControl.DefDestination;
+	P2140_Arrival_Item.Destination := .P2140_DefaultDestination;
 	P2140_Arrival_Item.Length := 0;
 	P2140_LastArrival_Item := P2140_Arrival_Item;
 	fb_SorterArrivalBuffer_P2140.AddItem(P2140_Arrival_Item);
 	ReadID_P2140_Old := BarCodeReaders.BCR_S2140_01.GoodreadCount;
 ELSE 
-	P2140_Arrival_Item := MsgControl.BlankItem;
+	P2140_Arrival_Item := BlankItem;
 	P2140_Arrival_Item.Status := E_StatusCode.UpdateRequested;
 END_IF
+
 //----------------------------------------BCR_S2141_01--------------------------------------------------------------
 //Location Update
 // Set up Bar Code Readers
-	BCR_S2141_01.LogEntries := .nBarcodeLogEnable.BCR_S2141_01_LOG;
-	BCR_S2141_01(
+BCR_S2141_01.LogEntries := .nBarcodeLogEnable.BCR_S2141_01_LOG;
+BCR_S2141_01(
 	In_ReadTrig:= PhotoEyes.PE_10302.Out_OnFltrd, 
 	In_ResetCounts:= , 
 	In_TriggerOnTime := T#20MS ,
@@ -190,7 +175,7 @@ END_IF
 	MisreadCount=> , 
 	GoodreadCount=> );
 //Logging	
-	BCR_S2150_01.LogEntries := .nBarcodeLogEnable.BCR_S2150_01_LOG;
+BCR_S2150_01.LogEntries := .nBarcodeLogEnable.BCR_S2150_01_LOG;
 tpBcr2150Trig(
 	IN := PhotoEyes.PE_2301.Out,
 				PT := T#10MS,
@@ -199,8 +184,8 @@ tpBcr2150Trig(
 rSorter2150PE(CLK:= PhotoEyes.PE_2301.Out, Q =>);
 fSorter2150PE(CLK:= PhotoEyes.PE_2301.Out, Q =>);
 
-// Log the rising edge of the Trigger
-IF rSorter2150PE.Q THEN
+// Log the rising/falling edge of the Trigger
+IF rSorter2150PE.Q OR fSorter2150PE.Q THEN
 	IF nBarcodeLogEnable.TRIGGER_PE THEN
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG,
@@ -210,23 +195,13 @@ IF rSorter2150PE.Q THEN
 	END_IF
 END_IF
 
-// Log the falling edge of the Trigger
-IF fSorter2150PE.Q THEN
-	IF nBarcodeLogEnable.TRIGGER_PE THEN
-		// Write to the Error List
-		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG,
-			msgFmtStr := 'Sort BCR PE Blocked : %s',
-			strArg := BOOL_TO_STRING(PhotoEyes.PE_2301.Out)
-		);
-	END_IF
-END_IF
 // Send Read Information to Sorter	
 //	Creates Arrival message at sorter
 IF ReadID_P2150_Old <> BarCodeReaders.BCR_S2150_01.GoodreadCount THEN
 	P2150_Arrival_Item.UniqueID := BCR_S2150_01.Out_ResultID;
 	P2150_Arrival_Item.ID := BCR_S2150_01.Out_ReadString;
 	P2150_Arrival_Item.Status := E_StatusCode.UpdateRequested;
-	P2150_Arrival_Item.DeviceID := GVL_IO.Sorter_P2150Name;
+	P2150_Arrival_Item.DeviceID := BCR_S2150_01.In_EquipID;
 	P2150_Arrival_Item.MessageType := E_MessageIds.Arrival_23;
 	P2150_Arrival_Item.Destination := MsgControl.DefDestination;
 	P2150_Arrival_Item.Length := 0;
@@ -234,14 +209,14 @@ IF ReadID_P2150_Old <> BarCodeReaders.BCR_S2150_01.GoodreadCount THEN
 	fb_SorterArrivalBuffer_P2150.AddItem(P2140_Arrival_Item);
 	ReadID_P2150_Old := BarCodeReaders.BCR_S2150_01.GoodreadCount;
 ELSE 
-	P2150_Arrival_Item := MsgControl.BlankItem;
+	P2150_Arrival_Item := BlankItem;
 	P2150_Arrival_Item.Status := E_StatusCode.UpdateRequested;
 END_IF
 
 //----------------------------------------BCR_S3080_01--------------------------------------------------------------
 //Location Update
 // Set up Bar Code Readers
-	BCR_S2150_01.LogEntries := .nBarcodeLogEnable.BCR_S2150_01_LOG;
+BCR_S2150_01.LogEntries := .nBarcodeLogEnable.BCR_S2150_01_LOG;
 	BCR_S3080_01(
 	In_ReadTrig:= PhotoEyes.PE_9161.Out_OnFltrd, 
 	In_ResetCounts:= , 
@@ -253,8 +228,6 @@ END_IF
 	Out_ResultID=>, 
 	MisreadCount=> , 
 	GoodreadCount=> );
-
-	
 ]]></ST>
     </Implementation>
     <LineIds Name="BarCodeReaders">
@@ -286,11 +259,10 @@ END_IF
       <LineId Id="1024" Count="0" />
       <LineId Id="1076" Count="0" />
       <LineId Id="1078" Count="15" />
-      <LineId Id="1095" Count="10" />
-      <LineId Id="1107" Count="1" />
-      <LineId Id="1077" Count="0" />
+      <LineId Id="1095" Count="3" />
       <LineId Id="1190" Count="15" />
       <LineId Id="1189" Count="0" />
+      <LineId Id="1267" Count="0" />
       <LineId Id="1016" Count="0" />
       <LineId Id="1021" Count="0" />
       <LineId Id="1074" Count="0" />
@@ -303,8 +275,7 @@ END_IF
       <LineId Id="1048" Count="0" />
       <LineId Id="1120" Count="0" />
       <LineId Id="1122" Count="15" />
-      <LineId Id="1139" Count="10" />
-      <LineId Id="1151" Count="2" />
+      <LineId Id="1139" Count="3" />
       <LineId Id="1207" Count="15" />
       <LineId Id="1206" Count="0" />
       <LineId Id="1166" Count="0" />
@@ -313,8 +284,7 @@ END_IF
       <LineId Id="1072" Count="0" />
       <LineId Id="1061" Count="10" />
       <LineId Id="1060" Count="0" />
-      <LineId Id="434" Count="1" />
-      <LineId Id="92" Count="0" />
+      <LineId Id="435" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

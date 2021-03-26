@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="FB_ConfirmCheck" Id="{292012a5-c6f1-4846-b7d2-d1154be0ca6c}" SpecialFunc="None">
     <Declaration><![CDATA[(*
 	Each confirm location needs its own instance of this FunctionBlock in order to allow the LastDest to corretly detect sorted items
@@ -31,13 +31,14 @@ VAR
 	fbDivertLog			: FB_ItemLogBuffer;
 	ItemToLog			: ST_Item;
 	sMessage			: STRING;
-	BlankItem			: ST_Item := (ID := ''
-										, UniqueID := 0
-										, Destination := 0
-										, Status := E_StatusCode.No_Status
-										, ExtStatus := E_StatusCode.No_Status
-										, DeviceID := ''
-										, MessageType := E_MessageIds.NoMessage_00);
+	BlankItem					: ST_Item := (ID := '', UniqueID := 0
+													, Destination := 0
+													, DestinationIdx := 0
+													, Status := E_StatusCode.No_Status
+													, ExtStatus := E_StatusCode.No_Status
+													, DeviceID := ''
+													, MessageType := E_MessageIds.NoMessage_00);
+
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Clear the Detected Item each iteration to ensure that it only has a item assigned after the confirm PE has been cleared

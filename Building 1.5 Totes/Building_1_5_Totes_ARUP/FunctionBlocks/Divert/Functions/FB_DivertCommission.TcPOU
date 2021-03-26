@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="FB_DivertCommission" Id="{57a00f10-7d90-4a03-9ee7-14f066965371}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertCommission
 VAR_INPUT
@@ -20,9 +20,9 @@ VAR
 	EndCount 		: UDINT;
 	InductFlag		: BOOL;
 	NumberofDiverts	: DINT; 
-	DivertLength 	: ARRAY[0..10] OF UDINT;
-	DivertTime 		: ARRAY[0..10] OF TIME;
-	DischargeFlag	: ARRAY[0..10] OF BOOL;
+	DivertLength 	: ARRAY[0..16] OF UDINT;
+	DivertTime 		: ARRAY[0..16] OF TIME;
+	DischargeFlag	: ARRAY[0..16] OF BOOL;
 	
 	DivertTimer 	: TON := (PT := TestTime);	
 END_VAR
@@ -32,7 +32,7 @@ END_VAR
 
 NumberofDiverts	:= UPPER_BOUND(Diverts,1);
 
-IF NumberofDiverts < 10 THEN
+IF NumberofDiverts < 17 THEN
 	IF InductTrigger AND NOT InductFlag THEN
 		StartCount := ReferenceValue;
 		DivertTimer(IN := TRUE);

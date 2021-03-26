@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="ST_RoundRobin" Id="{83e87dbf-c53f-44ae-b6fb-851d7e6eea01}">
+    <Declaration><![CDATA[TYPE ST_RoundRobin :
+STRUCT
+	Destination		:	DINT;
+	Enabled			:	UINT;
+	Last_Enabled	:	UINT;
+	Available		:	UINT;
+	Sent			:	UINT;
+	aDestinations	:	ARRAY[0..32] OF DINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

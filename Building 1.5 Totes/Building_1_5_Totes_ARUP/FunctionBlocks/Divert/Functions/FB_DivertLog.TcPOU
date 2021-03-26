@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="FB_DivertLog" Id="{dffd4819-1436-437c-ba4c-f557df3024a3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertLog
+VAR_IN_OUT
+	DivertArray	: ARRAY[*] OF ST_Divert;
+END_VAR
+VAR_INPUT
+	DivertLogEnable		:	UDINT;
+	EncoderCounts		:	UDINT;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	DivertCountMax			: DINT;
+	DivertCountMin			: DINT;
+	DivertIndex				: DINT;
+	r_DivertExtend			: ARRAY [1..16] OF R_TRIG;
+	f_DivertExtend			: ARRAY [1..16] OF F_TRIG;
+	r_ConfirmPE				: ARRAY [1..16] OF R_TRIG;
+	f_ConfirmPE				: ARRAY [1..16] OF F_TRIG;
+	sMessage				: STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Get the Max and Min counts
+DivertCountMin := LOWER_BOUND(DivertArray,1);
+DivertCountMax := UPPER_BOUND(DivertArray,1);
+
+FOR DivertIndex := DivertCountMin TO DivertCountMax DO
+	// Divert at DivertIndex
+	r_DivertExtend[DivertIndex](CLK := DivertArray[DivertIndex].Output1);
+	f_DivertExtend[DivertIndex](CLK := DivertArray[DivertIndex].Output1);
+	
+	IF r_DivertExtend[DivertIndex].Q THEN
+		// Mask the divert index to see if it should be logged
+		IF ((DivertLogEnable AND LREAL_TO_UDINT(EXPT(2,DivertIndex))) > 0) THEN
+			sMessage := DINT_TO_STRING(DivertIndex);
+			sMessage := CONCAT(sMessage,' : ');
+			sMessage := CONCAT(sMEssage, UDINT_TO_STRING(EncoderCounts));
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Extend Divert %s'
+				, strArg := sMessage); 
+		END_IF;
+	END_IF
+	IF f_DivertExtend[DivertIndex].Q THEN
+		// Mask the divert index to see if it should be logged
+		IF ((DivertLogEnable AND LREAL_TO_UDINT(EXPT(2,DivertIndex))) > 0) THEN
+			sMessage := DINT_TO_STRING(DivertIndex);
+			sMessage := CONCAT(sMessage,' : ');
+			sMessage := CONCAT(sMEssage, UDINT_TO_STRING(EncoderCounts));
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Retract Divert %s'
+				, strArg := sMessage); 
+		END_IF;
+	END_IF
+	
+	// Confirm at DivertIndex
+	r_ConfirmPE[DivertIndex](CLK := DivertArray[DivertIndex].ConfirmPE);
+	f_ConfirmPE[DivertIndex](CLK := DivertArray[DivertIndex].ConfirmPE);
+	
+	IF r_ConfirmPE[DivertIndex].Q THEN
+		// Mask the convirm index to see if it should be logged
+		IF ((DivertLogEnable AND LREAL_TO_UDINT(EXPT(2,(DivertIndex+15)))) > 0) THEN
+			sMessage := DINT_TO_STRING(DivertIndex);
+			sMessage := CONCAT(sMessage,' Blocked: ');
+			sMessage := CONCAT(sMEssage, UDINT_TO_STRING(EncoderCounts));
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Configm PE %s'
+				, strArg := sMessage); 
+		END_IF;
+	END_IF
+	IF f_ConfirmPE[DivertIndex].Q THEN
+		// Mask the convirm index to see if it should be logged
+		IF ((DivertLogEnable AND LREAL_TO_UDINT(EXPT(2,(DivertIndex+15)))) > 0) THEN
+			sMessage := DINT_TO_STRING(DivertIndex);
+			sMessage := CONCAT(sMessage,' Cleared: ');
+			sMessage := CONCAT(sMEssage, UDINT_TO_STRING(EncoderCounts));
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Configm PE %s'
+				, strArg := sMessage); 
+		END_IF;
+	END_IF
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="FB_DivertLog">
+      <LineId Id="9" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="66" Count="2" />
+      <LineId Id="31" Count="5" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="71" Count="5" />
+      <LineId Id="41" Count="7" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="80" Count="5" />
+      <LineId Id="53" Count="2" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="86" Count="5" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="25" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

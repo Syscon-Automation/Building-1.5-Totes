@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="FB_SystemCntrl" Id="{35f3f1a5-d376-44b6-8b57-8c08aa22e010}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SystemCntrl
 
@@ -12,6 +12,7 @@
 	and be easily setup as system faults.
 *)
 VAR_IN_OUT
+	{attribute 'OPC.UA.DA' := '1'}
 	Sts_EquipState				: ST_EquipmentStatus;		// State Status
 END_VAR
 VAR_INPUT
@@ -22,10 +23,12 @@ VAR_INPUT
 	Cfg_EquipLabel				: STRING(20);		// Label of the equipment
 	// Events
 	In_SystemEvents				: UINT;		// Event that is specific to the instance of the solenoid/actuator
+	{attribute 'OPC.UA.DA' := '0'}
 	Cfg_EquipEvntsArry			: ARRAY [0..15] OF ST_CfgEvents;
 	
 	// Interlocks that can be Instance Specific
 	In_SystemIntlks				: UINT;		// Interlock that is specific to the instance of the solenoid/actuator
+	{attribute 'OPC.UA.DA' := '0'}
 	Cfg_EquipIntlksArry		: ARRAY [0..15] OF ST_CfgEvents;		// Descriptions of the Interlock 
 	
 END_VAR
@@ -50,12 +53,14 @@ VAR_OUTPUT
 	Sts_FaultsArry				: ARRAY[0..15] OF ST_EventSts;	// Status of each Fault Event State (0= OFF, 1=ON)
 	{attribute 'OPC.UA.DA' := '1'}
 	Sts_WarnsArry				: ARRAY[0..15] OF ST_EventSts;		// Status of each Warning Event State (0= OFF, 1=ON)
-	{attribute 'OPC.UA.DA' := '1'}
+	{attribute 'OPC.UA.DA' := '0'}
 	Sts_EvntsArry				: ARRAY[0..15] OF ST_EventSts; 	// Status of each Event State (0= OFF, 1=ON)
 END_VAR
 VAR
+	{attribute 'OPC.UA.DA' := '0'}
 	System_fbIntrlks				: FB_Intlks_Latch;
 	System_IntlksArry				: ARRAY[0..15] OF BOOL;
+	{attribute 'OPC.UA.DA' := '0'}
 	System_EventManager				: FB_EventMngr;
 	System_EventArry				: ARRAY[0..15] OF BOOL;
 	System_LatchIgnore				: BOOL := FALSE;		// Put as a place holder for ease of future use
