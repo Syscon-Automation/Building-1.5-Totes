@@ -17,6 +17,7 @@ END_VAR
       <ST><![CDATA[BarCodeReaders();
 CommStatus();
 Conveyors();
+//Log_Diverts();
 //MsgControl();
 Photoeyes();
 ProxSensors();
@@ -46,8 +47,7 @@ IF rStartPersistentSave.Q THEN
 END_IF]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="85" Count="2" />
-      <LineId Id="89" Count="25" />
+      <LineId Id="126" Count="29" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
