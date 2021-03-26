@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.10">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.12">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{622B47A5-2C8F-FCDB-B43E-364C3DC63FBC}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..25] OF BYTE</Name>
@@ -11,345 +11,8 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}" AutoDeleteType="true">ST_ItemBufferFdbk</Name>
-			<BitSize>8</BitSize>
-			<SubItem>
-				<Name>bEmpty</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
-				<Comment><![CDATA[ Buffer is Empty]]></Comment>
-				<BitSize>8</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{5DEC6664-3F47-ACF5-F1A2-B70C0AF42EFC}" AutoDeleteType="true">E_StatusCode</Name>
-			<BitSize>8</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000002}">USINT</BaseType>
-			<EnumInfo>
-				<Text><![CDATA[No_Status]]></Text>
-				<Enum>0</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[OK]]></Text>
-				<Enum>1</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Stopped]]></Text>
-				<Enum>2</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Faulted]]></Text>
-				<Enum>3</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[UnknownError]]></Text>
-				<Enum>9</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[NotInSorter]]></Text>
-				<Enum>20</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[UpdateRequested]]></Text>
-				<Enum>21</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[QueryNeeded]]></Text>
-				<Enum>22</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[UpdateNeeded]]></Text>
-				<Enum>23</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[UpdateReceived]]></Text>
-				<Enum>24</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[ReqNotReceived]]></Text>
-				<Enum>25</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[ItemNotUpdated]]></Text>
-				<Enum>26</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[UnidentifiedItem]]></Text>
-				<Enum>27</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[ItemNotFound]]></Text>
-				<Enum>28</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Sorter_UnknownError]]></Text>
-				<Enum>29</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Assign_Accepted]]></Text>
-				<Enum>30</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Assign_Full]]></Text>
-				<Enum>31</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Assign_NotFound]]></Text>
-				<Enum>32</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Assign_NotInducted]]></Text>
-				<Enum>33</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Exiting_Sorter]]></Text>
-				<Enum>34</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Exited_Sorter]]></Text>
-				<Enum>35</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Idle]]></Text>
-				<Enum>40</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[In_Sorter]]></Text>
-				<Enum>41</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Diverting]]></Text>
-				<Enum>42</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Missed]]></Text>
-				<Enum>43</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Full]]></Text>
-				<Enum>44</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Offline]]></Text>
-				<Enum>45</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Faulted]]></Text>
-				<Enum>46</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_NotInducted]]></Text>
-				<Enum>47</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_LateAssignment]]></Text>
-				<Enum>48</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_UnknownError]]></Text>
-				<Enum>49</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Recirculated]]></Text>
-				<Enum>50</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Detected]]></Text>
-				<Enum>51</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Success]]></Text>
-				<Enum>52</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Divert_Complete]]></Text>
-				<Enum>53</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[In_Transfer]]></Text>
-				<Enum>61</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Transferring]]></Text>
-				<Enum>62</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Tranfer_Success]]></Text>
-				<Enum>63</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Transfer_Missed]]></Text>
-				<Enum>64</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Transfer_Failed]]></Text>
-				<Enum>65</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Transfer_UnknownError]]></Text>
-				<Enum>69</Enum>
-			</EnumInfo>
-		</DataType>
-		<DataType>
-			<Name GUID="{37B09027-984C-9C86-0BA8-D872729DF5D9}" AutoDeleteType="true">E_MessageIds</Name>
-			<BitSize>16</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
-			<EnumInfo>
-				<Text><![CDATA[NoMessage_00]]></Text>
-				<Enum>0</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[TransportCommand_05]]></Text>
-				<Enum>5</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[LocationUpdateResponse_07]]></Text>
-				<Enum>7</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[EquipmentStatusResponse_08]]></Text>
-				<Enum>8</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[KeepAlive_09]]></Text>
-				<Enum>9</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[Arrival_23]]></Text>
-				<Enum>23</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[TransportResponse_25]]></Text>
-				<Enum>25</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[TransportComplete_26]]></Text>
-				<Enum>26</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[LocationUpdate_27]]></Text>
-				<Enum>27</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[EquipmentStatusUpdate_28]]></Text>
-				<Enum>28</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[KeepAliveResponse_29]]></Text>
-				<Enum>29</Enum>
-			</EnumInfo>
-		</DataType>
-		<DataType>
-			<Name GUID="{B604BFB6-DC67-9331-58BE-73300A10E191}" AutoDeleteType="true">ST_Item</Name>
-			<BitSize>864</BitSize>
-			<SubItem>
-				<Name>ID</Name>
-				<Type GUID="{18071995-0000-0000-0000-000100000050}">STRING(80)</Type>
-				<Comment><![CDATA[ Bar Code 	]]></Comment>
-				<BitSize>648</BitSize>
-				<BitOffs>0</BitOffs>
-				<Default>
-					<String><![CDATA[]]></String>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>UniqueID</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ Generic ID for tracking]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>672</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>Destination</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<BitSize>32</BitSize>
-				<BitOffs>704</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>Length</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<BitSize>32</BitSize>
-				<BitOffs>736</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>Status</Name>
-				<Type GUID="{5DEC6664-3F47-ACF5-F1A2-B70C0AF42EFC}">E_StatusCode</Type>
-				<BitSize>8</BitSize>
-				<BitOffs>768</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>ExtStatus</Name>
-				<Type GUID="{5DEC6664-3F47-ACF5-F1A2-B70C0AF42EFC}">E_StatusCode</Type>
-				<BitSize>8</BitSize>
-				<BitOffs>776</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>CapturedInMetrics</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
-				<BitSize>8</BitSize>
-				<BitOffs>784</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>DeviceID</Name>
-				<Type GUID="{18071995-0000-0000-0000-000100000005}">STRING(5)</Type>
-				<Comment><![CDATA[ Device ID associated with this record]]></Comment>
-				<BitSize>48</BitSize>
-				<BitOffs>792</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>MessageType</Name>
-				<Type GUID="{37B09027-984C-9C86-0BA8-D872729DF5D9}">E_MessageIds</Type>
-				<Comment><![CDATA[ Message Type associated with this record]]></Comment>
-				<BitSize>16</BitSize>
-				<BitOffs>848</BitOffs>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{571043E5-A359-0785-C350-4323CDA37A4B}" AutoDeleteType="true">ST_ItemBuffer</Name>
-			<BitSize>86464</BitSize>
-			<SubItem>
-				<Name>aBufferData</Name>
-				<Type GUID="{B604BFB6-DC67-9331-58BE-73300A10E191}">ST_Item</Type>
-				<ArrayInfo>
-					<LBound>0</LBound>
-					<Elements>100</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ Data stored in the buffer, 100 elements]]></Comment>
-				<BitSize>86400</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>nInPointer</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<Comment><![CDATA[ Pointer for data put into the buffer]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>86400</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>bClear</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
-				<Comment><![CDATA[ Clear the Buffer]]></Comment>
-				<BitSize>8</BitSize>
-				<BitOffs>86432</BitOffs>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}" AutoDeleteType="true">E_StateCntrl</Name>
+			<Name GUID="{3960C317-6EDC-5F00-4C7B-F8FAD8AA8743}" AutoDeleteType="true">E_StateCntrl</Name>
+			<Comment><![CDATA[ {attribute 'strict'}]]></Comment>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -372,9 +35,24 @@
 				<Enum>3</Enum>
 				<Comment><![CDATA[ Allowed to transition to Offline/Manual ]]></Comment>
 			</EnumInfo>
+			<Properties>
+				<Property>
+					<Name>textlistenumeration</Name>
+				</Property>
+				<Property>
+					<Name>qualified_only</Name>
+				</Property>
+				<Property>
+					<Name>generate_implicit_init_function</Name>
+				</Property>
+			</Properties>
+			<Hides>
+				<Hide GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}"/>
+			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}" AutoDeleteType="true">E_OperStateCntrl</Name>
+			<Name GUID="{DF0EE7B8-94B8-2210-4603-CDBA0E2B1058}" AutoDeleteType="true">E_OperStateCntrl</Name>
+			<Comment><![CDATA[ {attribute 'strict'}]]></Comment>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -413,6 +91,20 @@
 				<Text><![CDATA[unknown]]></Text>
 				<Enum>8</Enum>
 			</EnumInfo>
+			<Properties>
+				<Property>
+					<Name>textlistenumeration</Name>
+				</Property>
+				<Property>
+					<Name>qualified_only</Name>
+				</Property>
+				<Property>
+					<Name>generate_implicit_init_function</Name>
+				</Property>
+			</Properties>
+			<Hides>
+				<Hide GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}"/>
+			</Hides>
 		</DataType>
 		<DataType>
 			<Name GUID="{3AB4C627-A758-0E1E-7675-A1F136EB5998}" AutoDeleteType="true">ST_StateCntrlPB</Name>
@@ -475,11 +167,11 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{45893F60-17ED-F8B3-C0FA-66300A1E1DF8}" AutoDeleteType="true">ST_StateCntrlSts</Name>
+			<Name GUID="{9DD1BB04-677E-9B11-BAF5-0F59A039FFCF}" AutoDeleteType="true">ST_StateCntrlSts</Name>
 			<BitSize>896</BitSize>
 			<SubItem>
 				<Name>CrntState</Name>
-				<Type GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}">E_StateCntrl</Type>
+				<Type GUID="{3960C317-6EDC-5F00-4C7B-F8FAD8AA8743}">E_StateCntrl</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>0</BitOffs>
 				<Properties>
@@ -504,7 +196,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>CrntOperState</Name>
-				<Type GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}">E_OperStateCntrl</Type>
+				<Type GUID="{DF0EE7B8-94B8-2210-4603-CDBA0E2B1058}">E_OperStateCntrl</Type>
 				<Comment><![CDATA[ The Current Operational state]]></Comment>
 				<BitSize>16</BitSize>
 				<BitOffs>192</BitOffs>
@@ -546,13 +238,13 @@
 			</SubItem>
 			<SubItem>
 				<Name>LstState</Name>
-				<Type GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}">E_StateCntrl</Type>
+				<Type GUID="{3960C317-6EDC-5F00-4C7B-F8FAD8AA8743}">E_StateCntrl</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>672</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>LstOperState</Name>
-				<Type GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}">E_OperStateCntrl</Type>
+				<Type GUID="{DF0EE7B8-94B8-2210-4603-CDBA0E2B1058}">E_OperStateCntrl</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>688</BitOffs>
 			</SubItem>
@@ -629,12 +321,15 @@
 				<BitSize>8</BitSize>
 				<BitOffs>888</BitOffs>
 			</SubItem>
+			<Hides>
+				<Hide GUID="{45893F60-17ED-F8B3-C0FA-66300A1E1DF8}"/>
+			</Hides>
 		</DataType>
 		<DataType>
 			<Name IecBaseType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
 			<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
 			<BitSize>8960</BitSize>
-			<BaseType GUID="{45893F60-17ED-F8B3-C0FA-66300A1E1DF8}">ST_StateCntrlSts</BaseType>
+			<BaseType GUID="{9DD1BB04-677E-9B11-BAF5-0F59A039FFCF}">ST_StateCntrlSts</BaseType>
 			<ArrayInfo>
 				<LBound>1</LBound>
 				<Elements>10</Elements>
@@ -650,7 +345,7 @@
 			</Tasks>
 		</System>
 		<Plc>
-			<Project GUID="{C0616027-FF8E-43F6-867D-11FAFE1B833A}" Name="Building_1_5_Totes_ARUP" PrjFilePath="Building_1_5_Totes_ARUP\Building_1_5_Totes_ARUP.plcproj" TmcFilePath="Building_1_5_Totes_ARUP\Building_1_5_Totes_ARUP.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+			<Project GUID="{C0616027-FF8E-43F6-867D-11FAFE1B833A}" Name="Building_1_5_Totes_ARUP" PrjFilePath="Building_1_5_Totes_ARUP\Building_1_5_Totes_ARUP.plcproj" TmcFilePath="Building_1_5_Totes_ARUP\Building_1_5_Totes_ARUP.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" CopyTmcToTarget="true" CopyTpyToTarget="false" SymbolicMapping="true">
 				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Building_1_5_Totes_ARUP\Building_1_5_Totes_ARUP.tmc">
 					<Name>Building_1_5_Totes_ARUP Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
@@ -897,14 +592,6 @@
 							<Type GUID="{622B47A5-2C8F-FCDB-B43E-364C3DC63FBC}">ARRAY [0..25] OF BYTE</Type>
 						</Var>
 						<Var>
-							<Name>BarCodeReaders.st_ArrivalFdbkIn_P2140</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
-						</Var>
-						<Var>
-							<Name>BarCodeReaders.st_ArrivalFdbkIn_P2150</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
-						</Var>
-						<Var>
 							<Name>ProxSensors.In_PX_2131_Extended</Name>
 							<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
 							<Type>BOOL</Type>
@@ -1023,14 +710,6 @@
 							<Type>UINT</Type>
 						</Var>
 						<Var>
-							<Name>SystemSafety.Safety_SystemEstopsOK</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>SystemSafety.Safety_PanelEstop</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>Conveyors.P2146_VFD.ActualVelocity</Name>
 							<Type>INT</Type>
 						</Var>
@@ -1047,8 +726,12 @@
 							<Type>UINT</Type>
 						</Var>
 						<Var>
-							<Name>MsgControl.st_TransportFdbkIn</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
+							<Name>SystemSafety.Safety_SystemEstopsOK</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.Safety_PanelEstop</Name>
+							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>Photoeyes.PE_11241.In_PE</Name>
@@ -1222,9 +905,9 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MsgControl.st_SorterUpdateBuffer</Name>
-							<Comment><![CDATA[ Input from the sorter to update the host messaging (MsgControl)]]></Comment>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
+							<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
+							<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
+							<Type GUID="{E6B6B3B8-5AC6-8635-2FF4-F830805BA92F}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.PB_SysStart</Name>
@@ -1381,14 +1064,24 @@
 							<Type>UINT</Type>
 						</Var>
 						<Var>
-							<Name>GVL_IO.RIO1151_WcState</Name>
-							<Comment><![CDATA[ Remote IO Block 1151]]></Comment>
-							<Type>BOOL</Type>
+							<Name>GVL_IO.ENC_9091_Raw</Name>
+							<Comment><![CDATA[ Raw Encoder Value]]></Comment>
+							<Type>UINT</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.ENC_9031_Period</Name>
 							<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
 							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.ENC_9091_Period</Name>
+							<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
+							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.RIO1151_WcState</Name>
+							<Comment><![CDATA[ Remote IO Block 1151]]></Comment>
+							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.RIO2151_WcState</Name>
@@ -1460,67 +1153,8 @@
 							<Comment><![CDATA[ Ethernet Adapter State]]></Comment>
 							<Type>UINT</Type>
 						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
-							<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
-							<Type GUID="{3EEE37DC-2A55-E597-55FB-91592A7C4B18}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
-						</Var>
-						<Var>
-							<Name>Sorter.ENC_Raw_P2140</Name>
-							<Comment><![CDATA[ Raw Encoder Value]]></Comment>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Sorter.In_DefaultDestination_P2140</Name>
-							<Comment><![CDATA[ Input default destination update from Host messaging(MsgControl.RECEIVE)]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>Sorter.ENC_Raw_P2150</Name>
-							<Comment><![CDATA[ Raw Encoder Value]]></Comment>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Sorter.In_DefaultDestination_P2150</Name>
-							<Comment><![CDATA[ Input default destination update from Host messaging(MsgControl.RECEIVE)]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2140.st_UpdateFdbkIn</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2150.st_UpdateFdbkIn</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2140.st_ArrivalBuffer</Name>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2140.st_TransportBuffer</Name>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
-						</Var>
-						<Var>
-							<Name>GVL_IO.ENC_9091_Raw</Name>
-							<Comment><![CDATA[ Raw Encoder Value]]></Comment>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2150.st_ArrivalBuffer</Name>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2150.st_TransportBuffer</Name>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
-						</Var>
-						<Var>
-							<Name>GVL_IO.ENC_9091_Period</Name>
-							<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
-							<Type>UDINT</Type>
-						</Var>
 					</Vars>
-					<Vars VarGrpType="2">
+					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcTask Outputs</Name>
 						<Var>
 							<Name>MAIN.PLCPersistentSave</Name>
@@ -1587,14 +1221,12 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>BarCodeReaders.st_SorterArrivalBuffer_P2140</Name>
-							<Comment><![CDATA[ Output from the Barcode Reader to the sorter]]></Comment>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
+							<Name>Conveyors.P2141_VFD.ControlWord</Name>
+							<Type>UINT</Type>
 						</Var>
 						<Var>
-							<Name>BarCodeReaders.st_SorterArrivalBuffer_P2150</Name>
-							<Comment><![CDATA[ Output from the Barcode Reader to the sorter]]></Comment>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
+							<Name>Conveyors.P2141_VFD.TargetVelocity</Name>
+							<Type>INT</Type>
 						</Var>
 						<Var>
 							<Name>System.SysIntlksAllOk</Name>
@@ -1612,22 +1244,30 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>System.ConvDefaultState</Name>
-							<Comment><![CDATA[ The default state of all conveyors]]></Comment>
-							<Type GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}">E_StateCntrl</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2141_VFD.ControlWord</Name>
+							<Name>Conveyors.P2146_VFD.ControlWord</Name>
 							<Type>UINT</Type>
 						</Var>
 						<Var>
-							<Name>Conveyors.P2141_VFD.TargetVelocity</Name>
+							<Name>Conveyors.P2146_VFD.TargetVelocity</Name>
 							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>System.ConvDefaultState</Name>
+							<Comment><![CDATA[ The default state of all conveyors]]></Comment>
+							<Type GUID="{3960C317-6EDC-5F00-4C7B-F8FAD8AA8743}">E_StateCntrl</Type>
 						</Var>
 						<Var>
 							<Name>System.Cnvyr_Auto</Name>
 							<Comment><![CDATA[ Bit to send to all conveyors to put them in Auto mode]]></Comment>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P3080_VFD.ControlWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P3080_VFD.TargetVelocity</Name>
+							<Type>INT</Type>
 						</Var>
 						<Var>
 							<Name>System.Cnvyr_Manual</Name>
@@ -1643,26 +1283,6 @@
 							<Name>System.Cnvyr_Reset</Name>
 							<Comment><![CDATA[ Bit to send to all conveyors to reset faults, safeties and etc]]></Comment>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2146_VFD.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2146_VFD.TargetVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P3080_VFD.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P3080_VFD.TargetVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
-							<Name>MsgControl.st_UpdateFdbkOut</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
 						</Var>
 						<Var>
 							<Name>SystemSafety.System_SafetyState.Reset</Name>
@@ -1681,14 +1301,14 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MsgControl.Out_DefaultDestination</Name>
-							<Comment><![CDATA[ Update default destination location from Host(Send to Sorter PLC)]]></Comment>
+							<Name>GVL_EquipArrays.nEquip_Count</Name>
+							<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
 							<Type>DINT</Type>
 						</Var>
 						<Var>
-							<Name>MsgControl.st_SorterTransportBuffer</Name>
-							<Comment><![CDATA[ Output to the sorter to update the Item Destinations]]></Comment>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
+							<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
+							<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
+							<Type GUID="{E6B6B3B8-5AC6-8635-2FF4-F830805BA92F}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.HornMainPanel</Name>
@@ -1859,40 +1479,6 @@
 							<Name>GVL_IO.PU2150_04_Extend</Name>
 							<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.nEquip_Count</Name>
-							<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
-							<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
-							<Type GUID="{3EEE37DC-2A55-E597-55FB-91592A7C4B18}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2140.st_ArrivalFdbkOut</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2140.st_TransportFdbkOut</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2150.st_ArrivalFdbkOut</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2150.st_TransportFdbkOut</Name>
-							<Type GUID="{475BB302-20EA-0F51-7FAD-5140BB425113}">ST_ItemBufferFdbk</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2140.st_UpdateBuffer</Name>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
-						</Var>
-						<Var>
-							<Name>ProcessBuffers_P2150.st_UpdateBuffer</Name>
-							<Type GUID="{571043E5-A359-0785-C350-4323CDA37A4B}">ST_ItemBuffer</Type>
 						</Var>
 					</Vars>
 					<Contexts>

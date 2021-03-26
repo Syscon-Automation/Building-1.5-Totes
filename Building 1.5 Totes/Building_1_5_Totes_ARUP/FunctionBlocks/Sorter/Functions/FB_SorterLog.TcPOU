@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="FB_SorterLog" Id="{e2396a7d-6b34-4b02-83dc-f2c406ebff27}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SorterLog
+VAR_IN_OUT
+END_VAR
+VAR_INPUT
+	SorterToLog			:	ST_Sorter;
+	SorterLogEnable		:	UDINT;
+	ToInduct			:	ST_ItemTemporary;
+END_VAR
+VAR_OUTPUT
+	TempItem			:	ST_ItemTemporary;
+END_VAR
+VAR
+	rInductPE			:	R_TRIG;
+	fInductPE			:	F_TRIG;
+	rDischargePE		:	R_TRIG;
+	fDischargePE		:	F_TRIG;
+	sMessage			:	STRING;
+	BlankItem			: 	ST_Item := (ID := ''
+										, UniqueID := 0
+										, Destination := 0
+										, DestinationIdx := 0
+										, Status := E_StatusCode.No_Status
+										, ExtStatus := E_StatusCode.No_Status
+										, DeviceID := ''
+										, MessageType := E_MessageIds.NoMessage_00);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Capture rising and falling edge Triggers of the configured Sorter PE (Induct/Discharge)
+rInductPE(CLK:= SorterToLog.InductPE, Q =>);
+fInductPE(CLK:= SorterToLog.InductPE, Q =>);
+rDischargePE(CLK:= SorterToLog.DischargePE, Q =>);
+fDischargePE(CLK:= SorterToLog.DischargePE, Q =>);
+
+// On the rising/falling edge of the Induct PE
+IF rDischargePE.Q OR fDischargePE.Q THEN
+	IF SorterLogEnable.SORTER_DISCHARGE_PE THEN
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Induct PE Blocked : %s'
+			, strArg := BOOL_TO_STRING(SorterToLog.DischargePE)); 
+	END_IF
+END_IF
+
+// Prepare a dummy record for items that arrive before BCR data is received
+// On the rising edge of the Induct PE
+IF rInductPE.Q THEN
+	// Test for a UniqueID, which indicates that a Barcode has been received
+	IF ToInduct.Item.UniqueID = 0 THEN
+		// Capture and create relevant info
+		TempItem.Counts := SorterToLog.EncoderCounts;
+		TempItem.Item.UniqueID :=  UDINT_TO_DINT(SorterToLog.EncoderCounts);
+		TempItem.Item.ID :=  CONCAT('T-', UDINT_TO_STRING(SorterToLog.EncoderCounts));
+		TempItem.Item.Destination := SorterToLog.Config.DefaultDestination;
+		TempItem.Item.Status := E_StatusCode.UnidentifiedItem;
+		IF SorterLogEnable.SORTER_TEMPID THEN
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Temp ID Assigned : %s'
+				, strArg := TempItem.Item.ID);
+		END_IF
+	END_IF	
+END_IF
+
+// Clear the dummy record when the PE clears
+// Items can only be inducted when the BCR info is received before or while the induct PE is blocked
+IF fInductPE.Q THEN
+	// Clear the record
+	TempItem.Counts := 0;
+	TempItem.Item :=  BlankItem;
+END_IF
+
+// On the rising/falling edge of the Discharge PE
+IF rDischargePE.Q OR fDischargePE.Q THEN
+	IF SorterLogEnable.SORTER_DISCHARGE_PE THEN
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Discharge PE Blocked : %s'
+			, strArg := BOOL_TO_STRING(SorterToLog.DischargePE)); 
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_SorterLog">
+      <LineId Id="135" Count="5" />
+      <LineId Id="226" Count="7" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="142" Count="1" />
+      <LineId Id="150" Count="18" />
+      <LineId Id="175" Count="3" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="189" Count="7" />
+      <LineId Id="211" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

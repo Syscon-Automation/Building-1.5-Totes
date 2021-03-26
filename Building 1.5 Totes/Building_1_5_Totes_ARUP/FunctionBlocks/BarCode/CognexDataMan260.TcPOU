@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="CognexDataMan260" Id="{6b0204a3-1525-40f4-a3f1-79c3ceda7b4d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK CognexDataMan260
 VAR_INPUT
@@ -8,6 +8,7 @@ VAR_INPUT
 	In_ReadTrig			: BOOL;			// Read Trigger input -- (1=Read Bar Code)
 	In_ResetCounts		: BOOL;		// Trigger to reset counters (1=Reset)
 	In_TriggerOnTime	: TIME := T#200MS;
+	{attribute 'OPC.UA.DA' := '1'}
 	In_EquipID			: STRING(20);	// Equip ID used for reporting
 	
 END_VAR

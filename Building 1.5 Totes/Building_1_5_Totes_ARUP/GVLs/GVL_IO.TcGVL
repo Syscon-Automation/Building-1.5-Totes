@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <GVL Name="GVL_IO" Id="{c1c3ca00-a4ff-4270-a218-a7754a85e85c}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'OPC.UA.DA' := '1'}
 VAR_GLOBAL
 	INIT						: BOOL := TRUE;		// Initialization Bit
 	
@@ -62,31 +63,18 @@ VAR_GLOBAL
 	P3090_Faulted            AT %I*   :BOOL;    //P3090 Faulted 
 	P3095_Faulted            AT %I*   :BOOL;    //P3095 Faulted 
 //---------------------------------Disconnect Status------------------------------------------------- 
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2130            AT %I*  :BOOL;  //P2130 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2135            AT %I*  :BOOL;  //P2135 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2140            AT %I*  :BOOL;  //P2140 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2143            AT %I*  :BOOL;  //P2143 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2141            AT %I*  :BOOL;  //P2141 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2142            AT %I*  :BOOL;  //P2142 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2145            AT %I*  :BOOL;  //P2145 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2146            AT %I*  :BOOL;  //P2146 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P2150            AT %I*  :BOOL;  //P2150 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P3080            AT %I*  :BOOL;  //P3080 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P3085            AT %I*  :BOOL;  //P3085 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P3090            AT %I*  :BOOL;  //P3090 Disconnect
-	{attribute 'OPC.UA.DA' := '1'}
 	DS_P3095            AT %I*  :BOOL;  //P3095 Disconnect
 //---------------------------------Solenoid Valves------------------------------------------------- 
    GR2140_01_Extend        AT %Q*:    BOOL; // P2140 Solenoid Extend   
@@ -101,15 +89,11 @@ VAR_GLOBAL
    PU2150_03_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
    PU2150_04_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
 //---------------------------------Encoder------------------------------------------------- 
-	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9031_Raw	AT %I*:	UINT;	// Raw Encoder Value
-	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9031_OK			: BOOL;
 	ENC_9031_Period	AT %I*:	UDINT;	// Encoder Period, channel 1, 100ns resolution
 	
-		{attribute 'OPC.UA.DA' := '1'}
 	ENC_9091_Raw	AT %I*:	UINT;	// Raw Encoder Value
-	{attribute 'OPC.UA.DA' := '1'}
 	ENC_9091_OK			: BOOL;
 	ENC_9091_Period	AT %I*:	UDINT;	// Encoder Period, channel 1, 100ns resolution
 	

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="MotionMergeExample" Id="{61412566-61ac-49ff-95e5-521eace37afb}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MotionMergeExample
 VAR
@@ -12,7 +12,6 @@ VAR
 END_VAR
 
 VAR PERSISTENT
-	{attribute 'OPC.UA.DA' := '1'}
 	Merge_1_Config				: ST_MotionMergeConfig; 
 END_VAR
 

@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <DUT Name="ST_Item" Id="{5d791c6b-b28c-4c54-9380-14b2cb3fa533}">
     <Declaration><![CDATA[TYPE ST_Item :
 STRUCT
 	ID : STRING := '';		// Bar Code 	
 	UniqueID : DINT := 0;		// Generic ID for tracking
 	Destination : DINT := 0;
+	DestinationIdx : DINT := 0;
 	Length : DINT := 0;
 	Status : E_StatusCode := E_StatusCode.No_Status;
 	ExtStatus : E_StatusCode := E_StatusCode.No_Status;

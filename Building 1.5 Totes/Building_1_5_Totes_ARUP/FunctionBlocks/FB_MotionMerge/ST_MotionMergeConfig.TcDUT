@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <DUT Name="ST_MotionMergeConfig" Id="{6532b1ed-1b8f-43bb-8d93-0984ceb81f56}">
-    <Declaration><![CDATA[TYPE ST_MotionMergeConfig :
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_MotionMergeConfig :
 STRUCT
 	MergeDistance: 			UINT;	// The distance from the induct PE to the merge point (Merge start location)
 	MergeClearDistance: 	UINT;	// The distance from the induct PE to a cleared point past the merge (Merge end location)

@@ -1,28 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <DUT Name="ST_EquipmentStatus" Id="{9b866fc5-b47f-4054-9247-046018821bdb}">
     <Declaration><![CDATA[TYPE ST_EquipmentStatus :
 STRUCT
 	Sts_EquipmentState:	ST_StateCntrlSts;		// State Status
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_SleepingActive: BOOL;	// Status to show conveyor is in sleep state
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_All_Intlks_OK:	BOOL;		// Status bit to show that all interloks are good to Run 
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_FaultActive:	BOOL;	// Status Bit Showing that a fault is present (0= No Active Faults, 1= Fault Active)
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_WarnActive:	BOOL;	// Status Bit Showing that a warning is present (0= No Active Warnings, 1= Warning Active)
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_All_Evnts_OK: BOOL;		// Status Bit Showing that ALL Events are OK to RUN (0= Event Present, 1= OK to Run)
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_IsRunning :BOOL;	// Status to show conveyor is running (1=running)
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_IsExtending :BOOL;	// Status to show Actuator is extending (1=extending)
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_IsExtended :BOOL;	// Status to show Actuator is extended (1=extended)
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_IsRetracting :BOOL;	// Status to show Actuator is retracting (1=retracting)
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_IsRetracted :BOOL;	// Status to show Actuator is retracted (1=retracted)
 END_STRUCT
 END_TYPE

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <GVL Name="GVL_SorterItems" Id="{8a915346-b285-428e-906a-de794a0f6ea5}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+VAR_GLOBAL
+	// Default Destination per Sorter/divert
+	P2140_DefaultDestination:		DINT;	// Input default destination update from Host messaging(MsgControl.RECEIVE)
+	P2150_DefaultDestination:		DINT;	// Input default destination update from Host messaging(MsgControl.RECEIVE)
+
+	st_SorterArrivalBuffer_P2140:		ST_ItemBuffer;		// Output from the Barcode Reader to the sorter
+	st_ArrivalFdbkIn_P2140: 			ST_ItemBufferFdbk;
+	st_ArrivalFdbkOut_P2140:			ST_ItemBufferFdbk;
+
+	st_SorterArrivalBuffer_P2150:		ST_ItemBuffer;		// Output from the Barcode Reader to the sorter
+	st_ArrivalFdbkIn_P2150:				ST_ItemBufferFdbk;
+	st_ArrivalFdbkOut_P2150:			ST_ItemBufferFdbk;
+	
+	st_SorterTransportBuffer_P2140:		ST_ItemBuffer;		// Routing from the ARUP Host to the sorter
+	st_TransportFdbkIn_P2140: 			ST_ItemBufferFdbk;
+	st_TransportFdbkOut_P2140: 			ST_ItemBufferFdbk;
+
+	st_SorterTransportBuffer_P2150:		ST_ItemBuffer;		// Routing from the ARUP Host to the sorter
+	st_TransportFdbkIn_P2150: 			ST_ItemBufferFdbk;
+	st_TransportFdbkOut_P2150: 			ST_ItemBufferFdbk;
+
+	st_SorterUpdateBuffer:				ST_ItemBuffer;  	// Output from the sorter to update the host messaging (MsgControl)
+	st_UpdateFdbkIn:					ST_ItemBufferFdbk;
+	st_UpdateFdbkOut:					ST_ItemBufferFdbk;
+
+	BlankItem					: ST_Item := (ID := '', UniqueID := 0
+													, Destination := 0
+													, DestinationIdx := 0
+													, Status := E_StatusCode.No_Status
+													, ExtStatus := E_StatusCode.No_Status
+													, DeviceID := ''
+													, MessageType := E_MessageIds.NoMessage_00);
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="ProcessBuffers_P2150" Id="{140d9094-9a1a-4cc6-81c1-a0bf56f4bd2e}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM ProcessBuffers_P2150
 VAR_IN_OUT
@@ -13,31 +13,22 @@ END_VAR
 
 VAR_INPUT
 	DivertToCommission				: DINT;
+	ItemsArrayMax 					: UDINT;
+	ItemsArrayMin 					: UDINT;
 END_VAR
 VAR
-	st_ArrivalBuffer AT %I* 		: ST_ItemBuffer;
-	st_ArrivalFdbkIn				: ST_ItemBufferFdbk;
-	st_ArrivalFdbkOut	AT %Q*		: ST_ItemBufferFdbk;
 	fb_ArrivalBuffer				: FB_ItemBuffer;
 	st_ArrivalItem 					: ST_Item;		// Arrival Item (Bar code read) from System PLC (BarCodeReaders.pou)
 
 	// Item to replace in the sorter buffer
 	st_ReplaceItem					: st_Item;
 
-	st_TransportBuffer AT %I* 		: ST_ItemBuffer;
-	st_TransportFdbkIn				: ST_ItemBufferFdbk;
-	st_TransportFdbkOut	AT %Q*		: ST_ItemBufferFdbk;
 	fb_TransportBuffer				: FB_ItemBuffer;
 
-	st_UpdateBuffer AT %Q* 			: ST_ItemBuffer;
-	st_UpdateFdbkIn	AT %I*			: ST_ItemBufferFdbk;
-	st_UpdateFdbkOut				: ST_ItemBufferFdbk;
 	fb_UpdateBuffer 				: FB_ItemBuffer;
 
 	st_ToUpdate						: ST_ItemTemporary;	// Item to Update on the Sorter, or waiting to be added to the sorter
 
-	ItemsArrayMax 			: UDINT;
-	ItemsArrayMin 			: UDINT;
 	ItemsArraySize			: UDINT;
 
 	TransportItemInSorter	: ST_Item;	// Temporary Processing Item
@@ -55,21 +46,16 @@ VAR
 
 	UpdateIndexCounter		: DINT;
 
-	BlankItem					: ST_Item := (ID := ''
-												, UniqueID := 0
-												, Destination := 0
-												, Status := E_StatusCode.No_Status
-												, ExtStatus := E_StatusCode.No_Status
-												, DeviceID := ''
-												, MessageType := E_MessageIds.NoMessage_00);
-
-//	fbGetCurTaskIdx : GETCURTASKINDEX;
 	bTest : BOOL;
 	sMessage	:	STRING;
 	
 	st_DisplayItem		:st_Item;
 	LogSorterDump		:BOOL := FALSE;
-	aTestBool			:	ARRAY[0..100] OF BOOL;
+	fb_FindDestination		: FB_FindDestination;
+	fb_DefaultDestination	: FB_FindDestination;
+	fb_RecircDestination	: FB_FindDestination;
+	// Created to allow the aDiverts to be used in the FB_FindDestination Function Block
+	aTempDiverts			: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF ST_DIVERT;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*
@@ -78,6 +64,7 @@ END_VAR]]></Declaration>
 	Each Arrival location will require a separate Arrival buffer in the BarCodeReaders program to map the I/O
 *)
 
+aTempDiverts := aDiverts;
 // Initialize the Transport and Update buffers
 // Set Master for FB's that control the buffer
 fb_ArrivalBuffer.Master := FALSE;
@@ -90,18 +77,18 @@ fb_TransportBuffer.LogEntries := .nItemBufferLogEnable.TRANSPORT;
 fb_UpdateBuffer.LogEntries := .nItemBufferLogEnable.UPDATE;
 
 // Provide names for the buffers
-fb_ArrivalBuffer.Name := 'SRT ARRIVAL';
-fb_TransportBuffer.Name := 'SRT TRANSPORT';
-fb_UpdateBuffer.Name := 'SRT UPDATE';
+fb_ArrivalBuffer.Name := 'P2150 SRT ARRIVAL';
+fb_TransportBuffer.Name := 'P2150 SRT TRANSPORT';
+fb_UpdateBuffer.Name := 'P2150 SRT UPDATE';
 
 // Initialize the FB_ItemExtBuffer Instances
-fb_ArrivalBuffer(st_BufferData := st_ArrivalBuffer
-						, st_BufferFdbkIn := st_ArrivalFdbkIn
-						, st_BufferFdbkOut => st_ArrivalFdbkOut);
-fb_TransportBuffer(st_BufferData := st_TransportBuffer
-						, st_BufferFdbkIn := st_TransportFdbkIn
-						, st_BufferFdbkOut => st_TransportFdbkOut);
-fb_UpdateBuffer(st_BufferData := st_UpdateBuffer
+fb_ArrivalBuffer(st_BufferData := st_SorterArrivalBuffer_P2150
+						, st_BufferFdbkIn := st_ArrivalFdbkOut_P2150
+						, st_BufferFdbkOut => st_ArrivalFdbkIn_P2150);
+fb_TransportBuffer(st_BufferData := st_SorterTransportBuffer_P2150
+						, st_BufferFdbkIn := st_TransportFdbkOut_P2150
+						, st_BufferFdbkOut => st_TransportFdbkIn_P2150);
+fb_UpdateBuffer(st_BufferData := st_SorterUpdateBuffer
 						, st_BufferFdbkIn := st_UpdateFdbkIn
 						, st_BufferFdbkOut => st_UpdateFdbkOut);
 
@@ -115,9 +102,6 @@ END_IF
 	Set the Upper/Lower bound of relevant arrays for looping purposes
 	ItemsArrayMax/Min for the sorter array slot count
 *)
-ItemsArrayMin		:= Sorter.SORTERENCODERMIN_P2150;
-ItemsArrayMax		:= Sorter.SORTERENCODERMAX_P2150;
-
 // Size is Max - Min + 1 to capture both extremes
 ItemsArraySize := ItemsArrayMax - ItemsArrayMin + 1;
 
@@ -127,7 +111,7 @@ ItemsArraySize := ItemsArrayMax - ItemsArrayMin + 1;
 	When an Item arrives, the System PLC adds it to the shared buffer and increments
 	the InPointer
 *)
-IF st_ArrivalBuffer.nInPointer <> fb_ArrivalBuffer.OutPointer THEN
+IF st_SorterArrivalBuffer_P2150.nInPointer <> fb_ArrivalBuffer.OutPointer THEN
 	fb_ArrivalBuffer.RemoveItem(st_ItemToReturn => st_ArrivalItem);
 END_IF
 
@@ -154,7 +138,7 @@ IF st_ArrivalItem.ID <> '' THEN
 		END_IF
 		// Transport Response
 		st_NextToInduct.Item.Status := E_StatusCode.Assign_NotInducted;
-		st_NextToInduct.Item.DeviceID := st_Sorter.Config.Name;
+		st_NextToInduct.Item.DeviceID := st_Sorter.Config.EquipID;
 		st_NextToInduct.Item.MessageType := E_MessageIds.TransportResponse_25;
 		fb_UpdateBuffer.AddItem(st_ItemToAdd := st_NextToInduct.Item);
 
@@ -165,6 +149,9 @@ IF st_ArrivalItem.ID <> '' THEN
 	END_IF
 	// Copy Last BCR item to Item to Induct
 	st_NextToInduct.Item :=  st_ArrivalItem;
+	// Add the Sorter EquipID to the NextToInduct
+	st_NextToInduct.Item.DeviceID := st_Sorter.Config.EquipID;
+	// Set the Default Destination
 	st_NextToInduct.Item.Destination := st_Sorter.Config.DefaultDestination;
 	// Capture an encoder value that when the encoder count exceeds this value, NextToInduct item will be cleared
 	st_NextToInduct.Counts := st_Sorter.EncoderCounts;
@@ -193,9 +180,37 @@ END_IF
 	When an update arrived, the System PLC adds it to the shared buffer and increments
 	the InPointer
 *)
-IF st_TransportBuffer.nInPointer <> fb_TransportBuffer.OutPointer THEN
+IF st_SorterTransportBuffer_P2150.nInPointer <> fb_TransportBuffer.OutPointer THEN
 	fb_TransportBuffer.RemoveItem(st_ItemToReturn => st_ToUpdate.Item);
+	// Lookup the index for the chosen destination
+	fb_FindDestination(RoundRobin := st_Sorter.Config.RoundRobin
+					, aDiverts := aTempDiverts
+					, DestinationID := st_ToUpdate.Item.Destination
+					, DestinationIndex => st_ToUpdate.Item.DestinationIdx);
+	IF .nSortBufferLogEnable.BUFFER_DESTINDEX THEN
+		sMessage := CONCAT(' Item: ', st_ToUpdate.Item.ID);
+		sMessage := CONCAT(sMessage,' Destination: ');
+		sMessage := CONCAT(sMessage, UDINT_TO_STRING(TransportSorterIndex));
+		sMessage := CONCAT(sMessage,' Index: ');
+		sMessage := CONCAT(sMessage, UDINT_TO_STRING(TransportSorterIndex));
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Divert Index of Destination: %s'
+			, strArg := sMessage);
+	END_IF
 END_IF
+
+// Get the Default Destination Index
+fb_DefaultDestination(RoundRobin := st_Sorter.Config.RoundRobin
+				, aDiverts := aTempDiverts
+				, DestinationID := st_Sorter.Config.DefaultDestination
+				, DestinationIndex => st_Sorter.Config.DefaultDestIdx);
+
+// Get the Recirculation Destination Index
+fb_RecircDestination(RoundRobin := st_Sorter.Config.RoundRobin
+				, aDiverts := aTempDiverts
+				, DestinationID := st_Sorter.Config.RecircDestination
+				, DestinationIndex => st_Sorter.Config.RecircDestIdx);
 
 // Test the Item to Update against the Item to Induct and update if they match:
 //	Update the NextItemToInduct with the updated data, then clear the Item to Update
@@ -204,19 +219,20 @@ IF st_ToUpdate.Item.ID <> '' THEN
 		// Indicate that the transport command was received and a response was sent
 		st_NextToInduct.Item.MessageType := E_MessageIds.TransportResponse_25;
 		// Test the assigned lane for availability
-		IF aDiverts[st_ToUpdate.Item.Destination].Full
-		   OR aDiverts[st_ToUpdate.Item.Destination].Faulted THEN
+		IF aDiverts[st_ToUpdate.Item.DestinationIdx].Full
+		   OR aDiverts[st_ToUpdate.Item.DestinationIdx].Faulted THEN
 			// Prepare a message to indicate that the item cannot be assigned
 			st_ToUpdate.Item.Status := E_StatusCode.Assign_Full;
-			st_ToUpdate.Item.DeviceID := st_Sorter.Config.Name;
+			st_ToUpdate.Item.DeviceID := st_Sorter.Config.EquipID;
 			st_ToUpdate.Item.MessageType := E_MessageIds.TransportResponse_25;
 			fb_UpdateBuffer.AddItem(st_ItemToAdd := st_ToUpdate.Item);
 			st_NextToInduct.Item.ExtStatus := E_StatusCode.Divert_Full;
 		ELSE
-			st_NextToInduct.Item.DeviceID := st_Sorter.Config.Name;
+			st_NextToInduct.Item.DeviceID := st_Sorter.Config.EquipID;
 			st_NextToInduct.Item.Status := E_StatusCode.Assign_Accepted;
 			// Update the Destination
 			st_NextToInduct.Item.Destination := st_ToUpdate.Item.Destination;
+			st_NextToInduct.Item.DestinationIdx := st_ToUpdate.Item.DestinationIdx;
 			fb_UpdateBuffer.AddItem(st_ItemToAdd := st_NextToInduct.Item);
 		END_IF
 		// If commissioning, ignore any other direction
@@ -258,8 +274,8 @@ ExitComplete := FALSE;
 // Loop through the entire array, it should be appropriately sized for the length of the sorter section
 FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArrayMax) DO //Loop through everything in the sorter	
 
-	// For Transport commands, start from the current encoder count and work backwards
-	TransportSorterIndex := F_CalculateIndex(Offset := -(UpdateIndexCounter)
+	// For Transport commands, start from the current encoder count and work forwards, just like the exit
+	TransportSorterIndex := F_CalculateIndex(Offset := (UpdateIndexCounter)
 											, InitialValue := st_Sorter.EncoderCounts
 											, BufferSize := ItemsArraySize);
 
@@ -311,12 +327,13 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 			// Copy the found item record, 
 			TransportItemFound := TransportItemInSorter;
 			// Test the destined divert for availability
-			IF aDiverts[TransportItemFound.Destination].Full OR aDiverts[TransportItemFound.Destination].Faulted THEN
+			IF aDiverts[st_ToUpdate.Item.DestinationIdx].Full OR aDiverts[st_ToUpdate.Item.DestinationIdx].Faulted THEN
 				// Prepare a message to indicate that the item cannot be assigned
 				TransportItemFound.Status := E_StatusCode.Assign_Full;
 				TransportItemFound.ExtStatus := E_StatusCode.Divert_Full;
 				TransportItemFound.MessageType := E_MessageIds.TransportResponse_25;
 				TransportItemFound.Destination := st_Sorter.Config.DefaultDestination;
+				TransportItemFound.DestinationIdx := st_Sorter.Config.DefaultDestIdx;
 			// Test for an already diverting item and assign an ExtStatus of LateAssignment
 			ELSIF TransportItemInSorter.Status >= E_StatusCode.Diverting THEN
 				TransportItemFound.ExtStatus := E_StatusCode.Divert_LateAssignment;
@@ -324,10 +341,12 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 			ELSE
 				//  Change the destination, which should be the only item in the update
 				TransportItemFound.Destination := st_ToUpdate.Item.Destination;
+				TransportItemFound.DestinationIdx := st_ToUpdate.Item.DestinationIdx;
 				// This message indicates we could assign the Item
 				TransportItemFound.Status := E_StatusCode.Assign_Accepted;
 				TransportItemFound.MessageType := E_MessageIds.TransportResponse_25;
 			END_IF
+			TransportItemFound.DeviceID := st_Sorter.Config.EquipID;
 			// Add the item to the update buffer
 			fb_UpdateBuffer.AddItem(TransportItemFound);
 			// Clear the ToUpdate Item
@@ -346,6 +365,8 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 					sMessage := CONCAT(sMessage, UDINT_TO_STRING(TransportSorterIndex));
 					sMessage := CONCAT(sMessage,' Orig Dest: ');
 					sMessage := CONCAT(sMessage, DINT_TO_STRING(TransportItemInSorter.Destination));
+					sMessage := CONCAT(sMessage,' Orig DeviceID ');
+					sMessage := CONCAT(sMessage, TransportItemInSorter.DeviceID);
 					// Write to the Error List
 					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
 						, msgFmtStr := 'Dest Updated After Induct: %s'
@@ -353,6 +374,7 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 				END_IF
 				// Update the Destination. If the destination is unavailable, it has been already been set to the default
 				TransportItemInSorter.Destination := TransportItemFound.Destination;
+				TransportItemInSorter.DeviceID := TransportItemFound.DeviceID;
 				TransportItemInSorter.MessageType := TransportItemFound.MessageType;
 				TransportItemInSorter.Status := TransportItemFound.Status;
 				TransportItemInSorter.ExtStatus := TransportItemFound.ExtStatus;
@@ -363,6 +385,8 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 					sMessage := CONCAT(sMessage, UDINT_TO_STRING(TransportSorterIndex));
 					sMessage := CONCAT(sMessage,' New Dest: ');
 					sMessage := CONCAT(sMessage, DINT_TO_STRING(TransportItemInSorter.Destination));
+					sMessage := CONCAT(sMessage,' New DeviceID ');
+					sMessage := CONCAT(sMessage, TransportItemInSorter.DeviceID);
 					// Write to the Error List
 					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
 						, msgFmtStr := 'Dest Updated After Induct: %s'
@@ -564,6 +588,7 @@ END_IF
       <LineId Id="7164" Count="2" />
       <LineId Id="7159" Count="0" />
       <LineId Id="7158" Count="0" />
+      <LineId Id="7243" Count="0" />
       <LineId Id="5886" Count="0" />
       <LineId Id="5550" Count="9" />
       <LineId Id="6045" Count="4" />
@@ -572,7 +597,8 @@ END_IF
       <LineId Id="5889" Count="1" />
       <LineId Id="5892" Count="1" />
       <LineId Id="5891" Count="0" />
-      <LineId Id="5570" Count="22" />
+      <LineId Id="5570" Count="4" />
+      <LineId Id="5578" Count="14" />
       <LineId Id="6464" Count="0" />
       <LineId Id="6077" Count="0" />
       <LineId Id="6088" Count="1" />
@@ -583,7 +609,9 @@ END_IF
       <LineId Id="6092" Count="0" />
       <LineId Id="6099" Count="3" />
       <LineId Id="6468" Count="1" />
-      <LineId Id="5597" Count="16" />
+      <LineId Id="5597" Count="11" />
+      <LineId Id="7244" Count="2" />
+      <LineId Id="5609" Count="4" />
       <LineId Id="5954" Count="1" />
       <LineId Id="5965" Count="0" />
       <LineId Id="5963" Count="1" />
@@ -596,18 +624,24 @@ END_IF
       <LineId Id="5957" Count="0" />
       <LineId Id="5614" Count="0" />
       <LineId Id="5820" Count="0" />
-      <LineId Id="5639" Count="10" />
+      <LineId Id="5639" Count="5" />
+      <LineId Id="7247" Count="31" />
+      <LineId Id="5649" Count="0" />
       <LineId Id="5952" Count="0" />
       <LineId Id="5650" Count="11" />
       <LineId Id="6966" Count="0" />
-      <LineId Id="5662" Count="10" />
+      <LineId Id="5662" Count="4" />
+      <LineId Id="7279" Count="0" />
+      <LineId Id="5667" Count="5" />
       <LineId Id="6978" Count="0" />
       <LineId Id="6969" Count="3" />
       <LineId Id="6979" Count="3" />
       <LineId Id="6973" Count="4" />
       <LineId Id="5673" Count="13" />
       <LineId Id="6636" Count="0" />
-      <LineId Id="5687" Count="13" />
+      <LineId Id="5687" Count="5" />
+      <LineId Id="7280" Count="1" />
+      <LineId Id="5695" Count="5" />
       <LineId Id="5967" Count="0" />
       <LineId Id="6116" Count="1" />
       <LineId Id="5968" Count="1" />
@@ -633,38 +667,15 @@ END_IF
       <LineId Id="6479" Count="0" />
       <LineId Id="5705" Count="0" />
       <LineId Id="5822" Count="0" />
-      <LineId Id="5708" Count="3" />
-      <LineId Id="6967" Count="0" />
-      <LineId Id="5712" Count="1" />
-      <LineId Id="7083" Count="0" />
-      <LineId Id="7077" Count="0" />
-      <LineId Id="7080" Count="1" />
-      <LineId Id="5715" Count="0" />
-      <LineId Id="7075" Count="1" />
-      <LineId Id="5716" Count="2" />
-      <LineId Id="5720" Count="0" />
+      <LineId Id="5708" Count="0" />
+      <LineId Id="7282" Count="19" />
       <LineId Id="7074" Count="0" />
       <LineId Id="7071" Count="0" />
       <LineId Id="7073" Count="0" />
       <LineId Id="7072" Count="0" />
       <LineId Id="5721" Count="5" />
       <LineId Id="7086" Count="0" />
-      <LineId Id="7084" Count="0" />
-      <LineId Id="6480" Count="0" />
-      <LineId Id="6103" Count="4" />
-      <LineId Id="6110" Count="3" />
-      <LineId Id="6481" Count="0" />
-      <LineId Id="6131" Count="0" />
-      <LineId Id="5728" Count="2" />
-      <LineId Id="6968" Count="0" />
-      <LineId Id="6130" Count="0" />
-      <LineId Id="6482" Count="0" />
-      <LineId Id="6118" Count="2" />
-      <LineId Id="6129" Count="0" />
-      <LineId Id="6122" Count="0" />
-      <LineId Id="6125" Count="3" />
-      <LineId Id="6483" Count="0" />
-      <LineId Id="6366" Count="0" />
+      <LineId Id="7302" Count="34" />
       <LineId Id="7085" Count="0" />
       <LineId Id="6368" Count="0" />
       <LineId Id="6370" Count="0" />

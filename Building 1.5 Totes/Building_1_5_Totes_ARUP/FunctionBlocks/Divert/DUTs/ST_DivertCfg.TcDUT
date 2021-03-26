@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <DUT Name="ST_DivertCfg" Id="{5277c023-827e-42f9-afe0-50787740de26}">
-    <Declaration><![CDATA[TYPE ST_DivertCfg :
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_DivertCfg :
 STRUCT
-	ID 				: STRING;			// User assined Divert indetifier		
+	ID 				: STRING;			// User assigned Divert indetifier		
+	EquipID 		: STRING[5];		// Identifier used for host communication		
 	Number			: INT;				// Divert number, can be distinct from the Index in the Divert Array
 	Distance		: INT;				// Distance, in encoder counts, from induct photo eye
 	ConfirmDist		: INT;				// Distance from the Divert point to the Confirm PE

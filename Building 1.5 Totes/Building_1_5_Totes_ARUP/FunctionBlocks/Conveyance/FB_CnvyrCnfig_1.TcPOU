@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="FB_CnvyrCnfig_1" Id="{3ef8a691-dcc9-40ac-aa24-71b15137a9f1}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CnvyrCnfig_1
 
@@ -22,6 +22,7 @@
 
 VAR_IN_OUT
 	CFG_EquipIndex				: DINT;	// Index used for local Equipment status array
+	{attribute 'OPC.UA.DA' := '1'}
 	Sts_EquipState				: ST_EquipmentStatus;		// State Status
 END_VAR
 VAR_INPUT
@@ -81,7 +82,6 @@ VAR_OUTPUT
 	Sts_FaultsArry				: ARRAY[0..15] OF ST_EventSts;	// Status of each Fault Event State (0= OFF, 1=ON)
 	{attribute 'OPC.UA.DA' := '1'}
 	Sts_WarnsArry				: ARRAY[0..15] OF ST_EventSts;		// Status of each Warning Event State (0= OFF, 1=ON)
-	{attribute 'OPC.UA.DA' := '1'}
 	Sts_EvntsArry				: ARRAY[0..15] OF ST_EventSts; 	// Status of each Event State (0= OFF, 1=ON)
 END_VAR
 VAR
