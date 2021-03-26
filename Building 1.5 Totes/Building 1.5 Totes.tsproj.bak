@@ -2635,7 +2635,7 @@
 									<Entry Name="FSOE__FSoE Slave CMD" Index="#x6000" Sub="#x01">
 										<Type>USINT</Type>
 									</Entry>
-									<Entry Name="FSOE__InputChannel1" Index="#x6001" Sub="#x01">
+									<Entry Name="FSOE__InputChannel1" Index="#x6001" Sub="#x01" Flags="#x00008020">
 										<Type>BIT</Type>
 									</Entry>
 									<Entry Name="FSOE__InputChannel2" Index="#x6001" Sub="#x02">
