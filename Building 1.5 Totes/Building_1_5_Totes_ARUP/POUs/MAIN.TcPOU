@@ -24,7 +24,7 @@ Conveyors();
 //MsgControl();
 Photoeyes();
 ProxSensors();
-//ServerControl();
+ServerControl();
 Singulation_Control();
 Solenoids();
 Sorter();

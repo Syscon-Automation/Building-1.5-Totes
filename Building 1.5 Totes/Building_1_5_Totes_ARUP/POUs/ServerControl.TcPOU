@@ -46,7 +46,7 @@ bInitialize := FALSE;
 aTransmitTrigger[1] := TransmitTrigger;
 fbServer( TxMessage := TxMessage, aTransmitTrigger := aTransmitTrigger, sSrvNetID := sSrvNetID, bEnable := bEnable, bLog := bLog);
 
-MsgControl();		// Control the messages being sent out via TCP/IP
+//MsgControl();		// Control the messages being sent out via TCP/IP
 
 
 		]]></ST>
