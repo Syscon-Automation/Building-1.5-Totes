@@ -401,7 +401,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name IecBaseType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
+			<Name GUID="{ADB50AAF-9ECC-E38A-9D24-5F6270DDEFE8}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
 			<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
 			<BitSize>8960</BitSize>
 			<BaseType GUID="{D6D20213-A374-FEAE-0825-A80B50BFB908}">ST_StateCntrlSts</BaseType>
@@ -583,8 +583,8 @@
 				<Target>
 					<ManualSelect>{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</ManualSelect>
 					<ManualSelect>{3EBB9639-5FF3-42B6-8847-35C70DC013C8}</ManualSelect>
-					<TargetSelect TargetId="2">{66689887-CCBD-452C-AC9A-039D997C6E66}</TargetSelect>
 					<TargetSelect TargetId="2">{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</TargetSelect>
+					<TargetSelect TargetId="2">{66689887-CCBD-452C-AC9A-039D997C6E66}</TargetSelect>
 					<TargetSelect TargetId="2">{3EBB9639-5FF3-42B6-8847-35C70DC013C8}</TargetSelect>
 					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020002" DongleLevel="60" DongleSystemId="{1F9928DE-E089-C61E-A665-5C7A8251A0A6}" DongleSerialNumber="100071340"/>
 				</Target>
@@ -1098,12 +1098,12 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>ProxSensors.In_PX_4171_Retracted</Name>
+							<Name>ProxSensors.In_PX_4151_Extended</Name>
 							<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>ProxSensors.In_PX_4151_Extended</Name>
+							<Name>ProxSensors.In_PX_4171_Retracted</Name>
 							<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
@@ -1938,11 +1938,6 @@
 							<Type>INT</Type>
 						</Var>
 						<Var>
-							<Name>System.ConvDefaultState</Name>
-							<Comment><![CDATA[ The default state of all conveyors]]></Comment>
-							<Type GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}">E_StateCntrl</Type>
-						</Var>
-						<Var>
 							<Name>Conveyors.P3080_VFD.ControlWord</Name>
 							<Type>UINT</Type>
 						</Var>
@@ -1954,6 +1949,11 @@
 							<Name>System.Cnvyr_Auto</Name>
 							<Comment><![CDATA[ Bit to send to all conveyors to put them in Auto mode]]></Comment>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>System.ConvDefaultState</Name>
+							<Comment><![CDATA[ The default state of all conveyors]]></Comment>
+							<Type GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}">E_StateCntrl</Type>
 						</Var>
 						<Var>
 							<Name>System.Cnvyr_Manual</Name>
@@ -5052,7 +5052,7 @@
 						<DeviceData>000105540505</DeviceData>
 					</Pnp>
 				</AddressInfo>
-				<Image Id="4" AddrType="2" ImageType="3">
+				<Image Id="4" AddrType="1" ImageType="3">
 					<Name>Image</Name>
 				</Image>
 				<Ethernet DeviceDesc="ARUP (X000)"/>

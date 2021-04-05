@@ -15,6 +15,7 @@ VAR_OUTPUT
 	bOk			: BOOL;(* TRUE = New entry added or removed succesfully, FALSE = Fifo overflow or fifo empty *)
 	sGet		: T_MaxString := '';(* String entry removed (read) from fifo *)
 	nCount		: UDINT := 0;(* Number of fifo entries *)
+	ncbSize		: UDINT := 0; (* Bytes assigned to the buffer*)
 END_VAR
 VAR
 	fbBuffer 	: FB_StringRingBuffer;(* Basic (lower level) string buffer control function block *)
@@ -30,7 +31,15 @@ END_VAR
       <Implementation>
         <ST><![CDATA[(* Clears all fifo entries *)
 fbBuffer.A_Reset( 	pBuffer := ADR( buffer ), cbBuffer := SIZEOF( buffer ), 
-					bOk=>bOk, nCount=>nCount, getValue=>sGet ); 
+					bOk=>bOk, nCount=>nCount, getValue=>sGet, cbSize=>ncbSize); 
+
+sPut := CONCAT( CONCAT( sPrefix, 'Log Buffer Cleared' ), CONCAT( CONCAT('::Queued Strings ', UDINT_TO_STRING(nCount)),CONCAT('::Used Buffer Size ', UDINT_TO_STRING(ncbSize))) );
+
+IF bOk THEN
+	IF bLog THEN(* Log information message *)
+		ADSLOGSTR( ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG, '%s', sPut );	
+	END_IF
+END_IF
 ]]></ST>
       </Implementation>
     </Action>
@@ -48,13 +57,13 @@ ELSIF ( nErrID AND 16#80000000) = 16#80000000 THEN
 ELSIF (nErrID AND 16#00008100) = 16#00008100 THEN
 	CASE nErrID OF
 		ServerControl.PLCPRJ_ERROR_RECEIVE_TIMEOUT:
-			sSource := '::PLC sample project receive timeout error: 0x';
+			sSource := '::PLC receive timeout error: 0x';
 		ServerControl.PLCPRJ_ERROR_SENDFIFO_OVERFLOW:
-			sSource := '::PLC sample project send fifo overflow error: 0x';
+			sSource := '::PLC send fifo overflow error: 0x';
 		ServerControl.PLCPRJ_ERROR_RECFIFO_OVERFLOW:
-			sSource := '::PLC sample project receive fifo overflow error: 0x';
+			sSource := '::PLC receive fifo overflow error: 0x';
 	ELSE
-		sSource := '::Other PLC sample project error: 0x';
+		sSource := '::Other PLC TCP error: 0x';
 	END_CASE
 ELSIF (nErrID AND 16#00008000) = 16#00008000 THEN
 	sSource := '::Internal TCP/IP Connection Server error: 0x';
@@ -78,7 +87,7 @@ END_IF]]></ST>
         <ST><![CDATA[(* Adds new fifo entry *)
 sPut := CONCAT( CONCAT( sPrefix, sMessage ), CONCAT( '::', HSOCKET_TO_STRING(hSocket) ) );
 fbBuffer.A_AddTail( pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
-					putValue:= sPut, bOk=>bOk, nCount=>nCount );
+					putValue:= sPut, bOk=>bOk, nCount=>nCount, cbSize=>ncbSize);
 IF bOk THEN
 	IF bLog THEN(* Log information message *)
 		ADSLOGSTR( ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG, '%s', sPut );	
@@ -105,6 +114,11 @@ fbBuffer.A_RemoveHead( pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
     </LineIds>
     <LineIds Name="FB_LogFifo.Clear">
       <LineId Id="2" Count="2" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="7" Count="3" />
+      <LineId Id="5" Count="0" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="FB_LogFifo.Error">

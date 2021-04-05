@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="MsgControl" Id="{2ad4410f-a5b6-449d-a112-8dab3c58adad}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MsgControl
 VAR_INPUT
@@ -215,7 +215,8 @@ IF st_SorterUpdateBuffer.nInPointer <> fb_SorterUpdateBuffer.OutPointer THEN
 END_IF
 
 // Transmit on Device Status Change
-DeviceStatus();
+//DeviceStatus();1
+
 
 (* -------------------- Reset The Transmit Triger after the message is succesfully added to the buffer ------------------- *)
 IF ((ServerControl.fbServer.aApplications[nConnectionIndex].bTransmitTrigger = TRUE) OR ServerControl.TransmitTrigger = TRUE)  AND (TxCounter_Old <> ServerControl.fbServer.aApplications[nConnectionIndex].TxCounter) THEN
@@ -920,7 +921,9 @@ TransportResponse := String1;]]></ST>
       <LineId Id="1721" Count="5" />
       <LineId Id="1736" Count="1" />
       <LineId Id="1733" Count="0" />
-      <LineId Id="1446" Count="17" />
+      <LineId Id="1446" Count="10" />
+      <LineId Id="2201" Count="0" />
+      <LineId Id="1457" Count="6" />
       <LineId Id="271" Count="0" />
     </LineIds>
     <LineIds Name="MsgControl.Arrival">

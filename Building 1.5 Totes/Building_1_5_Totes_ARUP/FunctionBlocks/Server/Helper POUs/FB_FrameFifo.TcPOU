@@ -14,6 +14,7 @@ VAR_OUTPUT
 	nCount		: UDINT			:= 0;(* Number of fifo entries *)
 	cbFree		: UDINT 		:= 0;(* Free buffer space *)
 	msgType		: SINT;			// Extract the message type to determine if we are logging it
+	ncbSize		: UDINT;		// (*Buffer assigned bytes*)
 END_VAR
 VAR
 	fbBuffer 	: FB_StringRingBuffer := (bOverwrite := FALSE);(* Basic (lower level) string buffer control function block *)
@@ -26,13 +27,25 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[(* Adds new fifo entry *)
 fbBuffer.A_AddTail( pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
-					putValue:= sPut, bOk=>bOk, nCount=>nCount );
+					putValue:= sPut, bOk=>bOk, nCount=>nCount, cbSize=>ncbSize );
+
 IF bOk THEN
 	cbFree := ServerControl.PLCPRJ_BUFFER_SIZE - fbBuffer.cbSize;(* Calculate the free buffer space *)
 	IF bLog THEN(* Log message *)
 		msgType := STRING_TO_SINT(MID(sPut,2,2));
 		// Ignore frequent messages
-		IF msgType <> E_MessageIds.KeepAlive_09 AND msgType <> E_MessageIds.KeepAliveResponse_29 THEN
+		IF (msgType = TransportCommand_05 AND nMessageLogEnable.TransportCommand_05)
+		   OR (msgType = E_MessageIds.LocationUpdateResponse_07 AND nMessageLogEnable.LocationUpdateResponse_07)
+		   OR (msgType = E_MessageIds.EquipmentStatusResponse_08 AND nMessageLogEnable.EquipmentStatusResponse_08)
+		   OR (msgType = E_MessageIds.KeepAlive_09 AND nMessageLogEnable.KeepAlive_09)
+		   OR (msgType = E_MessageIds.Arrival_23 AND nMessageLogEnable.Arrival_23)
+		   OR (msgType = E_MessageIds.TransportResponse_25 AND nMessageLogEnable.TransportResponse_25)
+		   OR (msgType = E_MessageIds.TransportComplete_26 AND nMessageLogEnable.TransportComplete_26)
+		   OR (msgType = E_MessageIds.LocationUpdate_27 AND nMessageLogEnable.LocationUpdate_27)
+		   OR (msgType = E_MessageIds.EquipmentStatusUpdate_28 AND nMessageLogEnable.EquipmentStatusUpdate_28)
+		   OR (msgType = E_MessageIds.KeepAliveResponse_29 AND nMessageLogEnable.KeepAliveResponse_29)
+		   OR (msgType = E_MessageIds.NoMessage_00)
+		   THEN
 			ADSLOGSTR( ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG, CONCAT( sPrefix, '"%s"' ), sPut );
 		END_IF
 	END_IF
@@ -43,8 +56,17 @@ END_IF]]></ST>
       <Implementation>
         <ST><![CDATA[(* Resets fifo = clears all data *)
 fbBuffer.A_Reset( pBuffer:= ADR(buffer), cbBuffer:= SIZEOF(buffer),
-				bOk=>bOk, getValue=>sGet, nCount=>nCount );
-cbFree := ServerControl.PLCPRJ_BUFFER_SIZE;(* Free buffer size *)]]></ST>
+				bOk=>bOk, getValue=>sGet, nCount=>nCount, cbSize=>ncbSize );
+cbFree := ServerControl.PLCPRJ_BUFFER_SIZE;(* Free buffer size *)
+
+sPut := CONCAT(CONCAT( sPrefix, 'Frame Buffer Cleared' ), CONCAT( CONCAT('::Queued Strings ', UDINT_TO_STRING(nCount)),CONCAT('::Used Buffer Size ', UDINT_TO_STRING(ncbSize))) );
+
+IF bOk THEN
+	IF bLog THEN(* Log information message *)
+		ADSLOGSTR( ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG, '%s', sPut );	
+	END_IF
+END_IF
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="RemoveHead" Id="{fdedd4c5-4667-45fb-a700-e608891979aa}">
@@ -61,9 +83,15 @@ END_IF]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_FrameFifo.AddTail">
-      <LineId Id="2" Count="5" />
+      <LineId Id="2" Count="2" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="5" Count="2" />
       <LineId Id="10" Count="1" />
       <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="7" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="18" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="9" Count="0" />
@@ -72,6 +100,8 @@ END_IF]]></ST>
     <LineIds Name="FB_FrameFifo.Clear">
       <LineId Id="2" Count="2" />
       <LineId Id="1" Count="0" />
+      <LineId Id="6" Count="7" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_FrameFifo.RemoveHead">
       <LineId Id="2" Count="4" />

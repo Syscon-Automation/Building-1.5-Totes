@@ -157,8 +157,10 @@ END_CASE
 ]]></ST>
     </Implementation>
     <LineIds Name="FB_Server">
-      <LineId Id="3" Count="114" />
-      <LineId Id="2" Count="0" />
+      <LineId Id="291" Count="22" />
+      <LineId Id="518" Count="5" />
+      <LineId Id="320" Count="85" />
+      <LineId Id="111" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
