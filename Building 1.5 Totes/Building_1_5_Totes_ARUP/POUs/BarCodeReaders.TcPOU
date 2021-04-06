@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="BarCodeReaders" Id="{6db726c2-b8f2-4f56-a606-779b1afe45e4}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM BarCodeReaders
 VAR
@@ -98,7 +98,7 @@ BCR_S2140_01(
 	In_ReadTrig:= PhotoEyes.PE_10081.Out_OnFltrd, 
 	In_ResetCounts:= , 
 	In_TriggerOnTime := T#20MS ,
-	In_EquipID := '00001',
+	In_EquipID := '00064',
 	Out_NewReadTrig=> , 
 	Out_ReadString=> , 
 	Out_ReadStatus=> ,
@@ -152,7 +152,7 @@ BCR_S2141_01(
 	In_ReadTrig:= PhotoEyes.PE_10302.Out_OnFltrd, 
 	In_ResetCounts:= , 
 	In_TriggerOnTime := T#20MS ,
-	In_EquipID := '00001',
+	In_EquipID := '00067',
 	Out_NewReadTrig=> , 
 	Out_ReadString=> , 
 	Out_ReadStatus=> ,
@@ -167,7 +167,7 @@ BCR_S2141_01(
 	In_ReadTrig:= PhotoEyes.PE_2301.Out_OnFltrd, 
 	In_ResetCounts:= , 
 	In_TriggerOnTime := T#20MS ,
-	In_EquipID := '00001',
+	In_EquipID := '00081',
 	Out_NewReadTrig=> , 
 	Out_ReadString=> , 
 	Out_ReadStatus=> ,
@@ -221,7 +221,7 @@ BCR_S2150_01.LogEntries := .nBarcodeLogEnable.BCR_S2150_01_LOG;
 	In_ReadTrig:= PhotoEyes.PE_9161.Out_OnFltrd, 
 	In_ResetCounts:= , 
 	In_TriggerOnTime := T#20MS ,
-	In_EquipID := '00001',
+	In_EquipID := '00068',
 	Out_NewReadTrig=> , 
 	Out_ReadString=> , 
 	Out_ReadStatus=> ,
