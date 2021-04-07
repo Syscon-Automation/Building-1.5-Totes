@@ -13,7 +13,11 @@ TYPE E_OperStateCntrl :
 	extending := 5,
 	retracted := 6,
 	retracting := 7,
-	unknown :=8
+	unknown :=8,
+	offline :=9,
+	auto := 10,
+	manual := 11,
+	faulted	:= 12
 ) INT;
 END_TYPE
 ]]></Declaration>
@@ -64,6 +68,26 @@ END_TYPE
             <o>
               <v n="TextID">"unknown"</v>
               <v n="TextDefault">"8"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"offline"</v>
+              <v n="TextDefault">"9"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"auto"</v>
+              <v n="TextDefault">"10"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"manual"</v>
+              <v n="TextDefault">"11"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"faulted"</v>
+              <v n="TextDefault">"12"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

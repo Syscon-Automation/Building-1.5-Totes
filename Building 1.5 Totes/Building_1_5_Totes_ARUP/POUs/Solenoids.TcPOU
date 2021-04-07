@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
   <POU Name="Solenoids" Id="{02f07705-3c99-482e-b422-168a6adede53}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Solenoids
 VAR
@@ -243,8 +243,8 @@ GR2140_02(
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2140.Out_Grabber_2_Ext,
-   In_EquipRtrcdFdbck := ProxSensors.PX_11291_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_11321_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_11321_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_11291_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgGR2140_02Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -279,8 +279,8 @@ PI2140_01(
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2140.In_PinStop_Extended,
    In_P_SVReqRetract:= Singulation_Control.SortSingulation_P2140.Out_PinStop_Ret,
-   In_EquipRtrcdFdbck := ProxSensors.PX_11181_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_11201_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_11201_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_11181_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPI2140_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,   Cfg_EquipIntlksArry:= cfgPI2140_01IntlksArry,
@@ -314,8 +314,8 @@ GR2140_01(
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2140.Out_Grabber_1_Ext,
-   In_EquipRtrcdFdbck := ProxSensors.PX_11141_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_11161_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_11161_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_11141_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgGR2140_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -342,15 +342,15 @@ PL2140_01.In_EquipEvents.2:= System.SysEventsAllOk;
 PL2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PL2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
 PL2140_01.In_EquipEvents.5:= NOT CommStatus.RIO10161_CommFault.Out;
-
+PL2140_01.In_EquipEvents.6:= FALSE;
 // Function Call
 PL2140_01(
    In_p_EquipStatePB:= PL2140_01_StatePB,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2140[2].Output2,
-   In_EquipRtrcdFdbck := ProxSensors.PX_10211_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_10231_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_10231_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_10211_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPL2140_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -384,8 +384,8 @@ GR2150_01(
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2150.Out_Grabber_1_Ext,
-   In_EquipRtrcdFdbck := ProxSensors.PX_2181_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_2201_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_2201_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_2181_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgGR2150_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -419,8 +419,8 @@ GR2150_02(
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2150.Out_Grabber_2_Ext,
-   In_EquipRtrcdFdbck := ProxSensors.PX_2131_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_2151_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_2151_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_2131_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgGR2150_02Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -454,8 +454,8 @@ PU2150_01(
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[1].Output1,
-   In_EquipRtrcdFdbck := ProxSensors.PX_3301_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_3331_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_3331_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_3301_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPU2150_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -489,8 +489,8 @@ PU2150_02(
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[2].Output1,
-   In_EquipRtrcdFdbck := ProxSensors.PX_3171_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_3191_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_3191_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_3171_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPU2150_02Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -524,8 +524,8 @@ PU2150_03(
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[3].Output1,
-   In_EquipRtrcdFdbck := ProxSensors.PX_4291_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_4311_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_4311_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_4291_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPU2150_03Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -559,8 +559,8 @@ PU2150_04(
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[4].Output1,
-   In_EquipRtrcdFdbck := ProxSensors.PX_4151_Extended.Out,
-   In_EquipExtdFdbck := ProxSensors.PX_4171_Retracted.Out,
+   In_EquipRtrcdFdbck := ProxSensors.PX_4171_Retracted.Out,
+   In_EquipExtdFdbck := ProxSensors.PX_4151_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPU2150_04Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -578,7 +578,9 @@ PU2150_04(
       <LineId Id="1380" Count="0" />
       <LineId Id="835" Count="5" />
       <LineId Id="1607" Count="0" />
-      <LineId Id="841" Count="26" />
+      <LineId Id="841" Count="0" />
+      <LineId Id="2050" Count="0" />
+      <LineId Id="843" Count="24" />
       <LineId Id="1379" Count="0" />
       <LineId Id="868" Count="5" />
       <LineId Id="1608" Count="1" />
@@ -594,7 +596,8 @@ PU2150_04(
       <LineId Id="1369" Count="0" />
       <LineId Id="967" Count="5" />
       <LineId Id="1612" Count="0" />
-      <LineId Id="973" Count="26" />
+      <LineId Id="2051" Count="0" />
+      <LineId Id="974" Count="25" />
       <LineId Id="1366" Count="0" />
       <LineId Id="1000" Count="5" />
       <LineId Id="1613" Count="0" />
@@ -606,11 +609,15 @@ PU2150_04(
       <LineId Id="1832" Count="0" />
       <LineId Id="1066" Count="5" />
       <LineId Id="1615" Count="0" />
-      <LineId Id="1072" Count="26" />
+      <LineId Id="1072" Count="0" />
+      <LineId Id="2063" Count="0" />
+      <LineId Id="1074" Count="24" />
       <LineId Id="1372" Count="0" />
       <LineId Id="1099" Count="5" />
       <LineId Id="1616" Count="0" />
-      <LineId Id="1105" Count="26" />
+      <LineId Id="1105" Count="0" />
+      <LineId Id="2052" Count="0" />
+      <LineId Id="1107" Count="24" />
       <LineId Id="1375" Count="0" />
       <LineId Id="1132" Count="5" />
       <LineId Id="1617" Count="0" />

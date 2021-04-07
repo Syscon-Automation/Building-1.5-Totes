@@ -2,15 +2,6 @@
 <TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.10">
 	<DataTypes>
 		<DataType>
-			<Name GUID="{622B47A5-2C8F-FCDB-B43E-364C3DC63FBC}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..25] OF BYTE</Name>
-			<BitSize>208</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
-			<ArrayInfo>
-				<LBound>0</LBound>
-				<Elements>26</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
 			<Name GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}" AutoDeleteType="true">E_StateCntrl</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
@@ -36,7 +27,7 @@
 			</EnumInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}" AutoDeleteType="true">E_OperStateCntrl</Name>
+			<Name GUID="{D347E415-1EF9-6DD2-7D3E-D070CBD869C8}" AutoDeleteType="true">E_OperStateCntrl</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -75,6 +66,25 @@
 				<Text><![CDATA[unknown]]></Text>
 				<Enum>8</Enum>
 			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[offline]]></Text>
+				<Enum>9</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[auto]]></Text>
+				<Enum>10</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[manual]]></Text>
+				<Enum>11</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[faulted]]></Text>
+				<Enum>12</Enum>
+			</EnumInfo>
+			<Hides>
+				<Hide GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}"/>
+			</Hides>
 		</DataType>
 		<DataType>
 			<Name GUID="{3AB4C627-A758-0E1E-7675-A1F136EB5998}" AutoDeleteType="true">ST_StateCntrlPB</Name>
@@ -137,7 +147,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{D6D20213-A374-FEAE-0825-A80B50BFB908}" AutoDeleteType="true">ST_StateCntrlSts</Name>
+			<Name GUID="{CC62C8ED-804B-A109-7E53-39AAE4C55D91}" AutoDeleteType="true">ST_StateCntrlSts</Name>
 			<BitSize>896</BitSize>
 			<SubItem>
 				<Name>CrntState</Name>
@@ -166,7 +176,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>CrntOperState</Name>
-				<Type GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}">E_OperStateCntrl</Type>
+				<Type GUID="{D347E415-1EF9-6DD2-7D3E-D070CBD869C8}">E_OperStateCntrl</Type>
 				<Comment><![CDATA[ The Current Operational state]]></Comment>
 				<BitSize>16</BitSize>
 				<BitOffs>192</BitOffs>
@@ -256,7 +266,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>LstOperState</Name>
-				<Type GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}">E_OperStateCntrl</Type>
+				<Type GUID="{D347E415-1EF9-6DD2-7D3E-D070CBD869C8}">E_OperStateCntrl</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>688</BitOffs>
 				<Properties>
@@ -399,15 +409,27 @@
 					</Property>
 				</Properties>
 			</SubItem>
+			<Hides>
+				<Hide GUID="{D6D20213-A374-FEAE-0825-A80B50BFB908}"/>
+			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{ADB50AAF-9ECC-E38A-9D24-5F6270DDEFE8}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
+			<Name IecBaseType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
 			<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
 			<BitSize>8960</BitSize>
-			<BaseType GUID="{D6D20213-A374-FEAE-0825-A80B50BFB908}">ST_StateCntrlSts</BaseType>
+			<BaseType GUID="{CC62C8ED-804B-A109-7E53-39AAE4C55D91}">ST_StateCntrlSts</BaseType>
 			<ArrayInfo>
 				<LBound>1</LBound>
 				<Elements>10</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{622B47A5-2C8F-FCDB-B43E-364C3DC63FBC}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..25] OF BYTE</Name>
+			<BitSize>208</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>26</Elements>
 			</ArrayInfo>
 		</DataType>
 		<DataType>
@@ -583,8 +605,8 @@
 				<Target>
 					<ManualSelect>{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</ManualSelect>
 					<ManualSelect>{3EBB9639-5FF3-42B6-8847-35C70DC013C8}</ManualSelect>
-					<TargetSelect TargetId="2">{66689887-CCBD-452C-AC9A-039D997C6E66}</TargetSelect>
 					<TargetSelect TargetId="2">{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</TargetSelect>
+					<TargetSelect TargetId="2">{66689887-CCBD-452C-AC9A-039D997C6E66}</TargetSelect>
 					<TargetSelect TargetId="2">{3EBB9639-5FF3-42B6-8847-35C70DC013C8}</TargetSelect>
 					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020002" DongleLevel="60" DongleSystemId="{1F9928DE-E089-C61E-A665-5C7A8251A0A6}" DongleSerialNumber="100071340"/>
 				</Target>
@@ -602,6 +624,11 @@
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
 						<Name>PlcTask Inputs</Name>
+						<Var>
+							<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
+							<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
+							<Type GUID="{B705C051-BDF3-BC2D-EB52-CEC3C4A70B71}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
+						</Var>
 						<Var>
 							<Name>MAIN.EAP_205.DevState</Name>
 							<Comment><![CDATA[ EAP Device State]]></Comment>
@@ -1401,11 +1428,6 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
-							<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
-							<Type GUID="{ADB50AAF-9ECC-E38A-9D24-5F6270DDEFE8}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
-						</Var>
-						<Var>
 							<Name>GVL_IO.SystemAirPressure</Name>
 							<Type>BOOL</Type>
 						</Var>
@@ -1622,6 +1644,11 @@
 					</Vars>
 					<Vars VarGrpType="2">
 						<Name>PlcTask Outputs</Name>
+						<Var>
+							<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
+							<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
+							<Type GUID="{B705C051-BDF3-BC2D-EB52-CEC3C4A70B71}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
+						</Var>
 						<Var>
 							<Name>MAIN.PLCPersistentSave</Name>
 							<Type>BOOL</Type>
@@ -1990,11 +2017,6 @@
 							<Name>GVL_EquipArrays.nEquip_Count</Name>
 							<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
-							<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
-							<Type GUID="{ADB50AAF-9ECC-E38A-9D24-5F6270DDEFE8}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.HornMainPanel</Name>
@@ -5052,7 +5074,7 @@
 						<DeviceData>000105540505</DeviceData>
 					</Pnp>
 				</AddressInfo>
-				<Image Id="4" AddrType="2" ImageType="3">
+				<Image Id="4" AddrType="1" ImageType="3">
 					<Name>Image</Name>
 				</Image>
 				<Ethernet DeviceDesc="ARUP (X000)"/>
