@@ -5074,7 +5074,7 @@
 						<DeviceData>000105540505</DeviceData>
 					</Pnp>
 				</AddressInfo>
-				<Image Id="4" AddrType="1" ImageType="3">
+				<Image Id="4" AddrType="2" ImageType="3">
 					<Name>Image</Name>
 				</Image>
 				<Ethernet DeviceDesc="ARUP (X000)"/>

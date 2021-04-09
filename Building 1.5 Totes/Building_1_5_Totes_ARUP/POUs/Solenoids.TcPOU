@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="Solenoids" Id="{02f07705-3c99-482e-b422-168a6adede53}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Solenoids
 VAR
@@ -219,7 +219,10 @@ cfgPU2150_04EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//----------------------------------------GR2140_02--------------------------------------------------------------
+      <ST><![CDATA[// REMOVE THIS!!!!!!
+GVL_IO.SystemAirPressure := TRUE;
+
+//----------------------------------------GR2140_02--------------------------------------------------------------
 GR2140_02_StatePB.AutoPB := System.Cnvyr_Auto;
 GR2140_02_StatePB.ManPB := System.Cnvyr_Manual;
 GR2140_02_StatePB.ResetPB := System.Cnvyr_Reset;
@@ -574,6 +577,9 @@ PU2150_04(
 ]]></ST>
     </Implementation>
     <LineIds Name="Solenoids">
+      <LineId Id="2280" Count="0" />
+      <LineId Id="2283" Count="0" />
+      <LineId Id="2282" Count="0" />
       <LineId Id="819" Count="15" />
       <LineId Id="1380" Count="0" />
       <LineId Id="835" Count="5" />
