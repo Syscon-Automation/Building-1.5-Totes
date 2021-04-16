@@ -53,7 +53,7 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Send out reset PB put here in case added logic was needed
-SysStateCntrl_StatePB.ResetPB := GVL_IO.PB_SysReset OR HMI_PBSysReset; 
+SysStateCntrl_StatePB.ResetPB := GVL_IO.PB_SysReset OR HMI_PBSysReset OR GVL_IO.PB_RemoteReset_3211 OR GVL_IO.PB_RemoteReset_8251 OR GVL_IO.PB_RemoteReset_10221;
 SysStateCntrl_StatePB.AutoPB := (HMI_PBSysStart OR GVL_IO.PB_SysStart) AND SysIntlksAllOk;
 SysStateCntrl_StatePB.StopPB := HMI_PBSysStop OR (NOT GVL_IO.PB_SysStop);
 
@@ -61,25 +61,23 @@ SysStateCntrl_StatePB.StopPB := HMI_PBSysStop OR (NOT GVL_IO.PB_SysStop);
 SysShrtPulseTmr(In_Trig:= TRUE , Cfg_OnTime:= SysShrtPlsOnTime, Cfg_OffTime:= SysShrtPlsOffTime, Output=> );
 
 // Set up System Interlocks
-(*
-SysState.In_SystemIntlks.0 := GVL_IO.SystemAirPressure;
-*)
 
- 
+SysState.In_SystemIntlks.0 := GVL_IO.SystemAirPressure;
+
 
 // Setup the InterlockArray since persistent data items cannot by initilaized the same
 // Index 0
-(*
+
 cfgSysStateIntlksArry[0].Description := 'System Air Pressure';
-cfgSysStateIntlksArry[0].DeviceLabel := 'PS22121';
+cfgSysStateIntlksArry[0].DeviceLabel := 'System';
 cfgSysStateIntlksArry[0].OKState := TRUE;
-*)
+
 
 // Set up System Events
 
-//SysState.In_SystemEvents.0 := GVL_IO.Panel_Estop_Button;
-//SysState.In_SystemEvents.1 := GVL_IO.P5031_Estop_Button;
-//SysState.In_SystemEvents.2 := GVL_IO.P5032_Estop_Button;
+SysState.In_SystemEvents.0 := SystemSafety.Safety_PanelEstop;
+SysState.In_SystemEvents.1 := GVL_IO.Remote_PullCord2142_OK;
+SysState.In_SystemEvents.2 := GVL_IO.Remote_PullCord2150_OK;
 
 // Setup the EventArray since persistent data items cannot by initilaized the same
 // Index 0
@@ -88,20 +86,20 @@ cfgSysStateEvntsArry[0].DeviceLabel := 'PB1';
 cfgSysStateEvntsArry[0].OKState := TRUE;
 cfgSysStateEvntsArry[0].StopCode := E_StopCodes.SystemStop;
 // Index 1
-cfgSysStateEvntsArry[1].Description := 'P5031 E-Stop Button';
-cfgSysStateEvntsArry[1].DeviceLabel := 'P5031';
+cfgSysStateEvntsArry[1].Description := 'P2142 Pull cord OK';
+cfgSysStateEvntsArry[1].DeviceLabel := 'P2142';
 cfgSysStateEvntsArry[1].OKState := TRUE;
 cfgSysStateEvntsArry[1].StopCode := E_StopCodes.SystemStop;
 // Index 2
-cfgSysStateEvntsArry[2].Description := 'P5032 E-Stop Button';
-cfgSysStateEvntsArry[2].DeviceLabel := 'P5032';
+cfgSysStateEvntsArry[2].Description := 'P2150 Pull cord OK';
+cfgSysStateEvntsArry[2].DeviceLabel := 'P2150';
 cfgSysStateEvntsArry[2].OKState := TRUE;
 cfgSysStateEvntsArry[2].StopCode := E_StopCodes.SystemStop;
 
 // Function Call
 SysState(
     In_p_EquipStatePB:= SysStateCntrl_StatePB,
-	Cfg_EquipLabel := '4th Floor Large Box',  
+	Cfg_EquipLabel := 'Building 1.5',  
     Cfg_EquipIntlksArry:= cfgSysStateIntlksArry,
     Cfg_EquipEvntsArry:= cfgSysStateEvntsArry, 
     Sts_EquipState := SysStateCntrlSts,
@@ -245,8 +243,11 @@ END_IF
       <LineId Id="797" Count="2" />
       <LineId Id="935" Count="1" />
       <LineId Id="800" Count="1" />
-      <LineId Id="815" Count="15" />
-      <LineId Id="833" Count="22" />
+      <LineId Id="815" Count="3" />
+      <LineId Id="821" Count="9" />
+      <LineId Id="833" Count="0" />
+      <LineId Id="1120" Count="0" />
+      <LineId Id="835" Count="20" />
       <LineId Id="858" Count="6" />
       <LineId Id="937" Count="0" />
       <LineId Id="865" Count="0" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="Sorter_P2150" Id="{2147324e-605f-456c-8043-9467e4eb8174}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Sorter_P2150
 
@@ -8,8 +8,8 @@ VAR_IN_OUT
 	In_InductingItem				: ST_Item;
 	st_tempItem						: ST_ItemTemporary;	// Temporary record used when barcode not yet received
 	st_Sorter						: ST_Sorter;
-	aDiverts						: ARRAY[Sorter.DIVERTMIN..Sorter.NUMBEROFDIVERTS] OF ST_DIVERT;
-	aItems 							: ARRAY[Sorter.SORTERENCODERMIN..Sorter.SORTERENCODERMAX] OF ST_Item;
+	aDiverts						: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF ST_DIVERT;
+	aItems 							: ARRAY[Sorter.SORTERENCODERMIN_P2150..Sorter.SORTERENCODERMAX_P2150] OF ST_Item;
 END_VAR
 
 VAR_INPUT
@@ -48,8 +48,8 @@ VAR
 	Output2ItemIndex		: UDINT;
 
 	// Confirm Check variables
-	fb_ConfirmCheck 		: ARRAY[Sorter.DIVERTMIN..Sorter.NUMBEROFDIVERTS] OF FB_ConfirmCheck;
-	st_ConfirmItem 			: ARRAY[Sorter.DIVERTMIN..Sorter.NUMBEROFDIVERTS] OF ST_Item;
+	fb_ConfirmCheck 		: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF FB_ConfirmCheck;
+	st_ConfirmItem 			: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF ST_Item;
 	nConfirmItemIndex 		: UDINT;
 	
 	workingItem			: ST_Item;	// Actual item to induct
@@ -65,9 +65,11 @@ VAR
 	st_DisplayItem		:st_Item;
 	
 	LogSorterDump: BOOL := FALSE;
+
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// Initialize FB_ItemExtBuffer
+      <ST><![CDATA[
+// Initialize FB_ItemExtBuffer
 fbSorterDiagLog(st_BufferData := aSorterDiagLog);
 
 (*
@@ -376,6 +378,7 @@ END_WHILE
 ]]></ST>
     </Implementation>
     <LineIds Name="Sorter_P2150">
+      <LineId Id="8175" Count="0" />
       <LineId Id="6884" Count="13" />
       <LineId Id="6901" Count="2" />
       <LineId Id="8035" Count="2" />

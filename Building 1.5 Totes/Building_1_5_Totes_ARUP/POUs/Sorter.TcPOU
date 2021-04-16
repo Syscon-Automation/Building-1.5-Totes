@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="Sorter" Id="{efb4f521-b93c-401a-8a07-5bbe9c018238}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Sorter
 VAR
@@ -69,7 +69,7 @@ END_VAR
 
 VAR CONSTANT
 //----------------------------------------P2140--------------------------------------------------------------	
-	SORTERMASKSIZE_P2140				: UINT := 11;		// Number of bits to mask into the Encoder Count, will define the size of the SORTERENCODERMAX value
+	SORTERMASKSIZE_P2140				: UINT := 12;		// Number of bits to mask into the Encoder Count, will define the size of the SORTERENCODERMAX value
 	{attribute 'OPC.UA.DA' := '1'}
 	NUMBEROFDIVERTS_P2140				: DINT := 2;
 	DIVERTMIN_P2140					: DINT := 1;
@@ -147,17 +147,18 @@ IF P2140_DefaultDestination <> 0
 END_IF
 
 // Name of the sorter equipment
-//st_SorterCfg.Name := Conveyors.cfgP8005Label;
+st_Sorter_P2140Cfg.Name := Conveyors.cfgP2140Label;
 st_Sorter_P2140Cfg.DivertCount := NUMBEROFDIVERTS_P2140;
 IF DivertToCommission_P2140 > 0 THEN
 	st_Sorter_P2140Cfg.DefaultDestination := DivertToCommission_P2140;
 END_IF
 st_Sorter_P2140.EncoderCounts := st_SorterEncoder_P2140.CurrentCount;
-st_Sorter_P2140.InductPE := PhotoEyes.PE_10081.Out_OnFltrd;
-st_Sorter_P2140.DischargePE := Photoeyes.PE_10091.Out_OnFltrd;
+st_Sorter_P2140.InductPE := PhotoEyes.PE_10081.Out;
+st_Sorter_P2140.DischargePE := Photoeyes.PE_10091.Out;
 
 // Test the Encoder
 tEncoderOK_P2140.IN := (Conveyors.P2140_Status.Sts_IsRunning AND (st_Sorter_P2140.EncoderCounts = nLastEncoderCount_P2140));
+nLastEncoderCount_P2140 := st_Sorter_P2140.EncoderCounts;
 tEncoderOK_P2140(PT:=T#1S);
 
 // OK when Q is not on, but the alarm is reversed
@@ -178,7 +179,9 @@ ProcessBuffers_P2140(st_NextToInduct := st_ToInduct_P2140
 				, aItems := aSorterItems_P2140
 				, DivertToCommission := DivertToCommission_P2140
 				,ItemsArrayMin := SORTERENCODERMIN_P2140
-				,ItemsArrayMax := SORTERENCODERMAX_P2140);
+				,ItemsArrayMax := SORTERENCODERMAX_P2140
+				,DefaultDestIdx => st_Sorter_P2140Cfg.DefaultDestIdx
+				,RecircDestIdx => st_Sorter_P2140Cfg.RecircDestIdx);
 
 // Sorter LOG logs induct/discharge PE's and prepares the Temporory Record for unidentified items
 P2140_SorterLog(
@@ -199,8 +202,8 @@ Sorter_P2140(st_Sorter := st_Sorter_P2140
 		, st_tempItem := st_TempItem_P2140
 		, ItemsArrayMax := SORTERENCODERMAX_P2140
 		, ItemsArrayMin := SORTERENCODERMIN_P2140
-		, DivertArrayMax := DIVERTMIN_P2140
-		, DivertArrayMin := NUMBEROFDIVERTS_P2140
+		, DivertArrayMax := NUMBEROFDIVERTS_P2140
+		, DivertArrayMin := DIVERTMIN_P2140
 		, st_DischargeItem => SorterDischargeItem_P2140);
 
 // Log the diverts
@@ -274,7 +277,7 @@ fb_CommissionSorterDiverts_P2150(
 
 // Provide a "hard-coded" default destination.
 IF st_Sorter_P2150Cfg.DefaultDestination <= 0 THEN
-	st_Sorter_P2150Cfg.DefaultDestination := 5;
+	st_Sorter_P2150Cfg.DefaultDestination := 30;
 END_IF						
 
 // Check for a changed Default Destination from the messaging
@@ -285,21 +288,25 @@ IF P2150_DefaultDestination <> 0
 END_IF
 
 // Name of the sorter equipment
-//st_SorterCfg.Name := Conveyors.cfgP8005Label;
+st_Sorter_P2150Cfg.Name := Conveyors.cfgP2150Label;
 st_Sorter_P2150Cfg.DivertCount := NUMBEROFDIVERTS_P2150;
 IF DivertToCommission_P2150 > 0 THEN
 	st_Sorter_P2150Cfg.DefaultDestination := DivertToCommission_P2150;
 END_IF
 st_Sorter_P2150.EncoderCounts := st_SorterEncoder_P2150.CurrentCount;
-st_Sorter_P2150.InductPE := PhotoEyes.PE_2131.Out_OnFltrd;
-st_Sorter_P2150.DischargePE := Photoeyes.PE_4161.Out_OnFltrd;
+st_Sorter_P2150.InductPE := PhotoEyes.PE_2131.Out;
+st_Sorter_P2150.DischargePE := Photoeyes.PE_4161.Out;
 
 // Test the Encoder
 tEncoderOK_P2150.IN := (Conveyors.P2150_Status.Sts_IsRunning AND (st_Sorter_P2150.EncoderCounts = nLastEncoderCount_P2150));
+nLastEncoderCount_P2150 := st_Sorter_P2150.EncoderCounts;
 tEncoderOK_P2150(PT:=T#1S);
 
 // OK when Q is not on, but the alarm is reversed
   GVL_IO.ENC_9031_OK := tEncoderOK_P2150.Q;
+  
+// Publish the sorter name
+  GVL_IO.Sorter_P2150Name := st_Sorter_P2150Cfg.Name;
 
 // Sorter
 (*
@@ -316,7 +323,9 @@ ProcessBuffers_P2150(st_NextToInduct := st_ToInduct_P2150
 				, aItems := aSorterItems_P2150
 				, DivertToCommission := DivertToCommission_P2150
 				,ItemsArrayMin := SORTERENCODERMIN_P2150
-				,ItemsArrayMax := SORTERENCODERMAX_P2150);
+				,ItemsArrayMax := SORTERENCODERMAX_P2150
+				,DefaultDestIdx => st_Sorter_P2150Cfg.DefaultDestIdx
+				,RecircDestIdx => st_Sorter_P2150Cfg.RecircDestIdx);
 
 // Sorter log logs induct/discharge PE's and prepares the Temporory Record for unidentified items
 P2150_SorterLog(
@@ -331,16 +340,16 @@ P2150_SorterLog(
 	Config portion of the st_sorter is separate to allow it be be persistent.
 *)
 st_sorter_P2150.Config := st_sorter_P2150Cfg;
-Sorter_P2140(st_Sorter := st_Sorter_P2150
+Sorter_P2150(st_Sorter := st_Sorter_P2150
 		, In_ItemToInduct := st_ToInduct_P2150.Item
 		, In_InductingItem := st_Inducting_P2150.Item
-		, aItems := aSorterItems_P2140
-		, aDiverts := aSorterDiverts_P2140
+		, aItems := aSorterItems_P2150
+		, aDiverts := aSorterDiverts_P2150
 		, st_tempItem := st_TempItem_P2150
 		, ItemsArrayMax := SORTERENCODERMAX_P2150
 		, ItemsArrayMin := SORTERENCODERMIN_P2150
-		, DivertArrayMax := DIVERTMIN_P2150
-		, DivertArrayMin := NUMBEROFDIVERTS_P2150
+		, DivertArrayMax := NUMBEROFDIVERTS_P2150
+		, DivertArrayMin := DIVERTMIN_P2150
 		, st_DischargeItem => SorterDischargeItem_P2150);
 
 // Log the diverts
@@ -355,10 +364,15 @@ P2150_DivertLog(DivertArray := aSorterDiverts_P2150,
       <LineId Id="1333" Count="9" />
       <LineId Id="619" Count="10" />
       <LineId Id="1347" Count="6" />
-      <LineId Id="630" Count="16" />
+      <LineId Id="630" Count="11" />
+      <LineId Id="1529" Count="0" />
+      <LineId Id="642" Count="4" />
       <LineId Id="650" Count="12" />
       <LineId Id="1354" Count="1" />
-      <LineId Id="663" Count="1" />
+      <LineId Id="663" Count="0" />
+      <LineId Id="1531" Count="0" />
+      <LineId Id="1530" Count="0" />
+      <LineId Id="664" Count="0" />
       <LineId Id="1356" Count="5" />
       <LineId Id="710" Count="9" />
       <LineId Id="1368" Count="4" />
@@ -370,10 +384,18 @@ P2150_DivertLog(DivertArray := aSorterDiverts_P2150,
       <LineId Id="1380" Count="29" />
       <LineId Id="953" Count="10" />
       <LineId Id="1410" Count="6" />
-      <LineId Id="964" Count="16" />
+      <LineId Id="964" Count="11" />
+      <LineId Id="1523" Count="0" />
+      <LineId Id="976" Count="3" />
+      <LineId Id="1524" Count="0" />
+      <LineId Id="1526" Count="0" />
+      <LineId Id="1525" Count="0" />
+      <LineId Id="980" Count="0" />
       <LineId Id="984" Count="12" />
       <LineId Id="1417" Count="1" />
-      <LineId Id="997" Count="1" />
+      <LineId Id="997" Count="0" />
+      <LineId Id="1527" Count="1" />
+      <LineId Id="998" Count="0" />
       <LineId Id="1419" Count="5" />
       <LineId Id="1426" Count="0" />
       <LineId Id="1043" Count="10" />

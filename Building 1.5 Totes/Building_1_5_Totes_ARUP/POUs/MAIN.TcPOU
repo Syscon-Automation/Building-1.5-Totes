@@ -19,15 +19,17 @@ END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[BarCodeReaders();
 CommStatus();
+Solenoids();
 Conveyors();
-//Log_Diverts();
+Sorter();
+Log_Diverts_P2140();
+Log_Diverts_P2150();
+P_PulseCountDist();
 //MsgControl();
 Photoeyes();
 ProxSensors();
 ServerControl();
 Singulation_Control();
-Solenoids();
-Sorter();
 System();
 SystemSafety();
 GVL_IO.INIT := FALSE;
@@ -50,7 +52,14 @@ IF rStartPersistentSave.Q THEN
 END_IF]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="126" Count="29" />
+      <LineId Id="126" Count="1" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="130" Count="4" />
+      <LineId Id="137" Count="18" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

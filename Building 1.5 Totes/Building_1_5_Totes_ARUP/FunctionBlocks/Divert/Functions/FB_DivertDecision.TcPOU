@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_DivertDecision" Id="{f1effae8-ec79-4e78-bb87-c5d8f21259a3}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertDecision
 VAR_IN_OUT
@@ -28,7 +28,7 @@ END_VAR]]></Declaration>
       <ST><![CDATA[fbDivertLog(st_BufferData := aDivertLog);
 
 //Divert this item if this divert is this item's intended destination
-IF DivertIndex = Output1Item.Destination THEN
+IF DivertIndex = Output1Item.DestinationIdx THEN
 	// Check this only once, then set the Status accordingly
 	IF Divert.Status = E_StatusCode.Divert_Idle THEN
 		IF Divert.Full THEN
@@ -52,7 +52,7 @@ IF DivertIndex = Output1Item.Destination THEN
 		Output1Activate := 1;
 		Divert.Item := Output1Item;
 		//Energize Output2 after SorterCode.CFG_Output2Offset has passed 
-		IF DivertIndex = Output2Item.Destination THEN
+		IF DivertIndex = Output2Item.DestinationIdx THEN
 			Output2Activate := 1;
 		END_IF
 		DivertController( Output1Activate	:= Output1Activate
@@ -72,7 +72,7 @@ ELSE
 	//Turn off output if dest does not equal divert index
 	Output1Activate := 0;
 	//Keep Output2 energized for SorterCode.CFG_Output2Offset distance
-	IF DivertIndex <> Output2Item.Destination THEN
+	IF DivertIndex <> Output2Item.DestinationIdx THEN
 		// Set and Idle status for the divert
 		Divert.Status := E_StatusCode.Divert_Idle;
 		Output2Activate := 0;

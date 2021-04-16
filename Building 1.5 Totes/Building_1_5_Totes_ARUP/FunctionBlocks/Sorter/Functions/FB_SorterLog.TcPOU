@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_SorterLog" Id="{e2396a7d-6b34-4b02-83dc-f2c406ebff27}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SorterLog
 VAR_IN_OUT
@@ -21,7 +21,6 @@ VAR
 	BlankItem			: 	ST_Item := (ID := ''
 										, UniqueID := 0
 										, Destination := 0
-										, DestinationIdx := 0
 										, Status := E_StatusCode.No_Status
 										, ExtStatus := E_StatusCode.No_Status
 										, DeviceID := ''
@@ -36,12 +35,12 @@ rDischargePE(CLK:= SorterToLog.DischargePE, Q =>);
 fDischargePE(CLK:= SorterToLog.DischargePE, Q =>);
 
 // On the rising/falling edge of the Induct PE
-IF rDischargePE.Q OR fDischargePE.Q THEN
+IF rInductPE.Q OR fInductPE.Q THEN
 	IF SorterLogEnable.SORTER_DISCHARGE_PE THEN
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
 			, msgFmtStr := 'Induct PE Blocked : %s'
-			, strArg := BOOL_TO_STRING(SorterToLog.DischargePE)); 
+			, strArg := BOOL_TO_STRING(SorterToLog.InductPE)); 
 	END_IF
 END_IF
 

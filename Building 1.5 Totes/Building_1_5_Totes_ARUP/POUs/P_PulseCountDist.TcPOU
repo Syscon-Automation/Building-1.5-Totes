@@ -24,13 +24,13 @@ VAR
 END_VAR
 
 VAR CONSTANT
-	EncoderMax: UDINT := MAIN.SORTERENCODERMAX;
+	EncoderMax: UDINT := Sorter.SORTERENCODERMAX_P2150;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Uncomment to get pulse counts for a distance
-//TestStart(CLK:= (* Start photo eye goes here --> *) Photoeyes.PE_24041.Out);
-//TestEnd(CLK:= (* End photo eye goes here --> *) Photoeyes.PE_24161.Out);
-//EncoderValue := MAIN.st_SorterEncoder.CurrentCount;
+TestStart(CLK:= (* Start photo eye goes here --> *) Photoeyes.PE_10081.Out);
+TestEnd(CLK:= (* End photo eye goes here --> *) Photoeyes.PE_10302.Out);
+EncoderValue := GVL_IO.ENC_9031_Raw;
 
 Timer(IN:= Reading, PT:= T#1H, Q=> , ET=> );
 

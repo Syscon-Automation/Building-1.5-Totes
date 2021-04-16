@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="ProcessBuffers_P2150" Id="{140d9094-9a1a-4cc6-81c1-a0bf56f4bd2e}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM ProcessBuffers_P2150
 VAR_IN_OUT
@@ -15,18 +15,33 @@ END_VAR
 
 VAR_INPUT
 	DivertToCommission				: DINT;
-	ItemsArrayMax 					: UDINT;
-	ItemsArrayMin 					: UDINT;
+	ItemsArrayMax 			: UDINT;
+	ItemsArrayMin 			: UDINT;
 END_VAR
+
+VAR_OUTPUT
+	DefaultDestIdx					: DINT;
+	RecircDestIdx					: DINT;
+END_VAR
+
 VAR
+	st_ArrivalBuffer AT %I* 		: ST_ItemBuffer;
+	st_ArrivalFdbkIn				: ST_ItemBufferFdbk;
+	st_ArrivalFdbkOut	AT %Q*		: ST_ItemBufferFdbk;
 	fb_ArrivalBuffer				: FB_ItemBuffer;
 	st_ArrivalItem 					: ST_Item;		// Arrival Item (Bar code read) from System PLC (BarCodeReaders.pou)
 
 	// Item to replace in the sorter buffer
 	st_ReplaceItem					: st_Item;
 
+	st_TransportBuffer AT %I* 		: ST_ItemBuffer;
+	st_TransportFdbkIn				: ST_ItemBufferFdbk;
+	st_TransportFdbkOut	AT %Q*		: ST_ItemBufferFdbk;
 	fb_TransportBuffer				: FB_ItemBuffer;
 
+	st_UpdateBuffer AT %Q* 			: ST_ItemBuffer;
+	st_UpdateFdbkIn	AT %I*			: ST_ItemBufferFdbk;
+	st_UpdateFdbkOut				: ST_ItemBufferFdbk;
 	fb_UpdateBuffer 				: FB_ItemBuffer;
 
 	st_ToUpdate						: ST_ItemTemporary;	// Item to Update on the Sorter, or waiting to be added to the sorter
@@ -53,20 +68,22 @@ VAR
 	
 	st_DisplayItem		:st_Item;
 	LogSorterDump		:BOOL := FALSE;
+	aTestBool			:	ARRAY[0..100] OF BOOL;
+	
 	fb_FindDestination		: FB_FindDestination;
 	fb_DefaultDestination	: FB_FindDestination;
 	fb_RecircDestination	: FB_FindDestination;
 	// Created to allow the aDiverts to be used in the FB_FindDestination Function Block
 	{attribute 'OPC.UA.DA' := '0'}
 	aTempDiverts			: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF ST_DIVERT;
-END_VAR]]></Declaration>
+END_VAR
+]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*
 	Each arrival location will require a unique ProcessBuffers routine. The data type defined as %I* and %Q* can be mapped to from
 	corresponding items in BarCodeReaders.
 	Each Arrival location will require a separate Arrival buffer in the BarCodeReaders program to map the I/O
 *)
-
 aTempDiverts := aDiverts;
 // Initialize the Transport and Update buffers
 // Set Master for FB's that control the buffer
@@ -80,9 +97,9 @@ fb_TransportBuffer.LogEntries := .nItemBufferLogEnable.TRANSPORT;
 fb_UpdateBuffer.LogEntries := .nItemBufferLogEnable.UPDATE;
 
 // Provide names for the buffers
-fb_ArrivalBuffer.Name := 'P2150 SRT ARRIVAL';
-fb_TransportBuffer.Name := 'P2150 SRT TRANSPORT';
-fb_UpdateBuffer.Name := 'P2150 SRT UPDATE';
+fb_ArrivalBuffer.Name := 'SRT ARRIVAL';
+fb_TransportBuffer.Name := 'SRT TRANSPORT';
+fb_UpdateBuffer.Name := 'SRT UPDATE';
 
 // Initialize the FB_ItemExtBuffer Instances
 fb_ArrivalBuffer(st_BufferData := st_SorterArrivalBuffer_P2150
@@ -156,6 +173,7 @@ IF st_ArrivalItem.ID <> '' THEN
 	st_NextToInduct.Item.DeviceID := st_Sorter.Config.EquipID;
 	// Set the Default Destination
 	st_NextToInduct.Item.Destination := st_Sorter.Config.DefaultDestination;
+	st_NextToInduct.Item.DestinationIdx := st_Sorter.Config.DefaultDestIdx;
 	// Capture an encoder value that when the encoder count exceeds this value, NextToInduct item will be cleared
 	st_NextToInduct.Counts := st_Sorter.EncoderCounts;
 	// Clear the Last recieved item
@@ -207,13 +225,13 @@ END_IF
 fb_DefaultDestination(RoundRobin := st_Sorter.Config.RoundRobin
 				, aDiverts := aTempDiverts
 				, DestinationID := st_Sorter.Config.DefaultDestination
-				, DestinationIndex => st_Sorter.Config.DefaultDestIdx);
+				, DestinationIndex => DefaultDestIdx);
 
 // Get the Recirculation Destination Index
 fb_RecircDestination(RoundRobin := st_Sorter.Config.RoundRobin
 				, aDiverts := aTempDiverts
 				, DestinationID := st_Sorter.Config.RecircDestination
-				, DestinationIndex => st_Sorter.Config.RecircDestIdx);
+				, DestinationIndex => RecircDestIdx);
 
 // Test the Item to Update against the Item to Induct and update if they match:
 //	Update the NextItemToInduct with the updated data, then clear the Item to Update
@@ -587,155 +605,10 @@ END_IF
 ]]></ST>
     </Implementation>
     <LineIds Name="ProcessBuffers_P2150">
-      <LineId Id="7157" Count="0" />
-      <LineId Id="7164" Count="2" />
-      <LineId Id="7159" Count="0" />
-      <LineId Id="7158" Count="0" />
-      <LineId Id="7243" Count="0" />
-      <LineId Id="5886" Count="0" />
-      <LineId Id="5550" Count="9" />
-      <LineId Id="6045" Count="4" />
-      <LineId Id="5560" Count="9" />
-      <LineId Id="5881" Count="0" />
-      <LineId Id="5889" Count="1" />
-      <LineId Id="5892" Count="1" />
-      <LineId Id="5891" Count="0" />
-      <LineId Id="5570" Count="4" />
-      <LineId Id="5578" Count="14" />
-      <LineId Id="6464" Count="0" />
-      <LineId Id="6077" Count="0" />
-      <LineId Id="6088" Count="1" />
-      <LineId Id="6084" Count="3" />
-      <LineId Id="6465" Count="0" />
-      <LineId Id="5593" Count="2" />
-      <LineId Id="6467" Count="0" />
-      <LineId Id="6092" Count="0" />
-      <LineId Id="6099" Count="3" />
-      <LineId Id="6468" Count="1" />
-      <LineId Id="5597" Count="11" />
-      <LineId Id="7244" Count="2" />
-      <LineId Id="5609" Count="4" />
-      <LineId Id="5954" Count="1" />
-      <LineId Id="5965" Count="0" />
-      <LineId Id="5963" Count="1" />
-      <LineId Id="5966" Count="0" />
-      <LineId Id="5956" Count="0" />
-      <LineId Id="5961" Count="1" />
-      <LineId Id="6470" Count="0" />
-      <LineId Id="5980" Count="2" />
-      <LineId Id="6471" Count="0" />
-      <LineId Id="5957" Count="0" />
-      <LineId Id="5614" Count="0" />
-      <LineId Id="5820" Count="0" />
-      <LineId Id="5639" Count="5" />
-      <LineId Id="7247" Count="31" />
-      <LineId Id="5649" Count="0" />
-      <LineId Id="5952" Count="0" />
-      <LineId Id="5650" Count="11" />
-      <LineId Id="6966" Count="0" />
-      <LineId Id="5662" Count="4" />
-      <LineId Id="7279" Count="0" />
-      <LineId Id="5667" Count="5" />
-      <LineId Id="6978" Count="0" />
-      <LineId Id="6969" Count="3" />
-      <LineId Id="6979" Count="3" />
-      <LineId Id="6973" Count="4" />
-      <LineId Id="5673" Count="13" />
-      <LineId Id="6636" Count="0" />
-      <LineId Id="5687" Count="5" />
-      <LineId Id="7280" Count="1" />
-      <LineId Id="5695" Count="5" />
-      <LineId Id="5967" Count="0" />
-      <LineId Id="6116" Count="1" />
-      <LineId Id="5968" Count="1" />
-      <LineId Id="6476" Count="0" />
-      <LineId Id="6064" Count="0" />
-      <LineId Id="6114" Count="1" />
-      <LineId Id="6065" Count="0" />
-      <LineId Id="6073" Count="0" />
-      <LineId Id="6071" Count="0" />
-      <LineId Id="6074" Count="0" />
-      <LineId Id="6070" Count="0" />
-      <LineId Id="6075" Count="0" />
-      <LineId Id="6066" Count="3" />
-      <LineId Id="6477" Count="0" />
-      <LineId Id="5973" Count="6" />
-      <LineId Id="5972" Count="0" />
-      <LineId Id="5970" Count="0" />
-      <LineId Id="5701" Count="3" />
-      <LineId Id="6478" Count="0" />
-      <LineId Id="6058" Count="1" />
-      <LineId Id="6076" Count="0" />
-      <LineId Id="6060" Count="3" />
-      <LineId Id="6479" Count="0" />
-      <LineId Id="5705" Count="0" />
-      <LineId Id="5822" Count="0" />
-      <LineId Id="5708" Count="0" />
-      <LineId Id="7282" Count="19" />
-      <LineId Id="7074" Count="0" />
-      <LineId Id="7071" Count="0" />
-      <LineId Id="7073" Count="0" />
-      <LineId Id="7072" Count="0" />
-      <LineId Id="5721" Count="5" />
-      <LineId Id="7086" Count="0" />
-      <LineId Id="7302" Count="34" />
-      <LineId Id="7085" Count="0" />
-      <LineId Id="6368" Count="0" />
-      <LineId Id="6370" Count="0" />
-      <LineId Id="7087" Count="0" />
-      <LineId Id="6484" Count="0" />
-      <LineId Id="6371" Count="9" />
-      <LineId Id="6485" Count="0" />
-      <LineId Id="6381" Count="2" />
-      <LineId Id="6486" Count="0" />
-      <LineId Id="6384" Count="8" />
-      <LineId Id="6487" Count="0" />
-      <LineId Id="6393" Count="1" />
-      <LineId Id="7056" Count="0" />
-      <LineId Id="7059" Count="10" />
-      <LineId Id="7057" Count="1" />
-      <LineId Id="7054" Count="0" />
-      <LineId Id="5732" Count="35" />
-      <LineId Id="6289" Count="0" />
-      <LineId Id="6490" Count="0" />
-      <LineId Id="6290" Count="2" />
-      <LineId Id="6572" Count="1" />
-      <LineId Id="6889" Count="1" />
-      <LineId Id="6293" Count="5" />
-      <LineId Id="5768" Count="6" />
-      <LineId Id="6579" Count="0" />
-      <LineId Id="5775" Count="1" />
-      <LineId Id="5778" Count="0" />
-      <LineId Id="6778" Count="0" />
-      <LineId Id="6895" Count="1" />
-      <LineId Id="6781" Count="0" />
-      <LineId Id="6811" Count="8" />
-      <LineId Id="6789" Count="0" />
-      <LineId Id="6782" Count="0" />
-      <LineId Id="6788" Count="0" />
-      <LineId Id="6783" Count="1" />
-      <LineId Id="6787" Count="0" />
-      <LineId Id="6776" Count="0" />
-      <LineId Id="6706" Count="0" />
-      <LineId Id="5783" Count="0" />
-      <LineId Id="6786" Count="0" />
-      <LineId Id="6707" Count="0" />
-      <LineId Id="6891" Count="3" />
-      <LineId Id="5785" Count="0" />
-      <LineId Id="6563" Count="0" />
-      <LineId Id="5786" Count="1" />
-      <LineId Id="6799" Count="0" />
-      <LineId Id="6801" Count="3" />
-      <LineId Id="6800" Count="0" />
-      <LineId Id="5788" Count="19" />
-      <LineId Id="6637" Count="0" />
-      <LineId Id="5808" Count="6" />
-      <LineId Id="6488" Count="0" />
-      <LineId Id="6148" Count="0" />
-      <LineId Id="6153" Count="3" />
-      <LineId Id="6489" Count="0" />
-      <LineId Id="5815" Count="4" />
-      <LineId Id="3094" Count="0" />
+      <LineId Id="8059" Count="3" />
+      <LineId Id="7520" Count="89" />
+      <LineId Id="8063" Count="0" />
+      <LineId Id="7610" Count="427" />
       <LineId Id="6220" Count="0" />
     </LineIds>
   </POU>

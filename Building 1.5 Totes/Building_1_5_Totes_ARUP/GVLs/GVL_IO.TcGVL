@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <GVL Name="GVL_IO" Id="{c1c3ca00-a4ff-4270-a218-a7754a85e85c}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
@@ -55,6 +55,13 @@ VAR_GLOBAL
 	LT_10171_Yellow	AT %Q*	:BOOL;	//Panel	Tower Yellow Light
 	{attribute 'OPC.UA.DA' := '1'}
 	LT_10201_Green	AT %Q*	:BOOL;	//Panel	Tower Green Light
+	
+		{attribute 'OPC.UA.DA' := '1'}
+	PanelEstop_OK AT %I* : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Remote_PullCord2150_OK AT %I*: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Remote_PullCord2142_OK AT %I*: BOOL;
 	
 	
 //---------------------------------Motor Outputs-------------------------------------------------

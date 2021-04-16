@@ -216,7 +216,7 @@ END_IF
 //----------------------------------------BCR_S3080_01--------------------------------------------------------------
 //Location Update
 // Set up Bar Code Readers
-BCR_S2150_01.LogEntries := .nBarcodeLogEnable.BCR_S2150_01_LOG;
+BCR_S3080_01.LogEntries := .nBarcodeLogEnable.BCR_S3080_01_LOG;
 	BCR_S3080_01(
 	In_ReadTrig:= PhotoEyes.PE_9161.Out_OnFltrd, 
 	In_ResetCounts:= , 

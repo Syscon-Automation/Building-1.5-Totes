@@ -117,7 +117,7 @@ VAR
    P3080_Status : ST_EquipmentStatus;
    P3080_VFD	:	VFD;
    Test_VFD_P3080: BOOL;
-   //P3080_ResetWakeTmr : TON ; //Timer for holding the reset button to wake up Infeed Conveyor
+   P3080_ResetWakeTmr : TON ; //Timer for holding the reset button to wake up Infeed Conveyor
 //Transport
 //----------------------------------------P3085--------------------------------------------------------------
    cfgP3085Label:	STRING(20) :=  'P3085';
@@ -457,12 +457,13 @@ P2140.In_EquipIntlks.3:= Solenoids.GR2140_01_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.4:= Solenoids.GR2140_02_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.5:= Solenoids.PI2140_01_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.6:= Solenoids.PL2140_01_Status.Sts_EquipmentState.StsAuto; 
+P2140.In_EquipIntlks.7:= Photoeyes.PE_10151.JamDetected; 
 //Events
 P2140.In_EquipEvents.2:= GVL_IO.DS_P2140;
 P2140.In_EquipEvents.3:= System.SysEventsAllOk;
 P2140.In_EquipEvents.4:= NOT CommStatus.RIO10161_CommFault.Out;
 P2140.In_EquipEvents.5:= NOT CommStatus.BCR_S2140_01_CommFault.Out;
-P2140.In_EquipEvents.6:= Photoeyes.PE_10151.JamDetected AND Solenoids.PL2140_01.Out_ExtendCrntSV;
+P2140.In_EquipEvents.6:= False;//Photoeyes.PE_10151.JamDetected AND Not Solenoids.PL2140_01.Out_ExtendCrntSV;
 
 // Function Call
 P2140(
@@ -543,7 +544,7 @@ P2141.In_EquipIntlks.2:= P2141_VFD.Run_OK;
 //Events
 P2141.In_EquipEvents.2:= GVL_IO.DS_P2141;
 P2141.In_EquipEvents.3:= System.SysEventsAllOk;
-P2142.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
+P2141.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
 
 // Function Call
 P2141(
@@ -585,6 +586,7 @@ P2142_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
 P2142.In_EquipIntlks.2:= NOT GVL_IO.P2142_Faulted;
+P2142.In_EquipIntlks.3:= Photoeyes.PE_8141.Out;
 //Events
 P2142.In_EquipEvents.2:= GVL_IO.DS_P2142;
 P2142.In_EquipEvents.3:= System.SysEventsAllOk;
@@ -675,7 +677,7 @@ P2146.In_EquipEvents.4:= NOT CommStatus.RIO2151_CommFault.Out;
 P2146(
    In_p_EquipStatePB:= P2146_StatePB,
    In_P_ConvReqRun:= TRUE,
-   In_ConvDwnStrmMtrStatus:= P2145_Status.Sts_IsRunning,
+   In_ConvDwnStrmMtrStatus:= P2150_Status.Sts_IsRunning,
    In_ConvCrntExitPhotoEye:= FALSE,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
@@ -705,6 +707,9 @@ P2150_StatePB.ResetPB := System.Cnvyr_Reset;
 P2150_StatePB.OfflinePB := System.Cnvyr_Offline;
 P2150SleepWakeTrig[1] := PhotoEyes.PE_2201.Out_OffFltrd;
 P2150SleepWakeTrig[2] := PhotoEyes.PE_2231.Out_OffFltrd;
+P2150SleepWakeTrig[3] := PhotoEyes.PE_2131.Out_OffFltrd;
+P2150SleepWakeTrig[4] := PhotoEyes.PE_2101.Out_OffFltrd;
+
 
 // Initialize the Equipment Type
 P2150_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
@@ -751,18 +756,18 @@ P2150_Status.Sts_IsRunning := GVL_IO.P2150_RUN;
 //Conveyors Incoming 3000 (Green line)
 //Spiral
 //----------------------------------------P3080--------------------------------------------------------------
-P3080_StatePB.AutoPB := System.Cnvyr_Auto;
+P3080_StatePB.AutoPB := System.Cnvyr_Auto OR GVL_IO.PB_RemoteReset_8251;
 P3080_StatePB.ManPB := System.Cnvyr_Manual;
-P3080_StatePB.ResetPB := System.Cnvyr_Reset;
+P3080_StatePB.ResetPB := System.Cnvyr_Reset OR GVL_IO.PB_RemoteReset_8251;
 P3080_StatePB.OfflinePB := System.Cnvyr_Offline;
-//P3080_ResetWakeTmr(IN:= GVL_IO.PB_RemoteReset_12181, PT:= T#3S, Q=> );
-P3080SleepWakeTrig[1] := TRUE; //Conveyor doesn't sleep they may want to change this with a button or photoeye?
+P3080_ResetWakeTmr(IN:= GVL_IO.PB_RemoteReset_8251, PT:= T#3S, Q=> );
+P3080SleepWakeTrig[1] := P3080_ResetWakeTmr.Q; //Reset Button
 
 // Initialize the Equipment Type
 P3080_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3080.In_EquipIntlks.2:= NOT P3080_VFD.Run_OK;
+P3080.In_EquipIntlks.2:= P3080_VFD.Run_OK;
 //Events
 P3080.In_EquipEvents.2:= GVL_IO.DS_P3080;
 P3080.In_EquipEvents.3:= System.SysEventsAllOk;
@@ -803,6 +808,7 @@ P3085_StatePB.ManPB := System.Cnvyr_Manual;
 P3085_StatePB.ResetPB := System.Cnvyr_Reset;
 P3085_StatePB.OfflinePB := System.Cnvyr_Offline;
 P3085SleepWakeTrig[1] := Photoeyes.PE_9191.out;
+P3085SleepWakeTrig[2] := GVL_IO.PB_RemoteReset_8251;
 
 
 // Initialize the Equipment Type
@@ -844,6 +850,7 @@ P3090_StatePB.ResetPB := System.Cnvyr_Reset;
 P3090_StatePB.OfflinePB := System.Cnvyr_Offline;
 P3090SleepWakeTrig[1] := Photoeyes.PE_12091.out;
 P3090SleepWakeTrig[2] := Photoeyes.PE_9191.out;
+P3090SleepWakeTrig[3] := GVL_IO.PB_RemoteReset_8251;
 
 // Initialize the Equipment Type
 P3090_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
@@ -859,7 +866,7 @@ P3090.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
 P3090(
    In_p_EquipStatePB:= P3090_StatePB,
    In_P_ConvReqRun:= TRUE,
-   In_ConvDwnStrmMtrStatus:= P3090_Status.Sts_IsRunning,
+   In_ConvDwnStrmMtrStatus:= P3095_Status.Sts_IsRunning,
    In_ConvCrntExitPhotoEye:=  Photoeyes.PE_12271.out,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
@@ -884,6 +891,7 @@ P3095_StatePB.ResetPB := System.Cnvyr_Reset;
 P3095_StatePB.OfflinePB := System.Cnvyr_Offline;
 P3095SleepWakeTrig[1] := Photoeyes.PE_12271.out;
 P3095SleepWakeTrig[2] := Photoeyes.PE_12091.out;
+P3095SleepWakeTrig[3] := GVL_IO.PB_RemoteReset_8251;
 
 // Initialize the Equipment Type
 P3095_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
@@ -1150,6 +1158,7 @@ END_IF
       <LineId Id="540" Count="5" />
       <LineId Id="2125" Count="2" />
       <LineId Id="2124" Count="0" />
+      <LineId Id="2869" Count="0" />
       <LineId Id="546" Count="2" />
       <LineId Id="1761" Count="0" />
       <LineId Id="2132" Count="0" />
@@ -1172,7 +1181,9 @@ END_IF
       <LineId Id="1155" Count="0" />
       <LineId Id="650" Count="5" />
       <LineId Id="1728" Count="0" />
-      <LineId Id="656" Count="8" />
+      <LineId Id="656" Count="5" />
+      <LineId Id="2870" Count="0" />
+      <LineId Id="662" Count="2" />
       <LineId Id="1753" Count="0" />
       <LineId Id="665" Count="6" />
       <LineId Id="1729" Count="0" />
@@ -1192,6 +1203,8 @@ END_IF
       <LineId Id="1158" Count="0" />
       <LineId Id="766" Count="5" />
       <LineId Id="1735" Count="0" />
+      <LineId Id="2513" Count="1" />
+      <LineId Id="2512" Count="0" />
       <LineId Id="772" Count="5" />
       <LineId Id="2137" Count="1" />
       <LineId Id="2140" Count="2" />
@@ -1216,6 +1229,7 @@ END_IF
       <LineId Id="818" Count="26" />
       <LineId Id="1161" Count="0" />
       <LineId Id="845" Count="5" />
+      <LineId Id="2871" Count="0" />
       <LineId Id="1738" Count="0" />
       <LineId Id="851" Count="8" />
       <LineId Id="1765" Count="0" />
@@ -1223,12 +1237,14 @@ END_IF
       <LineId Id="1162" Count="0" />
       <LineId Id="882" Count="5" />
       <LineId Id="1739" Count="0" />
+      <LineId Id="2872" Count="0" />
       <LineId Id="888" Count="8" />
       <LineId Id="1767" Count="0" />
       <LineId Id="897" Count="21" />
       <LineId Id="1163" Count="0" />
       <LineId Id="919" Count="5" />
       <LineId Id="1740" Count="0" />
+      <LineId Id="2873" Count="0" />
       <LineId Id="925" Count="8" />
       <LineId Id="1769" Count="0" />
       <LineId Id="934" Count="21" />

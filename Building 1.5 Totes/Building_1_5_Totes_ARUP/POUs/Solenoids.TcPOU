@@ -280,7 +280,7 @@ PI2140_01(
    In_p_EquipStatePB:= PI2140_01_StatePB,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
-   In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2140.In_PinStop_Extended,
+   In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2140.Out_PinStop_Ext,
    In_P_SVReqRetract:= Singulation_Control.SortSingulation_P2140.Out_PinStop_Ret,
    In_EquipRtrcdFdbck := ProxSensors.PX_11201_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_11181_Extended.Out,
@@ -340,18 +340,19 @@ PL2140_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
 PL2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+PL2140_01.In_EquipIntlks.2:= Photoeyes.PE_10151.JamDetected;
 //Events
 PL2140_01.In_EquipEvents.2:= System.SysEventsAllOk;
 PL2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PL2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
 PL2140_01.In_EquipEvents.5:= NOT CommStatus.RIO10161_CommFault.Out;
-PL2140_01.In_EquipEvents.6:= FALSE;
+
 // Function Call
 PL2140_01(
    In_p_EquipStatePB:= PL2140_01_StatePB,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
-   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2140[2].Output2,
+   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2140[2].Output1,
    In_EquipRtrcdFdbck := ProxSensors.PX_10231_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_10211_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
@@ -594,7 +595,9 @@ PU2150_04(
       <LineId Id="1381" Count="0" />
       <LineId Id="901" Count="5" />
       <LineId Id="1610" Count="0" />
-      <LineId Id="907" Count="26" />
+      <LineId Id="907" Count="22" />
+      <LineId Id="2500" Count="0" />
+      <LineId Id="930" Count="3" />
       <LineId Id="1378" Count="0" />
       <LineId Id="934" Count="5" />
       <LineId Id="1611" Count="0" />

@@ -409,10 +409,10 @@
     <Compile Include="POUs\Photoeyes.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\ProcessBuffers_P2140.TcPOU">
+    <Compile Include="POUs\ProcessBuffers_P2150.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\ProcessBuffers_P2150.TcPOU">
+    <Compile Include="POUs\ProcessBuffers_P2140.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\ProxSensors.TcPOU">
