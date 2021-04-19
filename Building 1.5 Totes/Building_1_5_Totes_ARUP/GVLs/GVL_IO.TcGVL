@@ -198,18 +198,16 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
 	RIO12182_WcState AT %I*				: BOOL;		// Remote IO Block 12812
 	{attribute 'OPC.UA.DA' := '1'}
-	BCR_S2140_01_WcState AT %I*			: BOOL;		// Barcode Reader S2140_01
-	{attribute 'OPC.UA.DA' := '1'}
-	BCR_S2141_01_WcState AT %I*			: BOOL;		// Barcode Reader S2141_01
-	{attribute 'OPC.UA.DA' := '1'}
-	BCR_S2150_01_WcState AT %I*			: BOOL;		// Barcode Reader S2150_01
-	{attribute 'OPC.UA.DA' := '1'}
-	BCR_S3080_01_WcState AT %I*			: BOOL;		// Barcode Reader S3080_01
+
 	{attribute 'OPC.UA.DA' := '1'}
 	EthernetAdapter_State AT %I*	    : UINT;		// Ethernet Adapter State
  //---------------------------------EAP-------------------------------------------------
 //Published
+  To205_P2130_IsRunning	AT %Q*:	BOOL; 
+  To205_P3095_SendingProduct AT %Q*: BOOL; 
 //Subscribed
+  From205_P3100_IsRunning AT %I*: BOOL;
+  From205_P2125_SendingProduct AT %I*: BOOL;
 
 
 END_VAR]]></Declaration>

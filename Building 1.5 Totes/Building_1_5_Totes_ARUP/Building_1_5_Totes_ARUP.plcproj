@@ -231,6 +231,9 @@
     <Compile Include="FunctionBlocks\Singulation\FB_Singulation.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FunctionBlocks\Singulation\FB_TwoGripIndexer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FunctionBlocks\Solenoids\Functions\FB_Solenoid_DA.TcPOU">
       <SubType>Code</SubType>
     </Compile>

@@ -358,6 +358,9 @@ cfgP3095EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[ResetAllDrives := System.Cnvyr_Reset; //Reset For VFD
+//EAP
+GVL_IO.To205_P2130_IsRunning := P2130_Status.Sts_IsRunning;
+GVL_IO.To205_P3095_SendingProduct := P3095_Status.Sts_IsRunning OR Photoeyes.PE_12091.Out OR Photoeyes.PE_12181.Out;
 
 //Conveyors Incoming 2000 (Purple line)
 //Transport
@@ -366,7 +369,7 @@ P2130_StatePB.AutoPB := System.Cnvyr_Auto;
 P2130_StatePB.ManPB := System.Cnvyr_Manual;
 P2130_StatePB.ResetPB := System.Cnvyr_Reset;
 P2130_StatePB.OfflinePB := System.Cnvyr_Offline;
-P2130SleepWakeTrig[1] := TRUE; //EAP Wakeup bits 
+P2130SleepWakeTrig[1] := GVL_IO.From205_P2125_SendingProduct; //EAP Wakeup bits 
 
 // Initialize the Equipment Type
 P2130_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
@@ -422,7 +425,7 @@ P2135.In_EquipEvents.4:= NOT CommStatus.RIO10161_CommFault.Out;
 P2135(
    In_p_EquipStatePB:= P2135_StatePB,
    In_P_ConvReqRun:= TRUE,
-   In_ConvDwnStrmMtrStatus:=  P2140_Status.Sts_IsRunning,
+   In_ConvDwnStrmMtrStatus:= P2140_Status.Sts_IsRunning,
    In_ConvCrntExitPhotoEye:=  Photoeyes.PE_10291.Out,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
@@ -907,7 +910,7 @@ P3095.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
 P3095(
    In_p_EquipStatePB:= P3095_StatePB,
    In_P_ConvReqRun:= TRUE,
-   In_ConvDwnStrmMtrStatus:= TRUE,  //EAP Status
+   In_ConvDwnStrmMtrStatus:= GVL_IO.From205_P3100_IsRunning, //EAP Status
    In_ConvCrntExitPhotoEye:= Photoeyes.PE_12181.Out,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
@@ -1140,6 +1143,9 @@ END_IF
     </Implementation>
     <LineIds Name="Conveyors">
       <LineId Id="5" Count="0" />
+      <LineId Id="3228" Count="0" />
+      <LineId Id="3230" Count="0" />
+      <LineId Id="3229" Count="0" />
       <LineId Id="1150" Count="0" />
       <LineId Id="1149" Count="0" />
       <LineId Id="102" Count="0" />
