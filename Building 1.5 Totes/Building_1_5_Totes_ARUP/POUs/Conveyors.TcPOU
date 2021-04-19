@@ -544,6 +544,7 @@ P2141_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
 P2141.In_EquipIntlks.2:= P2141_VFD.Run_OK;
+
 //Events
 P2141.In_EquipEvents.2:= GVL_IO.DS_P2141;
 P2141.In_EquipEvents.3:= System.SysEventsAllOk;
@@ -554,7 +555,7 @@ P2141(
    In_p_EquipStatePB:= P2141_StatePB,
    In_P_ConvReqRun:= TRUE,
    In_ConvDwnStrmMtrStatus:= P2142_Status.Sts_IsRunning,
-   In_ConvCrntExitPhotoEye:= FALSE,
+   In_ConvCrntExitPhotoEye:= Photoeyes.PE_8131.Out,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_WakeSlpTrigArry:= P2141SleepWakeTrig,
@@ -589,7 +590,8 @@ P2142_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
 P2142.In_EquipIntlks.2:= NOT GVL_IO.P2142_Faulted;
-P2142.In_EquipIntlks.3:= Photoeyes.PE_8141.Out;
+P2142.In_EquipIntlks.3:= Photoeyes.PE_8141.Out_OnFltrd;
+
 //Events
 P2142.In_EquipEvents.2:= GVL_IO.DS_P2142;
 P2142.In_EquipEvents.3:= System.SysEventsAllOk;
@@ -1181,13 +1183,16 @@ END_IF
       <LineId Id="1154" Count="0" />
       <LineId Id="608" Count="5" />
       <LineId Id="1727" Count="0" />
-      <LineId Id="614" Count="8" />
+      <LineId Id="614" Count="5" />
+      <LineId Id="3587" Count="0" />
+      <LineId Id="620" Count="2" />
       <LineId Id="1754" Count="0" />
       <LineId Id="623" Count="26" />
       <LineId Id="1155" Count="0" />
       <LineId Id="650" Count="5" />
       <LineId Id="1728" Count="0" />
       <LineId Id="656" Count="5" />
+      <LineId Id="3585" Count="0" />
       <LineId Id="2870" Count="0" />
       <LineId Id="662" Count="2" />
       <LineId Id="1753" Count="0" />

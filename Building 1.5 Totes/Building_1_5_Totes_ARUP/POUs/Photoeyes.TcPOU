@@ -300,7 +300,7 @@ PE_8131(
 PE_8141(
    In_Status:= ,
    CFG_PEOKState:= 1,
-   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OnDlyTime:= T#3S,
    CFG_OffDlyTime:= DebounceOffTime,
    CFG_JamDetTime:= JamDetectTime,
    In_Sim:=
