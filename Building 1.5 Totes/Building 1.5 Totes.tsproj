@@ -5524,7 +5524,7 @@ Published]]></Comment>
 				</Image>
 				<Ethernet DeviceDesc="ARUP (X000)"/>
 			</Device>
-			<Device Id="3" DevType="112" AmsPort="28675" AmsNetId="5.84.5.4.4.1" RemoteName="Communition with 205 (EtherCAT Automation Protocol)">
+			<Device Id="3" Disabled="true" DevType="112" AmsPort="28675" AmsNetId="5.84.5.4.4.1" RemoteName="Communition with 205 (EtherCAT Automation Protocol)">
 				<Name>Communition with 205 (EtherCAT Automation Protocol)</Name>
 				<AddressInfo>
 					<TcCom>
