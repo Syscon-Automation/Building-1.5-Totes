@@ -7,9 +7,10 @@ VAR
 	RetryLimit_P2140		:	UINT := 1;
 	ReleaseDist_P2140		:	UINT;
 	
-	SortSingulation_P2150	:	FB_Singulation;
+	SortSingulation_P2150	:	FB_TwoGripIndexer;
 	RetryLimit_P2150		:	UINT := 1;
-	ReleaseDist_P2150		:	UINT;
+	GapDist_P2150		:	UINT;
+	ProductSize_P2150		:	UINT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -36,23 +37,13 @@ END_VAR
 
 SortSingulation_P2150(
 	In_ConveyorRunning := Conveyors.P2150_Status.Sts_IsRunning,
-	In_Grabber_1_Auto := Solenoids.GR2150_01_Status.Sts_EquipmentState.StsAuto,
+	PE_Grabber := Photoeyes.PE_2331.Out_OffFltrd,
+	In_Grabber_1_Auto := Solenoids.GR2150_02_Status.Sts_EquipmentState.StsAuto,
 	In_Grabber_1_Extended := ProxSensors.In_PX_2181_Extended,
 	In_Grabber_1_Retracted := ProxSensors.In_PX_2201_Retracted,
-	In_Grabber_2_Auto := Solenoids.GR2150_02_Status.Sts_EquipmentState.StsAuto,
-	In_Grabber_2_Extended := ProxSensors.In_PX_2131_Extended,
-	In_Grabber_2_Retracted := ProxSensors.In_PX_2151_Retracted,
-//	In_PinStop_Auto := Solenoids.PS8005_Status.Sts_EquipmentState.StsAuto,
-//	In_PinStop_Extended := ProxSensors.In_PX_22541_Extended,
-//	In_PinStop_Retracted := ProxSensors.In_PX_22521_Retracted,
-	In_FaultReset := System.Cnvyr_Reset,
 	In_EncoderCount := GVL_IO.ENC_9091_Raw,
-	In_PE_GrabTrigger:= PhotoEyes.PE_2101.Out_OnFltrd, 
-	In_PE_ToteTrigger:= PhotoEyes.PE_2331.Out_OffFltrd, 
-	In_PE_ClearedTrigger:= PhotoEyes.PE_2131.Out_OffFltrd,
-	Cfg_GappingDistance := ReleaseDist_P2150,
-	Cfg_TimeOutTime:= T#5S,
-	Cfg_RetryLimit:= RetryLimit_P2150, 
+	Cfg_GappingDistance := GapDist_P2150,
+	Cfg_ProductSize := ProductSize_P2150, 
 );]]></ST>
     </Implementation>
     <LineIds Name="Singulation_Control">
@@ -70,7 +61,11 @@ SortSingulation_P2150(
       <LineId Id="11" Count="0" />
       <LineId Id="15" Count="0" />
       <LineId Id="45" Count="0" />
-      <LineId Id="92" Count="19" />
+      <LineId Id="92" Count="3" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="108" Count="1" />
+      <LineId Id="123" Count="0" />
       <LineId Id="91" Count="0" />
     </LineIds>
   </POU>

@@ -10,16 +10,15 @@ VAR_INPUT
 	In_ConveyorRunning			:	BOOL; //Added
 	
 	PE_Grabber:	BOOL;
+	In_Grabber_1_Auto: BOOL;
+	In_Grabber_1_Extended	:	BOOL;
+	In_Grabber_1_Retracted	:	BOOL;
+
 	
 	In_SV_Grabber_1_Extend	:	BOOL;
 	In_SV_Grabber_1_Retract	:	BOOL;
-	In_Grabber_1_Extended	:	BOOL;
-	In_Grabber_1_Retracted	:	BOOL;
 	
 	In_EncoderCount			:	UINT;
-	In_PEBlockCount			:	UINT;
-	In_ReleaseCount			:	UINT;
-	RolloverDetect 			:   UINT;
 	
 	Cfg_GappingDistance		:	UINT;	// Distance in encoder Pulses before the next item can be released
 	Cfg_ProductSize		    :	UINT;	// Size(length) in encoder count of product for the grabber to retract for
@@ -50,14 +49,19 @@ VAR
 	tonRunningWait				:	TON := (PT := T#5S);
 	
 	rResetState	:	R_TRIG;
+	fRetracted	: F_TRIG; 	// Capture the Falling edge of the Induct PE
 	// Extend and Retract controls
 	Grabber_1_Extend		:	BOOL;
 	Grabber_1_Retract		:	BOOL;
 	
-	BlockedPECount			:	UINT;
-	ClearedPECount			:	UINT;
-	ClearedDistance			:	UINT;
+	RolloverDetect_HeldDist			:   UINT;
+	HeldCount			    :	UINT;
+	HeldDistance			:	UINT;
+	RolloverDetect_ReleasedDist			:   UINT;
+	ReleasedCount           :	UINT;
+	ReleasedDistance        :	UINT;
 
+	fInductPE: INT;
 END_VAR
 
 VAR CONSTANT
@@ -140,93 +144,90 @@ ELSIF Out_Running THEN
 	
 // Call actions???	
 	
+fRetracted(CLK:= In_Grabber_1_Retracted, Q =>);	
 	
+IF  fRetracted.Q THEN
+	HeldCount := In_Encodercount;
+END_IF
 	
-	
-	
-	
-
-	
-// Singulation Distance Check, Hold for Gap
-	IF In_EncoderCount > ClearedPECount THEN
-		ClearedDistance := In_EncoderCount - ClearedPECount;
-		RolloverDetect := 0;
-	ELSE
-		// If the encoder rolls to 0, capture the last distance as an offset
-		IF RolloverDetect = 0 THEN
-			RolloverDetect := ClearedDistance;
-		END_IF
-		// The new distance to check is the number of pulses from the Cleared count to the rollover (RolloverDetect)
-		// 	plus the current encoder count
-		ClearedDistance := RolloverDetect + In_EncoderCount;
-	END_IF
-	
-// Singulation Distance Check, release for size 
-	IF In_EncoderCount > ClearedPECount THEN
-		ClearedDistance := In_EncoderCount - ClearedPECount;
-		RolloverDetect := 0;
-	ELSE
-		// If the encoder rolls to 0, capture the last distance as an offset
-		IF RolloverDetect = 0 THEN
-			RolloverDetect := ClearedDistance;
-		END_IF
-		// The new distance to check is the number of pulses from the Cleared count to the rollover (RolloverDetect)
-		// 	plus the current encoder count
-		ClearedDistance := RolloverDetect + In_EncoderCount;
-	END_IF
-	
-	// Release After Distance Requirement is satisfied
-	IF ClearedDistance > Cfg_GappingDistance THEN
-	
-		// Test for an item at the grabber stop
-		IF PE_Grabber THEN
-			// PinStop
-			
-		END_IF
-	END_IF
-// Activate all the outputs in one place
-Status_Output.GRABBER_1_OCCUPIED := Grabber1(Active := In_Grabber_1_Auto, Extend:= Grabber_1_Extend, Retract := Grabber_1_Retract);
-]]></ST>
-    </Implementation>
-    <Action Name="a_ResetGrabbers" Id="{6c52f269-b6f9-4b55-b70b-15a4f08b6416}">
-      <Implementation>
-        <ST><![CDATA[// Grabber 1 Set
-Grabber_1_Retract := FALSE;
-Grabber_1_Extend := TRUE;
-// Grabber 2 Set
-Grabber_2_Retract := FALSE;
-Grabber_2_Extend := TRUE;
-]]></ST>
-      </Implementation>
-    </Action>
-    <Method Name="Grabber1" Id="{dbb550bf-d0ad-4c23-8643-75a48f8ef06e}">
-      <Declaration><![CDATA[METHOD Grabber1 : BOOL
-VAR_INPUT
-	Active	: BOOL;	
-	Extend	: BOOL;
-	Retract	: BOOL;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF Active THEN
-	IF Extend THEN
-		Out_Grabber_1_Ext := TRUE;
-		Out_Grabber_1_Ret := FALSE;
-	ELSIF Retract THEN
-		Out_Grabber_1_Ext := FALSE;
-		Out_Grabber_1_Ret := TRUE;
-	ELSE
-		Out_Grabber_1_Ext := FALSE;
-		Out_Grabber_1_Ret := TRUE;
-	END_IF
-ELSE
-	Out_Grabber_1_Ext := FALSE;
-	Out_Grabber_1_Ret := TRUE;
+IF Releasedcount=0 AND In_Grabber_1_Retracted THEN
+	ReleasedCount := In_EncoderCount;		
 END_IF
 
-Grabber1 := Out_Grabber_1_Ext OR In_Grabber_1_Extended;]]></ST>
-      </Implementation>
-    </Method>
+IF In_Grabber_1_Retracted=0 THEN
+	ReleasedCount := 0;
+END_IF
+	
+// Singulation Distance Check, Hold for Gap
+IF HeldCount <> 0 THEN
+	IF In_EncoderCount > HeldCount THEN
+		HeldDistance := In_EncoderCount - HeldCount;
+		RolloverDetect_HeldDist := 0;
+	ELSE
+		// If the encoder rolls to 0, capture the last distance as an offset
+		IF RolloverDetect_HeldDist = 0 THEN
+			RolloverDetect_HeldDist := HeldDistance;
+		END_IF
+		// The new distance to check is the number of pulses from the Cleared count to the rollover (RolloverDetect)
+		// 	plus the current encoder count
+		HeldDistance := RolloverDetect_HeldDist + In_EncoderCount;
+	END_IF
+ELSE
+	HeldDistance:=0;
+END_IF
+	
+// Singulation Distance Check, release for size 
+IF ReleasedCount <> 0 THEN
+	IF In_EncoderCount > ReleasedCount THEN
+		ReleasedDistance := In_EncoderCount - ReleasedCount;
+		RolloverDetect_ReleasedDist := 0;
+	ELSE
+		// If the encoder rolls to 0, capture the last distance as an offset
+		IF RolloverDetect_ReleasedDist = 0 THEN
+			RolloverDetect_ReleasedDist := ReleasedDistance;
+		END_IF
+		// The new distance to check is the number of pulses from the Cleared count to the rollover (RolloverDetect)
+		// 	plus the current encoder count
+		ReleasedDistance  := RolloverDetect_ReleasedDist + In_EncoderCount;
+	END_IF
+ELSE 
+	ReleasedDistance :=0;
+END_IF
+	
+// Check Held Distance less than Gap distance
+IF Cfg_GappingDistance > HeldDistance THEN
+	 // Test for an item at the grabber stop
+		IF PE_Grabber THEN
+		//Close Grabber
+		Out_Grabber_1_Ext :=TRUE;
+		Out_Grabber_1_Ret :=FALSE;	
+		//Reset Release count
+		ELSE
+		//Open Grabber
+		Out_Grabber_1_Ext :=FALSE;
+		Out_Grabber_1_Ret :=TRUE;
+		END_IF
+	//Held distance greater than Gap, Released count less than Product size 
+	ELSE
+		IF Cfg_ProductSize > ReleasedDistance THEN
+		//Open Grabber 
+		Out_Grabber_1_Ext :=FALSE;
+		Out_Grabber_1_Ret :=TRUE;
+		//Held distance greater than Gap, Released Greater than Product size
+		ELSIF PE_Grabber THEN
+		//Close Gripper
+		Out_Grabber_1_Ext :=TRUE;
+		Out_Grabber_1_Ret :=FALSE;
+		END_IF
+END_IF
+
+	
+	
+	
+// Activate all the outputs in one place
+//Status_Output.GRABBER_1_OCCUPIED := Grabber1(Active := In_Grabber_1_Auto, Extend:= Grabber_1_Extend, Retract := Grabber_1_Retract);
+]]></ST>
+    </Implementation>
     <LineIds Name="FB_TwoGripIndexer">
       <LineId Id="3" Count="5" />
       <LineId Id="156" Count="0" />
@@ -248,25 +249,54 @@ Grabber1 := Out_Grabber_1_Ext OR In_Grabber_1_Extended;]]></ST>
       <LineId Id="237" Count="0" />
       <LineId Id="158" Count="1" />
       <LineId Id="238" Count="0" />
-      <LineId Id="160" Count="5" />
-      <LineId Id="29" Count="14" />
+      <LineId Id="160" Count="3" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="330" Count="0" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="334" Count="1" />
+      <LineId Id="382" Count="0" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="383" Count="1" />
+      <LineId Id="333" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="372" Count="0" />
+      <LineId Id="32" Count="11" />
+      <LineId Id="387" Count="1" />
+      <LineId Id="373" Count="0" />
       <LineId Id="255" Count="0" />
-      <LineId Id="242" Count="11" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="374" Count="0" />
+      <LineId Id="243" Count="10" />
       <LineId Id="44" Count="0" />
+      <LineId Id="385" Count="1" />
+      <LineId Id="375" Count="0" />
       <LineId Id="254" Count="0" />
-      <LineId Id="45" Count="4" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="361" Count="0" />
       <LineId Id="57" Count="0" />
-      <LineId Id="60" Count="1" />
-      <LineId Id="257" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="355" Count="1" />
+      <LineId Id="353" Count="0" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="350" Count="0" />
+      <LineId Id="457" Count="0" />
+      <LineId Id="364" Count="0" />
+      <LineId Id="351" Count="1" />
+      <LineId Id="365" Count="0" />
+      <LineId Id="357" Count="0" />
+      <LineId Id="366" Count="0" />
+      <LineId Id="358" Count="1" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="369" Count="0" />
+      <LineId Id="368" Count="0" />
+      <LineId Id="346" Count="1" />
       <LineId Id="64" Count="1" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_TwoGripIndexer.a_ResetGrabbers">
-      <LineId Id="2" Count="5" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_TwoGripIndexer.Grabber1">
-      <LineId Id="3" Count="15" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
