@@ -162,7 +162,7 @@ nLastEncoderCount_P2140 := st_Sorter_P2140.EncoderCounts;
 tEncoderOK_P2140(PT:=T#1S);
 
 // OK when Q is not on, but the alarm is reversed
-  GVL_IO.ENC_9091_OK := tEncoderOK_P2140.Q;
+  GVL_IO.ENC_9031_OK := tEncoderOK_P2140.Q;
 
 // Sorter
 (*
@@ -303,7 +303,7 @@ nLastEncoderCount_P2150 := st_Sorter_P2150.EncoderCounts;
 tEncoderOK_P2150(PT:=T#1S);
 
 // OK when Q is not on, but the alarm is reversed
-  GVL_IO.ENC_9031_OK := tEncoderOK_P2150.Q;
+  GVL_IO.ENC_9091_OK := tEncoderOK_P2150.Q;
   
 // Publish the sorter name
   GVL_IO.Sorter_P2150Name := st_Sorter_P2150Cfg.Name;

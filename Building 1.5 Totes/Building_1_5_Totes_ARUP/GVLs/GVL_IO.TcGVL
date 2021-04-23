@@ -149,7 +149,7 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
    GR2150_01_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
 	{attribute 'OPC.UA.DA' := '1'}
-   GR2150_02_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
+   PI2150_01_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
 	{attribute 'OPC.UA.DA' := '1'}
    PU2150_01_Extend        AT %Q*:    BOOL; // P2150 Solenoid Extend
 	{attribute 'OPC.UA.DA' := '1'}

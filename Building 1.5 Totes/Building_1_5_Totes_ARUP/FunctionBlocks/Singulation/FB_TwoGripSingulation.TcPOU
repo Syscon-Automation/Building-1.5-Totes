@@ -1,0 +1,258 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_TwoGripSingulation" Id="{7d4f03d8-8a29-4c0e-beee-ab2b44055293}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TwoGripSingulation
+VAR_INPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	In_ResetState	:	BOOL;		// Clear the current functional state of the Indexer
+
+	In_Pause:	BOOL;
+	In_ConveyorRunning			:	BOOL; //Added
+	
+	PE_Grabber:	BOOL;
+	In_Grabber_1_Auto: BOOL;
+	In_Grabber_1_Extended	:	BOOL;
+	In_Grabber_1_Retracted	:	BOOL;
+	
+	In_Grabber_2_Auto: BOOL;
+	In_Grabber_2_Extended	:	BOOL;
+	In_Grabber_2_Retracted	:	BOOL;
+
+	
+	In_SV_Grabber_1_Extend	:	BOOL;
+	In_SV_Grabber_1_Retract	:	BOOL;
+	In_SV_Grabber_2_Extend	:	BOOL;
+	In_SV_Grabber_2_Retract	:	BOOL;
+	
+	In_EncoderCount			:	UINT;
+	
+	Cfg_GappingDistance		:	UINT;	// Distance in encoder Pulses before the next item can be released
+	Cfg_ProductSize		    :	UINT;	// Size(length) in encoder count of product for the grabber to retract for
+	Cfg_GrabberSpace		:	UINT;	// Size(length) in encoder count for product to clear the grabber 
+END_VAR
+VAR_OUTPUT
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Homed					:	BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Ready					:	BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	Out_Running					:	BOOL;
+	
+	Out_Grabber_1_Ext:	BOOL;
+	Out_Grabber_1_Ret:	BOOL;
+	Out_Grabber_2_Ext:	BOOL;
+	Out_Grabber_2_Ret:	BOOL;
+
+	{attribute 'OPC.UA.DA' := '1'}
+	Status:		UINT;		// General Indexer  status
+	Status_Output:	UINT;	// Indexer grabber status
+	
+END_VAR
+VAR	
+	StartUp		: BOOL := TRUE;
+	rPE_Grabber_1: R_TRIG;
+	fPE_Grabber_1: F_TRIG;
+	
+	tonHomeWait					:	TON := (PT := T#1S);
+	tonReadyWait				:	TON := (PT := T#1S);
+	tonRunningWait				:	TON := (PT := T#5S);
+	
+	rResetState	:	R_TRIG;
+	fRetracted	: F_TRIG; 	// Capture the Falling edge of the Induct PE
+	// Extend and Retract controls
+	Grabber_1_Extend		:	BOOL;
+	Grabber_1_Retract		:	BOOL;
+	Grabber_2_Extend		:	BOOL;
+	Grabber_2_Retract		:	BOOL;
+	
+	RolloverDetect_HeldDist			:   UINT;
+	HeldCount			    :	UINT;
+	HeldDistance			:	UINT;
+	RolloverDetect_InductDist			:   UINT;
+	InductCount           :	UINT;
+	InductedDistance        :	UINT;
+
+END_VAR
+
+VAR CONSTANT
+	// Output Status
+	GRABBER_1_OCCUPIED:	UINT  := 1;
+	GRABBER_2_OCCUPIED:	UINT  := 2;
+	
+	// Singulation Status
+	PAUSED:						UINT  := 0;
+	PRODUCT_PRESENT:			UINT  := 1;
+	PRODUCT_RELEASED:			UINT  := 2;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Process the In_ResetState
+rResetState(CLK:=In_ResetState);
+
+IF rResetState.Q THEN
+	// Clear the Status
+	Status := 0;
+	// Revert to the StartUp state
+	StartUp := TRUE;
+	// Revert to the NOT Homed state
+	Out_Homed := FALSE;
+	tonHomeWait(IN := FALSE);
+	// Revert to the NOT Ready state
+	Out_Ready := FALSE;
+	tonReadyWait(IN := FALSE);
+	// Revert to the NOT Running state
+	Out_Running := FALSE;
+	tonRunningWait(IN := FALSE);
+	// Clear the reset request
+	// Clear the reset request
+	In_ResetState := FALSE;
+END_IF
+
+// Home the 
+IF StartUp  OR NOT Out_Homed OR NOT Out_Ready THEN
+	Status.PAUSED := TRUE;
+	
+	tonHomeWait.IN := NOT Out_Homed;
+	tonHomeWait();
+	IF NOT Out_Homed THEN
+		// Grabber
+		Grabber_1_Retract := TRUE;
+		Grabber_1_Extend := FALSE;
+		IF In_Grabber_1_Retracted
+		   THEN
+			Out_Homed := tonHomeWait.Q;
+		END_IF
+	END_IF
+
+	tonReadyWait.IN := NOT Out_Ready AND Out_Homed;
+	tonReadyWait();
+	IF NOT Out_Ready AND Out_Homed THEN
+
+		IF In_Grabber_1_Retracted
+		   THEN
+			Out_Ready := tonReadyWait.Q;
+		END_IF
+	END_IF
+
+	StartUp := NOT Out_Homed OR NOT Out_Ready;
+	Out_Running := FALSE;
+	
+ELSIF In_Pause OR NOT In_ConveyorRunning THEN
+	// Grabber
+	Grabber_1_Retract := TRUE;
+	Grabber_1_Extend := FALSE;
+
+ELSIF NOT Out_Running THEN
+	tonRunningWait.IN := NOT OUT_Running AND Out_Ready AND Out_Homed AND In_ConveyorRunning;
+	tonRunningWait();
+	Out_Running := tonRunningWait.Q;
+
+ELSIF Out_Running THEN
+	Status.PAUSED := FALSE;	
+		// Call Actions That run while in running state?
+
+
+	END_IF
+	
+// Call actions???	
+	
+// HeldDistance Calculation
+
+fRetracted(CLK:= In_Grabber_1_Retracted, Q =>);		
+IF  fRetracted.Q THEN
+	HeldCount := In_Encodercount;
+	ELSIF In_Grabber_1_Retracted AND In_Grabber_2_Retracted THEN
+	HeldCount:= 0;
+END_IF
+	
+IF HeldCount <> 0 THEN
+	IF In_EncoderCount > HeldCount THEN
+	HeldDistance := In_EncoderCount - HeldCount;
+	RolloverDetect_HeldDist := 0;
+	ELSE
+	// If the encoder rolls to 0, capture the last distance as an offset
+	IF RolloverDetect_HeldDist = 0 THEN
+	RolloverDetect_HeldDist := HeldDistance;
+	END_IF
+	// The new distance to check is the number of pulses from the Cleared count to the rollover (RolloverDetect)
+	// 	plus the current encoder count
+	HeldDistance := RolloverDetect_HeldDist + In_EncoderCount;
+	END_IF
+ELSE
+	HeldDistance:=0;
+END_IF
+
+// InductedDistance Calculation
+
+rPE_Grabber_1(CLK:= PE_Grabber, Q =>);	
+IF  rPE_Grabber_1.Q THEN
+	InductCount := In_Encodercount;
+	ELSIF NOT PE_Grabber THEN
+	InductCount := 0;	
+END_IF	
+
+// Singulation Distance Check, release for size 
+IF InductCount <> 0 THEN
+  IF In_EncoderCount > InductCount THEN
+	InductedDistance := In_EncoderCount - InductCount;
+	RolloverDetect_InductDist := 0;
+	ELSE
+	// If the encoder rolls to 0, capture the last distance as an offset
+	IF RolloverDetect_InductDist = 0 THEN
+	RolloverDetect_InductDist := InductedDistance;
+		END_IF
+	// The new distance to check is the number of pulses from the Cleared count to the rollover (RolloverDetect)
+	// 	plus the current encoder count
+	InductedDistance  := RolloverDetect_InductDist + In_EncoderCount;
+	END_IF
+ELSE
+	InductedDistance:=0;
+END_IF
+
+ 
+// Grabber Motion
+IF HeldDistance < Cfg_GappingDistance THEN
+	IF InductedDistance > Cfg_ProductSize THEN
+		Out_Grabber_1_Ext:= TRUE;
+		Out_Grabber_2_Ext:= TRUE;
+	ELSE
+		Out_Grabber_1_Ext:= FALSE;
+		Out_Grabber_2_Ext:= FALSE;
+	END_IF
+ELSIF HeldDistance < (Cfg_GappingDistance + Cfg_GrabberSpace) THEN
+	Out_Grabber_1_Ext:= FALSE;
+	Out_Grabber_2_Ext:= TRUE;
+ELSE
+	Out_Grabber_1_Ext:= FALSE;
+	Out_Grabber_2_Ext:= FALSE;
+	//HeldCount:= 0;
+END_IF
+		
+// Activate all the outputs in one place
+//Status_Output.GRABBER_1_OCCUPIED := Grabber1(Active := In_Grabber_1_Auto, Extend:= Grabber_1_Extend, Retract := Grabber_1_Retract);
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_TwoGripSingulation">
+      <LineId Id="1140" Count="69" />
+      <LineId Id="1606" Count="4" />
+      <LineId Id="1705" Count="1" />
+      <LineId Id="1611" Count="23" />
+      <LineId Id="1684" Count="1" />
+      <LineId Id="1635" Count="2" />
+      <LineId Id="1686" Count="0" />
+      <LineId Id="1638" Count="11" />
+      <LineId Id="1688" Count="1" />
+      <LineId Id="1687" Count="0" />
+      <LineId Id="1650" Count="2" />
+      <LineId Id="1551" Count="0" />
+      <LineId Id="1690" Count="0" />
+      <LineId Id="1692" Count="0" />
+      <LineId Id="1694" Count="3" />
+      <LineId Id="1693" Count="0" />
+      <LineId Id="1698" Count="6" />
+      <LineId Id="1691" Count="0" />
+      <LineId Id="1281" Count="0" />
+      <LineId Id="1284" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

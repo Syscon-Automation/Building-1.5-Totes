@@ -93,8 +93,8 @@ fb_SorterTransportBuffer_P2140.Name := 'P2140 SYS TRANSPORT';
 fb_SorterTransportBuffer_P2150.Name := 'P2150 SYS TRANSPORT';
 
 fb_SorterUpdateBuffer(st_BufferData := st_SorterUpdateBuffer
-					, st_BufferFdbkIn := st_UpdateFdbkIn
-					, st_BufferFdbkOut => st_UpdateFdbkOut);
+					, st_BufferFdbkIn := st_UpdateFdbkOut
+					, st_BufferFdbkOut => st_UpdateFdbkIn);
 fb_SorterTransportBuffer_P2140(st_BufferData := st_SorterTransportBuffer_P2140
 					, st_BufferFdbkIn := st_TransportFdbkIn_P2140
 					, st_BufferFdbkOut => st_TransportFdbkOut_P2140);
@@ -109,11 +109,11 @@ IF RxCounter_Old <> ServerControl.fbServer.aApplications[nConnectionIndex].RxCou
 	// Test the DeviceID and route the Transport accordingly
 	//	If there is only one possible DeviceID, this IF statement can be removed, but the fb_(TransportBuffer).AddItem call still has to be made
 	//	Also, the default destination needs to be passed per DeviceID
-	IF DeviceID = Sorter.st_Sorter_P2140.Config.EquipID THEN
+	IF DeviceID = Sorter.st_Sorter_P2140Cfg.EquipID THEN
 		fb_SorterTransportBuffer_P2140.AddItem(st_ItemToAdd := ItemTransport);
 		P2140_DefaultDestination := DefDestination;
 	END_IF
-	IF DeviceID = Sorter.st_Sorter_P2150.Config.EquipID THEN
+	IF DeviceID = Sorter.st_Sorter_P2150Cfg.EquipID THEN
 		fb_SorterTransportBuffer_P2150.AddItem(st_ItemToAdd := ItemTransport);
 		P2150_DefaultDestination := DefDestination;
 	END_IF

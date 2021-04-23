@@ -205,8 +205,8 @@ IF ReadID_P2150_Old <> BarCodeReaders.BCR_S2150_01.GoodreadCount THEN
 	P2150_Arrival_Item.MessageType := E_MessageIds.Arrival_23;
 	P2150_Arrival_Item.Destination := MsgControl.DefDestination;
 	P2150_Arrival_Item.Length := 0;
-	P2150_LastArrival_Item := P2140_Arrival_Item;
-	fb_SorterArrivalBuffer_P2150.AddItem(P2140_Arrival_Item);
+	P2150_LastArrival_Item := P2150_Arrival_Item;
+	fb_SorterArrivalBuffer_P2150.AddItem(P2150_Arrival_Item);
 	ReadID_P2150_Old := BarCodeReaders.BCR_S2150_01.GoodreadCount;
 ELSE 
 	P2150_Arrival_Item := BlankItem;

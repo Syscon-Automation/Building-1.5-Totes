@@ -159,35 +159,36 @@ END_VAR
 cfgP2130IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P2130', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
-   12(())];
+   13(())];
 cfgP2130EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
    (Description := 'Disconnect', DeviceLabel := 'P2130', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO12182 Comm Fault', DeviceLabel := 'RIO12182', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'Power Transfer Raised', DeviceLabel := 'PX12151', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.TransferLP),
+   (Description := 'Motor Faulted', DeviceLabel := 'P2130', OKState := FALSE, StopCode := E_StopCodes.MotorOL),
+   9(())];
 //Transport
 //----------------------------------------P2135--------------------------------------------------------------
 cfgP2135IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P2135', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
-   12(())];
+   11(())];
 cfgP2135EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
    (Description := 'Disconnect', DeviceLabel := 'P2135', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO10161 Comm Fault', DeviceLabel := 'RIO10161', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'Motor Faulted', DeviceLabel := 'P2135', OKState := FALSE, StopCode := E_StopCodes.MotorOL),
+   10(())];
 //Transport
 //----------------------------------------P2140--------------------------------------------------------------
 cfgP2140IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P2140', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
+   (),
    (Description := 'GR2140-01 Auto', DeviceLabel := 'GR2140-01', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
    (Description := 'GR2140-02 Auto', DeviceLabel := 'GR2140-02', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
    (Description := 'PI2140-01 Auto', DeviceLabel := 'PI2140-01', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
@@ -201,14 +202,14 @@ cfgP2140EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'RIO10161 Comm Fault', DeviceLabel := 'RIO10161', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'BCR_S2140_01 Comm Fault', DeviceLabel := 'BCR_S2140_01', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'Plow Jam', DeviceLabel := 'PL2140_01', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.ProductJam),
-   9(())];
+   (Description := 'Motor Faulted', DeviceLabel := 'P2140', OKState := FALSE, StopCode := E_StopCodes.MotorOL),
+   8(())];
 //Transport
 //----------------------------------------P2143--------------------------------------------------------------
 cfgP2143IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P2143', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
-   12(())];
+   13(())];
 cfgP2143EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
@@ -216,55 +217,56 @@ cfgP2143EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO8171 Comm Fault', DeviceLabel := 'RIO8171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'BCR_S2141_01 Comm Fault', DeviceLabel := 'BCR_S2141_011', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   10(())];
+   (Description := 'Motor Faulted', DeviceLabel := 'P2143', OKState := FALSE, StopCode := E_StopCodes.MotorOL),
+   9(())];
 //Spiral
 //----------------------------------------P2141--------------------------------------------------------------
 cfgP2141IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'VFD State Not OK', DeviceLabel := 'P2141', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
-   12(())];
+   14(())];
 cfgP2141EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
    (Description := 'Disconnect', DeviceLabel := 'P2141', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO8171 Comm Fault', DeviceLabel := 'RIO8171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'VFD State Not OK', DeviceLabel := 'P2141', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
+   10(())];
 //Transport
 //----------------------------------------P2142--------------------------------------------------------------
 cfgP2142IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P2142', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
-   12(())];
+   13(())];
 cfgP2142EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
    (Description := 'Disconnect', DeviceLabel := 'P2142', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO8171 Comm Fault', DeviceLabel := 'RIO8171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'Motor Faulted', DeviceLabel := 'P2142', OKState := FALSE, StopCode := E_StopCodes.MotorOL),
+   10(())];
 //Transport
 //----------------------------------------P2145--------------------------------------------------------------
 cfgP2145IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P2145', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
-   12(())];
+   13(())];
 cfgP2145EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
    (),
    (Description := 'Disconnect', DeviceLabel := 'P2145', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO2151 Comm Fault', DeviceLabel := 'RIO2151', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'Motor Faulted', DeviceLabel := 'P2145', OKState := FALSE, StopCode := E_StopCodes.MotorOL),
+   10(())];
 //Spiral
 //----------------------------------------P2146--------------------------------------------------------------
 cfgP2146IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'VFD State Not OK', DeviceLabel := 'P2146', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
+   (),
    12(())];
 cfgP2146EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
@@ -272,13 +274,14 @@ cfgP2146EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Disconnect', DeviceLabel := 'P2146', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO2151 Comm Fault', DeviceLabel := 'RIO2151', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'VFD State Not OK', DeviceLabel := 'P2146', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
+   10(())];
 //Sorter
 //----------------------------------------P2150--------------------------------------------------------------
 cfgP2150IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P2150', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
+   (),
    (Description := 'GR2150-01 Auto', DeviceLabel := 'GR2150-01', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
    (Description := 'GR2150-02 Auto', DeviceLabel := 'GR2150-02', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
    (Description := 'PU2150-01 Auto', DeviceLabel := 'PU2150-01', OKState := TRUE, StopCode := E_StopCodes.DeviceNoInAuto),
@@ -295,14 +298,15 @@ cfgP2150EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'RIO3171 Comm Fault', DeviceLabel := 'RIO3171', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'RIO4141 Comm Fault', DeviceLabel := 'RIO4141', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'BCR_S2150_01 Comm Fault', DeviceLabel := 'BCR_S2150_01', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   8(())];
+   (Description := 'Motor Faulted', DeviceLabel := 'P2150', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
+   7(())];
 //Conveyors Incoming 3000 (Green line)
 //Spiral
 //----------------------------------------P3080--------------------------------------------------------------
 cfgP3080IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'VFD State Not OK', DeviceLabel := 'P3080', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
+   (),
    12(())];
 cfgP3080EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
@@ -312,13 +316,14 @@ cfgP3080EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'RIO9191 Comm Fault', DeviceLabel := 'RIO9191', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'BCR_S2150_01 Comm Fault', DeviceLabel := 'BCR_S2150_01', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    (Description := 'Height Check', DeviceLabel := 'PE_12261', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.OverHeightFLT),
-   9(())];
+   (Description := 'VFD State Not OK', DeviceLabel := 'P3080', OKState := TRUE, StopCode := E_StopCodes.VFD_Fault),
+   8(())];
 //Transport
 //----------------------------------------P3085--------------------------------------------------------------
 cfgP3085IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P3085', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
+   (),
    12(())];
 cfgP3085EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
@@ -326,13 +331,14 @@ cfgP3085EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Disconnect', DeviceLabel := 'P3085', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO12182 Comm Fault', DeviceLabel := 'RIO12182', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'Motor Faulted', DeviceLabel := 'P3085', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
+   10(())];
 //Transport
 //----------------------------------------P3090--------------------------------------------------------------
 cfgP3090IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P3090', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
+   (),
    12(())];
 cfgP3090EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
@@ -340,13 +346,14 @@ cfgP3090EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Disconnect', DeviceLabel := 'P3090', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO12182 Comm Fault', DeviceLabel := 'RIO12182', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'Motor Faulted', DeviceLabel := 'P3090', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
+   10(())];
 //Transport
 //----------------------------------------P3095--------------------------------------------------------------
 cfgP3095IntlksArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Exit PE/Downstream MTR status' , DeviceLabel := '' , OKState := TRUE),   //DeviceLabel: Exit PE downstream
    (Description := 'System Interlocks' , DeviceLabel := '', OKState := TRUE, StopCode := E_StopCodes.SystemStop),
-   (Description := 'Motor Faulted', DeviceLabel := 'P3095', OKState := FALSE, StopCode := E_StopCodes.MotorRunTO),
+   (),
    12(())];
 cfgP3095EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Jam Detected', DeviceLabel := '', LatchRequired := TRUE, OKState := FALSE, StopCode := E_StopCodes.ProductJam),   //DeviceLabel: Jam PE
@@ -354,7 +361,9 @@ cfgP3095EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Disconnect', DeviceLabel := 'P3095', OKState := TRUE, StopCode := E_StopCodes.DisconnectState),   //DeviceLabel: Motor Disconnect
    (Description := 'System Fault', DeviceLabel := '', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.SystemStop),
    (Description := 'RIO12182 Comm Fault', DeviceLabel := 'RIO12182', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
-   11(())];
+   (Description := 'Power Transfer Raised', DeviceLabel := 'PX12251', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.TransferLP),
+   (Description := 'Motor Faulted', DeviceLabel := 'P3095', OKState := FALSE, StopCode := E_StopCodes.MotorOL),
+   9(())];
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[ResetAllDrives := System.Cnvyr_Reset; //Reset For VFD
@@ -375,11 +384,13 @@ P2130SleepWakeTrig[1] := GVL_IO.From205_P2125_SendingProduct; //EAP Wakeup bits
 P2130_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2130.In_EquipIntlks.2:= NOT GVL_IO.P2130_Faulted;
+//P2130.In_EquipIntlks.2:=
 //Events
 P2130.In_EquipEvents.2:= GVL_IO.DS_P2130;
 P2130.In_EquipEvents.3:= System.SysEventsAllOk;
 P2130.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
+P2130.In_EquipEvents.5:= ProxSensors.PX_12151_Extended.Out;
+P2130.In_EquipEvents.6:= NOT GVL_IO.P2130_Faulted;
 
 // Function Call
 P2130(
@@ -415,11 +426,12 @@ P2135SleepWakeTrig[1] := Photoeyes.PE_12171.Out;
 P2135_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2135.In_EquipIntlks.2:= NOT GVL_IO.P2135_Faulted;
+//P2135.In_EquipIntlks.2:=
 //Events
 P2135.In_EquipEvents.2:= GVL_IO.DS_P2135;
 P2135.In_EquipEvents.3:= System.SysEventsAllOk;
 P2135.In_EquipEvents.4:= NOT CommStatus.RIO10161_CommFault.Out;
+P2135.In_EquipEvents.5:= NOT GVL_IO.P2135_Faulted;
 
 // Function Call
 P2135(
@@ -455,7 +467,6 @@ P2140SleepWakeTrig[2] := Photoeyes.PE_12171.Out;
 P2140_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2140.In_EquipIntlks.2:= NOT GVL_IO.P2140_Faulted;
 P2140.In_EquipIntlks.3:= Solenoids.GR2140_01_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.4:= Solenoids.GR2140_02_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.5:= Solenoids.PI2140_01_Status.Sts_EquipmentState.StsAuto;
@@ -466,7 +477,8 @@ P2140.In_EquipEvents.2:= GVL_IO.DS_P2140;
 P2140.In_EquipEvents.3:= System.SysEventsAllOk;
 P2140.In_EquipEvents.4:= NOT CommStatus.RIO10161_CommFault.Out;
 P2140.In_EquipEvents.5:= NOT CommStatus.BCR_S2140_01_CommFault.Out;
-P2140.In_EquipEvents.6:= False;//Photoeyes.PE_10151.JamDetected AND Not Solenoids.PL2140_01.Out_ExtendCrntSV;
+P2140.In_EquipEvents.6:= FALSE;//Photoeyes.PE_10151.JamDetected AND Not Solenoids.PL2140_01.Out_ExtendCrntSV;
+P2140.In_EquipEvents.7:= NOT GVL_IO.P2140_Faulted;
 
 // Function Call
 P2140(
@@ -502,12 +514,13 @@ P2143SleepWakeTrig[2] := Photoeyes.PE_12171.Out;
 P2143_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2143.In_EquipIntlks.2:= NOT GVL_IO.P2143_Faulted;
+//P2143.In_EquipIntlks.2:= 
 //Events
 P2143.In_EquipEvents.2:= GVL_IO.DS_P2143;
 P2143.In_EquipEvents.3:= System.SysEventsAllOk;
 P2143.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
 P2143.In_EquipEvents.5:= NOT CommStatus.BCR_S2141_01_CommFault.Out;
+P2143.In_EquipEvents.6:= NOT GVL_IO.P2143_Faulted;
 
 // Function Call
 P2143(
@@ -543,12 +556,13 @@ P2141SleepWakeTrig[2] := Photoeyes.PE_10151.Out;
 P2141_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2141.In_EquipIntlks.2:= P2141_VFD.Run_OK;
+//P2141.In_EquipIntlks.2:= 
 
 //Events
 P2141.In_EquipEvents.2:= GVL_IO.DS_P2141;
 P2141.In_EquipEvents.3:= System.SysEventsAllOk;
 P2141.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
+P2141.In_EquipEvents.5:= P2141_VFD.Run_OK;
 
 // Function Call
 P2141(
@@ -589,13 +603,13 @@ P2142SleepWakeTrig[2] := Photoeyes.PE_8161.Out;
 P2142_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2142.In_EquipIntlks.2:= NOT GVL_IO.P2142_Faulted;
-P2142.In_EquipIntlks.3:= Photoeyes.PE_8141.Out_OnFltrd;
+//P2142.In_EquipIntlks.2:= 
 
 //Events
 P2142.In_EquipEvents.2:= GVL_IO.DS_P2142;
 P2142.In_EquipEvents.3:= System.SysEventsAllOk;
 P2142.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
+P2142.In_EquipEvents.5:= NOT GVL_IO.P2142_Faulted;
 
 // Function Call
 P2142(
@@ -632,11 +646,12 @@ P2145SleepWakeTrig[2] := PhotoEyes.PE_10291.Out_OffFltrd;
 P2145_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2145.In_EquipIntlks.2:= NOT GVL_IO.P2145_Faulted;
+//P2145.In_EquipIntlks.2:= 
 //Events
 P2145.In_EquipEvents.2:= GVL_IO.DS_P2145;
 P2145.In_EquipEvents.3:= System.SysEventsAllOk;
 P2145.In_EquipEvents.4:= NOT CommStatus.RIO2151_CommFault.Out;
+P2145.In_EquipEvents.5:= NOT GVL_IO.P2145_Faulted;
 
 // Function Call
 P2145(
@@ -672,11 +687,12 @@ P2145SleepWakeTrig[2] := PhotoEyes.PE_10091.Out_OffFltrd;
 P2146_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2146.In_EquipIntlks.2:= P2146_VFD.Run_OK;
+//P2146.In_EquipIntlks.2:= 
 //Events
 P2146.In_EquipEvents.2:= GVL_IO.DS_P2146;
 P2146.In_EquipEvents.3:= System.SysEventsAllOk;
 P2146.In_EquipEvents.4:= NOT CommStatus.RIO2151_CommFault.Out;
+P2146.In_EquipEvents.5:= P2146_VFD.Run_OK;
 
 // Function Call
 P2146(
@@ -720,13 +736,14 @@ P2150SleepWakeTrig[4] := PhotoEyes.PE_2101.Out_OffFltrd;
 P2150_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2150.In_EquipIntlks.2:= NOT GVL_IO.P2150_Faulted;
+P2150.In_EquipIntlks.2:= Singulation_Control.SortSingulation_P2150.Out_Ready;
 P2150.In_EquipIntlks.3:= Solenoids.GR2150_01_Status.Sts_EquipmentState.StsAuto;
-P2150.In_EquipIntlks.4:= Solenoids.GR2150_02_Status.Sts_EquipmentState.StsAuto;
+P2150.In_EquipIntlks.4:= Solenoids.PI2150_01_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.5:= Solenoids.PU2150_01_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.6:= Solenoids.PU2150_02_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.7:= Solenoids.PU2150_03_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.8:= Solenoids.PU2150_04_Status.Sts_EquipmentState.StsAuto;
+P2150.In_EquipIntlks.2:= Singulation_Control.SortSingulation_P2150.Out_Ready;
 //Events
 P2150.In_EquipEvents.2:= GVL_IO.DS_P2150;
 P2150.In_EquipEvents.3:= System.SysEventsAllOk;
@@ -734,6 +751,7 @@ P2150.In_EquipEvents.4:= NOT CommStatus.RIO2151_CommFault.Out;
 P2150.In_EquipEvents.5:= NOT CommStatus.RIO3171_CommFault.Out;
 P2150.In_EquipEvents.6:= NOT CommStatus.RIO4141_CommFault.Out;
 P2150.In_EquipEvents.7:= NOT CommStatus.BCR_S2150_01_CommFault.Out;
+P2150.In_EquipEvents.8:= NOT GVL_IO.P2150_Faulted;
 
 
 // Function Call
@@ -772,13 +790,14 @@ P3080SleepWakeTrig[1] := P3080_ResetWakeTmr.Q; //Reset Button
 P3080_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3080.In_EquipIntlks.2:= P3080_VFD.Run_OK;
+//P3080.In_EquipIntlks.2:= 
 //Events
 P3080.In_EquipEvents.2:= GVL_IO.DS_P3080;
 P3080.In_EquipEvents.3:= System.SysEventsAllOk;
 P3080.In_EquipEvents.4:= NOT CommStatus.RIO9191_CommFault.Out;
 P3080.In_EquipEvents.5:= NOT CommStatus.BCR_S2150_01_CommFault.Out;
 P3080.In_EquipEvents.6:= Photoeyes.PE_9221.Out;
+P3080.In_EquipEvents.7:= P3080_VFD.Run_OK;
 
 // Function Call
 P3080(
@@ -820,11 +839,12 @@ P3085SleepWakeTrig[2] := GVL_IO.PB_RemoteReset_8251;
 P3085_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3085.In_EquipIntlks.2:= NOT GVL_IO.P3085_Faulted;
+//P3085.In_EquipIntlks.2:= 
 //Events
 P3085.In_EquipEvents.2:= GVL_IO.DS_P3085;
 P3085.In_EquipEvents.3:= System.SysEventsAllOk;
 P3085.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
+P3085.In_EquipEvents.5:= NOT GVL_IO.P3085_Faulted;
 
 // Function Call
 P3085(
@@ -861,11 +881,12 @@ P3090SleepWakeTrig[3] := GVL_IO.PB_RemoteReset_8251;
 P3090_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3090.In_EquipIntlks.2:= NOT GVL_IO.P3090_Faulted;
+//P3090.In_EquipIntlks.2:=
 //Events
 P3090.In_EquipEvents.2:= GVL_IO.DS_P3090;
 P3090.In_EquipEvents.3:= System.SysEventsAllOk;
 P3090.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
+P3090.In_EquipEvents.5:= NOT GVL_IO.P3090_Faulted;
 
 // Function Call
 P3090(
@@ -902,11 +923,13 @@ P3095SleepWakeTrig[3] := GVL_IO.PB_RemoteReset_8251;
 P3095_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P3095.In_EquipIntlks.2:= NOT GVL_IO.P3095_Faulted;
+//P3095.In_EquipIntlks.2:= 
 //Events
 P3095.In_EquipEvents.2:= GVL_IO.DS_P3095;
 P3095.In_EquipEvents.3:= System.SysEventsAllOk;
 P3095.In_EquipEvents.4:= NOT CommStatus.RIO12182_CommFault.Out;
+P3095.In_EquipEvents.5:= ProxSensors.PX_12251_Extended.Out;
+P3095.In_EquipEvents.6:= NOT GVL_IO.P3095_Faulted;
 
 // Function Call
 P3095(
@@ -1144,126 +1167,40 @@ END_IF
 ]]></ST>
     </Implementation>
     <LineIds Name="Conveyors">
-      <LineId Id="5" Count="0" />
-      <LineId Id="3228" Count="0" />
-      <LineId Id="3230" Count="0" />
-      <LineId Id="3229" Count="0" />
-      <LineId Id="1150" Count="0" />
-      <LineId Id="1149" Count="0" />
-      <LineId Id="102" Count="0" />
-      <LineId Id="460" Count="14" />
-      <LineId Id="1772" Count="0" />
-      <LineId Id="475" Count="21" />
-      <LineId Id="1151" Count="0" />
-      <LineId Id="497" Count="5" />
-      <LineId Id="1723" Count="0" />
-      <LineId Id="503" Count="8" />
-      <LineId Id="1763" Count="0" />
-      <LineId Id="512" Count="21" />
-      <LineId Id="1152" Count="0" />
-      <LineId Id="534" Count="5" />
-      <LineId Id="1724" Count="0" />
-      <LineId Id="540" Count="5" />
-      <LineId Id="2125" Count="2" />
-      <LineId Id="2124" Count="0" />
-      <LineId Id="2869" Count="0" />
-      <LineId Id="546" Count="2" />
-      <LineId Id="1761" Count="0" />
-      <LineId Id="2132" Count="0" />
-      <LineId Id="2134" Count="0" />
-      <LineId Id="549" Count="21" />
-      <LineId Id="1153" Count="0" />
-      <LineId Id="571" Count="4" />
-      <LineId Id="1726" Count="0" />
-      <LineId Id="1725" Count="0" />
-      <LineId Id="577" Count="8" />
-      <LineId Id="1755" Count="0" />
-      <LineId Id="2152" Count="0" />
-      <LineId Id="586" Count="21" />
-      <LineId Id="1154" Count="0" />
-      <LineId Id="608" Count="5" />
-      <LineId Id="1727" Count="0" />
-      <LineId Id="614" Count="5" />
-      <LineId Id="3587" Count="0" />
-      <LineId Id="620" Count="2" />
-      <LineId Id="1754" Count="0" />
-      <LineId Id="623" Count="26" />
-      <LineId Id="1155" Count="0" />
-      <LineId Id="650" Count="5" />
-      <LineId Id="1728" Count="0" />
-      <LineId Id="656" Count="5" />
-      <LineId Id="3585" Count="0" />
-      <LineId Id="2870" Count="0" />
-      <LineId Id="662" Count="2" />
-      <LineId Id="1753" Count="0" />
-      <LineId Id="665" Count="6" />
-      <LineId Id="1729" Count="0" />
-      <LineId Id="672" Count="14" />
-      <LineId Id="1156" Count="0" />
-      <LineId Id="687" Count="5" />
-      <LineId Id="1730" Count="0" />
-      <LineId Id="693" Count="8" />
-      <LineId Id="1745" Count="0" />
-      <LineId Id="702" Count="21" />
-      <LineId Id="1157" Count="0" />
-      <LineId Id="724" Count="5" />
-      <LineId Id="1733" Count="0" />
-      <LineId Id="730" Count="8" />
-      <LineId Id="1744" Count="0" />
-      <LineId Id="739" Count="26" />
-      <LineId Id="1158" Count="0" />
-      <LineId Id="766" Count="5" />
-      <LineId Id="1735" Count="0" />
-      <LineId Id="2513" Count="1" />
-      <LineId Id="2512" Count="0" />
-      <LineId Id="772" Count="5" />
-      <LineId Id="2137" Count="1" />
-      <LineId Id="2140" Count="2" />
-      <LineId Id="2136" Count="0" />
-      <LineId Id="778" Count="2" />
-      <LineId Id="1741" Count="0" />
-      <LineId Id="1749" Count="0" />
-      <LineId Id="1751" Count="0" />
-      <LineId Id="2150" Count="0" />
-      <LineId Id="1748" Count="0" />
-      <LineId Id="781" Count="6" />
-      <LineId Id="1734" Count="0" />
-      <LineId Id="788" Count="14" />
-      <LineId Id="1160" Count="0" />
-      <LineId Id="1159" Count="0" />
-      <LineId Id="803" Count="4" />
-      <LineId Id="1737" Count="0" />
-      <LineId Id="808" Count="9" />
-      <LineId Id="1759" Count="0" />
-      <LineId Id="2155" Count="0" />
-      <LineId Id="2157" Count="0" />
-      <LineId Id="818" Count="26" />
-      <LineId Id="1161" Count="0" />
-      <LineId Id="845" Count="5" />
-      <LineId Id="2871" Count="0" />
-      <LineId Id="1738" Count="0" />
-      <LineId Id="851" Count="8" />
-      <LineId Id="1765" Count="0" />
-      <LineId Id="860" Count="21" />
-      <LineId Id="1162" Count="0" />
-      <LineId Id="882" Count="5" />
-      <LineId Id="1739" Count="0" />
-      <LineId Id="2872" Count="0" />
-      <LineId Id="888" Count="8" />
-      <LineId Id="1767" Count="0" />
-      <LineId Id="897" Count="21" />
-      <LineId Id="1163" Count="0" />
-      <LineId Id="919" Count="5" />
-      <LineId Id="1740" Count="0" />
-      <LineId Id="2873" Count="0" />
-      <LineId Id="925" Count="8" />
-      <LineId Id="1769" Count="0" />
-      <LineId Id="934" Count="21" />
-      <LineId Id="1386" Count="1" />
-      <LineId Id="459" Count="0" />
-      <LineId Id="1178" Count="142" />
-      <LineId Id="1388" Count="0" />
-      <LineId Id="1321" Count="64" />
+      <LineId Id="3942" Count="22" />
+      <LineId Id="4726" Count="0" />
+      <LineId Id="3965" Count="0" />
+      <LineId Id="5086" Count="0" />
+      <LineId Id="3966" Count="39" />
+      <LineId Id="5089" Count="0" />
+      <LineId Id="4006" Count="33" />
+      <LineId Id="4041" Count="10" />
+      <LineId Id="5092" Count="0" />
+      <LineId Id="4052" Count="40" />
+      <LineId Id="5094" Count="0" />
+      <LineId Id="4093" Count="40" />
+      <LineId Id="5096" Count="0" />
+      <LineId Id="4134" Count="39" />
+      <LineId Id="4175" Count="5" />
+      <LineId Id="5098" Count="0" />
+      <LineId Id="4181" Count="40" />
+      <LineId Id="5100" Count="0" />
+      <LineId Id="4222" Count="39" />
+      <LineId Id="5102" Count="0" />
+      <LineId Id="4262" Count="49" />
+      <LineId Id="5475" Count="0" />
+      <LineId Id="4312" Count="6" />
+      <LineId Id="5104" Count="0" />
+      <LineId Id="4319" Count="44" />
+      <LineId Id="5106" Count="0" />
+      <LineId Id="4364" Count="45" />
+      <LineId Id="5108" Count="0" />
+      <LineId Id="4410" Count="40" />
+      <LineId Id="5109" Count="0" />
+      <LineId Id="4451" Count="40" />
+      <LineId Id="4729" Count="0" />
+      <LineId Id="5111" Count="0" />
+      <LineId Id="4492" Count="233" />
       <LineId Id="188" Count="0" />
     </LineIds>
   </POU>

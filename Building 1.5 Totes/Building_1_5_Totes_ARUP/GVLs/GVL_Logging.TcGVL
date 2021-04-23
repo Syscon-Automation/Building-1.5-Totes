@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <GVL Name="GVL_Logging" Id="{21c578c0-5373-4478-a2a3-aab1d8780efe}">
     <Declaration><![CDATA[// Comment out attribute to allow direct access to this variable
 // {attribute 'qualified_only'} 
@@ -68,6 +68,7 @@ VAR_GLOBAL CONSTANT
 	SORTER_TEMPID		:	INT	:= 5;
 	SORTER_HEIGHT_PE	:	INT := 6;
 	SORTER_DISCHARGE_PE	:	INT	:= 7;
+	SORTER_DESTINATION_LU	:	INT	:= 8;
 	// Sorter buffer constants
 	BUFFER_ARRIVAL			:	INT := 0;
 	BUFFER_MISSINDUCT		: 	INT := 1;

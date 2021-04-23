@@ -8,10 +8,10 @@ DebounceOffTime:	TIME := T#500MS;     // Default Value
 JamDetectTime:	TIME := T#5S;     // Default Value
 
 In_PX_2131_Extended AT %I* : BOOL;      // Mapped IO input for PX
-PX_2131_Extended:  FB_DigDebnce;		// GR2150-02 "BELT" GRIPPER EXTENDED PROX
+PX_2131_Extended:  FB_DigDebnce;		// PI2150-01 PIN STOP EXTENDED PROX
 
 In_PX_2151_Retracted AT %I* : BOOL;      // Mapped IO input for PX
-PX_2151_Retracted:  FB_DigDebnce;		// GR2150-02 "BELT" GRIPPER RETRACTED PROX
+PX_2151_Retracted:  FB_DigDebnce;		// PI2150-01 PIN STOP GRIPPER RETRACTED PROX
 
 In_PX_2181_Extended AT %I* : BOOL;      // Mapped IO input for PX
 PX_2181_Extended:  FB_DigDebnce;		// GR2150-01 "BELT" GRIPPER EXTENDED PROX
@@ -72,10 +72,13 @@ PX_11161_Retracted:  FB_DigDebnce;		// GR2140-01 "D" GRIPPER RETRACTED PROX
 
 In_PX_12151_Extended AT %I* : BOOL;      // Mapped IO input for PX
 PX_12151_Extended:  FB_DigDebnce;		// P2130 PROX BREAK AWAY EXTENDED PROX
+
+In_PX_12251_Extended AT %I* : BOOL;      // Mapped IO input for PX
+PX_12251_Extended:  FB_DigDebnce;		// P3095 PROX BREAK AWAY EXTENDED PROX
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// GR2150-02 "BELT" GRIPPER Extended
+      <ST><![CDATA[// PI2150-01 PIN STOP GRIPPER Extended
 PX_2131_Extended(
 	In:= In_PX_2131_Extended,
 	CFG_OKState:= 0,
@@ -84,7 +87,7 @@ PX_2131_Extended(
 	In_Sim:= 
 	);
 
-// GR2150-02 "BELT" GRIPPER Retracted
+// PI2150-01 PIN STOP GRIPPER Retracted
 PX_2151_Retracted(
 	In:= In_PX_2151_Retracted,
 	CFG_OKState:= 0,
@@ -272,11 +275,24 @@ PX_12151_Extended(
 	CFG_OnDlyTime:= DebounceOffTime,
 	In_Sim:= 
 	);
+	
+// P3095 PROX BREAK AWAY Extended
+PX_12251_Extended(
+	In:= In_PX_12251_Extended,
+	CFG_OKState:= 0,
+	CFG_OnDlyTime:= DebounceOnTime,
+	CFG_OnDlyTime:= DebounceOffTime,
+	In_Sim:= 
+	);
 
 ]]></ST>
     </Implementation>
     <LineIds Name="ProxSensors">
-      <LineId Id="10" Count="197" />
+      <LineId Id="10" Count="196" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="285" Count="6" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="207" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

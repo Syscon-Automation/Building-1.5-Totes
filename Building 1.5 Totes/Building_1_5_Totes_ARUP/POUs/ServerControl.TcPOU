@@ -36,7 +36,7 @@ END_VAR
 
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
+      <ST><![CDATA[GVL_Logging.nServerLogEnable:= 1;	
 (* On PLC reset or program download close all created/opened sockets/connections *)
 fbCloseAll( sSrvNetID := sSrvNetID, bExecute:= bInitialize );
 IF fbCloseAll.bBusy OR fbCloseAll.bError THEN

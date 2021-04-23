@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="Sorter_P2140" Id="{8c10b2bf-75ff-4f5c-af4b-9502e14a05d7}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Sorter_P2140
 
@@ -360,7 +360,7 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 	END_IF
 
 	// Clear the Item array ahead of the current encoder count
-	nIndexToClear := f_CalculateIndex(Offset := 400, InitialValue:= exitEncoderCount, BufferSize := nItemArraySize);
+	nIndexToClear := f_CalculateIndex(Offset := 40, InitialValue:= exitEncoderCount, BufferSize := nItemArraySize);
 	IF aItems[nIndexToClear].ID <> '' THEN
 		IF .nSorterLogEnable.SORTER_DUMP THEN
 			sMessage := CONCAT(' Item: ', aItems[nIndexToClear].ID);
