@@ -562,7 +562,7 @@ P2141_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 P2141.In_EquipEvents.2:= GVL_IO.DS_P2141;
 P2141.In_EquipEvents.3:= System.SysEventsAllOk;
 P2141.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
-P2141.In_EquipEvents.5:= P2141_VFD.Run_OK;
+P2141.In_EquipEvents.5:= NOT P2141_VFD.IsFaulted;
 
 // Function Call
 P2141(
@@ -692,7 +692,7 @@ P2146.In_EquipIntlks.2:= Photoeyes.PE_2101.Out_OnFltrd;
 P2146.In_EquipEvents.2:= GVL_IO.DS_P2146;
 P2146.In_EquipEvents.3:= System.SysEventsAllOk;
 P2146.In_EquipEvents.4:= NOT CommStatus.RIO2151_CommFault.Out;
-P2146.In_EquipEvents.5:= P2146_VFD.Run_OK;
+P2146.In_EquipEvents.5:= NOT P2146_VFD.IsFaulted;
 
 // Function Call
 P2146(
@@ -797,7 +797,7 @@ P3080.In_EquipEvents.3:= System.SysEventsAllOk;
 P3080.In_EquipEvents.4:= NOT CommStatus.RIO9191_CommFault.Out;
 P3080.In_EquipEvents.5:= NOT CommStatus.BCR_S2150_01_CommFault.Out;
 P3080.In_EquipEvents.6:= Photoeyes.PE_9221.Out;
-P3080.In_EquipEvents.7:= P3080_VFD.Run_OK;
+P3080.In_EquipEvents.7:= NOT P3080_VFD.IsFaulted;
 
 // Function Call
 P3080(

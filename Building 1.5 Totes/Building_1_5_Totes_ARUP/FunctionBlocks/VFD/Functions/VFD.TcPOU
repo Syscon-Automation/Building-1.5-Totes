@@ -16,6 +16,7 @@ VAR_OUTPUT
 	Run_OK					: BOOL;
 	STO_Active				: BOOL;
 	IsRunning				: BOOL;
+	IsFaulted 				: BOOL;
 END_VAR
 VAR
 	VFD_State				: DriveState;
@@ -48,10 +49,12 @@ END_IF
 STO_Active := StatusWord.SAFETY_TORQUE_OFF_ACTIVE;
  
 IsRunning := ActualVelocity >= VelocityThreshold;
+IsFaulted := VFD_State.Fault;
 ]]></ST>
     </Implementation>
     <LineIds Name="VFD">
       <LineId Id="150" Count="18" />
+      <LineId Id="196" Count="0" />
       <LineId Id="84" Count="0" />
     </LineIds>
   </POU>

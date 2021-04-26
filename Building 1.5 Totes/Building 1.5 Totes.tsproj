@@ -1252,30 +1252,6 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>Conveyors.P2141_VFD.ActualVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2141_VFD.StatusWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2146_VFD.ActualVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2146_VFD.StatusWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P3080_VFD.ActualVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P3080_VFD.StatusWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
 							<Name>Photoeyes.PE_2101.In_PE</Name>
 							<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 							<Type>BOOL</Type>
@@ -1680,6 +1656,30 @@
 							<Name>GVL_IO.From205_P2125_SendingProduct</Name>
 							<Type>BOOL</Type>
 						</Var>
+						<Var>
+							<Name>Conveyors.P2141_VFD.ActualVelocity</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P2141_VFD.StatusWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P2146_VFD.ActualVelocity</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P2146_VFD.StatusWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P3080_VFD.ActualVelocity</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P3080_VFD.StatusWord</Name>
+							<Type>UINT</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="2">
 						<Name>PlcTask Outputs</Name>
@@ -2029,30 +2029,6 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>Conveyors.P2141_VFD.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2141_VFD.TargetVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2146_VFD.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2146_VFD.TargetVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P3080_VFD.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P3080_VFD.TargetVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
 							<Name>GVL_EquipArrays.nEquip_Count</Name>
 							<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
 							<Type>DINT</Type>
@@ -2241,6 +2217,30 @@ Published]]></Comment>
 						<Var>
 							<Name>GVL_IO.To205_P3095_SendingProduct</Name>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P2141_VFD.ControlWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P2141_VFD.TargetVelocity</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P2146_VFD.ControlWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P2146_VFD.TargetVelocity</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P3080_VFD.ControlWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P3080_VFD.TargetVelocity</Name>
+							<Type>INT</Type>
 						</Var>
 					</Vars>
 					<Contexts>
