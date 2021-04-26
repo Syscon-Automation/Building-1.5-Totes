@@ -873,6 +873,30 @@
 							<Type>UINT</Type>
 						</Var>
 						<Var>
+							<Name>SystemSafety.System_SafetyState.ComErr</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.System_SafetyState.FBErr</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.System_SafetyState.OtherErr</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.System_SafetyState.InRun</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.Safety_SystemEstopsOK</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.Safety_PanelEstop</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
 							<Name>BarCodeReaders.BCR_S2140_01.DeviceState</Name>
 							<Comment><![CDATA[ Device Connection State -- From mapped DevState ]]></Comment>
 							<Type>UINT</Type>
@@ -1236,14 +1260,6 @@
 							<Type>UINT</Type>
 						</Var>
 						<Var>
-							<Name>SystemSafety.Safety_SystemEstopsOK</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>SystemSafety.Safety_PanelEstop</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>Conveyors.P2146_VFD.ActualVelocity</Name>
 							<Type>INT</Type>
 						</Var>
@@ -1415,22 +1431,6 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>SystemSafety.System_SafetyState.ComErr</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>SystemSafety.System_SafetyState.FBErr</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>SystemSafety.System_SafetyState.OtherErr</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>SystemSafety.System_SafetyState.InRun</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>GVL_IO.PB_SysStart</Name>
 							<Comment><![CDATA[System Start Button]]></Comment>
 							<Type>BOOL</Type>
@@ -1461,13 +1461,13 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>GVL_IO.SystemAirPressure</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
 							<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
 							<Type GUID="{B705C051-BDF3-BC2D-EB52-CEC3C4A70B71}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.SystemAirPressure</Name>
+							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.PanelEstop_OK</Name>
@@ -1602,19 +1602,24 @@
 							<Type>UINT</Type>
 						</Var>
 						<Var>
-							<Name>GVL_IO.ENC_9091_Raw</Name>
-							<Comment><![CDATA[ Raw Encoder Value]]></Comment>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
 							<Name>GVL_IO.ENC_9031_Period</Name>
 							<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
+							<Name>GVL_IO.ENC_9091_Raw</Name>
+							<Comment><![CDATA[ Raw Encoder Value]]></Comment>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
 							<Name>GVL_IO.RIO1151_WcState</Name>
 							<Comment><![CDATA[ Remote IO Block 1151]]></Comment>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.ENC_9091_Period</Name>
+							<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
+							<Type>UDINT</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.RIO2151_WcState</Name>
@@ -1625,11 +1630,6 @@
 							<Name>GVL_IO.RIO3171_WcState</Name>
 							<Comment><![CDATA[ Remote IO Block 3171]]></Comment>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL_IO.ENC_9091_Period</Name>
-							<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
-							<Type>UDINT</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.RIO4141_WcState</Name>
@@ -1913,6 +1913,22 @@
 							<Type>UINT</Type>
 						</Var>
 						<Var>
+							<Name>SystemSafety.System_SafetyState.Reset</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.System_SafetyState.Run</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.System_SafetyState.ErrAck</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SystemSafety.System_SafetyState.CommErrAck</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
 							<Name>BarCodeReaders.BCR_S2140_01.TriggerEnable</Name>
 							<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
 							<Type>BOOL</Type>
@@ -1993,14 +2009,6 @@
 							<Type GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}">E_StateCntrl</Type>
 						</Var>
 						<Var>
-							<Name>Conveyors.P2141_VFD.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>Conveyors.P2141_VFD.TargetVelocity</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
 							<Name>System.Cnvyr_Auto</Name>
 							<Comment><![CDATA[ Bit to send to all conveyors to put them in Auto mode]]></Comment>
 							<Type>BOOL</Type>
@@ -2021,6 +2029,14 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>Conveyors.P2141_VFD.ControlWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Conveyors.P2141_VFD.TargetVelocity</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
 							<Name>Conveyors.P2146_VFD.ControlWord</Name>
 							<Type>UINT</Type>
 						</Var>
@@ -2037,20 +2053,14 @@
 							<Type>INT</Type>
 						</Var>
 						<Var>
-							<Name>SystemSafety.System_SafetyState.Reset</Name>
-							<Type>BOOL</Type>
+							<Name>GVL_EquipArrays.nEquip_Count</Name>
+							<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
+							<Type>DINT</Type>
 						</Var>
 						<Var>
-							<Name>SystemSafety.System_SafetyState.Run</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>SystemSafety.System_SafetyState.ErrAck</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>SystemSafety.System_SafetyState.CommErrAck</Name>
-							<Type>BOOL</Type>
+							<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
+							<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
+							<Type GUID="{B705C051-BDF3-BC2D-EB52-CEC3C4A70B71}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.HornMainPanel</Name>
@@ -2076,16 +2086,6 @@
 							<Name>GVL_IO.LT_3131_Red</Name>
 							<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.nEquip_Count</Name>
-							<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
-							<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
-							<Type GUID="{B705C051-BDF3-BC2D-EB52-CEC3C4A70B71}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 						</Var>
 						<Var>
 							<Name>GVL_IO.LT_3151_Yellow</Name>

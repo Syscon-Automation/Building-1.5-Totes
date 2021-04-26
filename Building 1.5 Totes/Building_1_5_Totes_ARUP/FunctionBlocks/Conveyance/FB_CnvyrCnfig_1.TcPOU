@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_CnvyrCnfig_1" Id="{3ef8a691-dcc9-40ac-aa24-71b15137a9f1}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CnvyrCnfig_1
 
@@ -226,7 +226,7 @@ Conv_fbEquipCntrl(
 
 //===Sleep Timer
 IF CFG_UseSleepTmr THEN
-	fbSleepCntrl.In_Trigs.0 := In_ConvCrntExitPhotoEye;
+	fbSleepCntrl.In_Trigs.0 := In_ConvCrntExitPhotoEye OR In_p_EquipStatePB.AutoPB;
 	fbSleepCntrl.In_Trigs.1 := In_WakeSlpTrigArry[1];
 	fbSleepCntrl.In_Trigs.2 := In_WakeSlpTrigArry[2];
 	fbSleepCntrl.In_Trigs.3 := In_WakeSlpTrigArry[3];

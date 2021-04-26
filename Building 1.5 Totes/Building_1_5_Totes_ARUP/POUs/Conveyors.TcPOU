@@ -687,7 +687,7 @@ P2145SleepWakeTrig[2] := PhotoEyes.PE_10091.Out_OffFltrd;
 P2146_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-//P2146.In_EquipIntlks.2:= 
+P2146.In_EquipIntlks.2:= Photoeyes.PE_2101.Out_OnFltrd;
 //Events
 P2146.In_EquipEvents.2:= GVL_IO.DS_P2146;
 P2146.In_EquipEvents.3:= System.SysEventsAllOk;
