@@ -107,7 +107,7 @@ SysState(
 );
 
 SysIntlksAllOk := SysState.Sts_All_Intlks_OK;
-SysEventsAllOk :=  NOT SysState.Sts_FaultActive;
+SysEventsAllOk := SysState.Sts_All_Evnts_OK;
 
 // Set up Start up delay and Auto/Manual control for conveyors
 

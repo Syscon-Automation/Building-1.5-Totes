@@ -110,6 +110,13 @@ IF RxCounter_Old <> ServerControl.fbServer.aApplications[nConnectionIndex].RxCou
 	//	If there is only one possible DeviceID, this IF statement can be removed, but the fb_(TransportBuffer).AddItem call still has to be made
 	//	Also, the default destination needs to be passed per DeviceID
 	IF DeviceID = Sorter.st_Sorter_P2140Cfg.EquipID THEN
+		// Added temporaily because code change needed on ARUP side 
+			IF ItemTransport.Destination =0 THEN
+			ItemTransport.Destination := 1;
+			ELSIF ItemTransport.Destination =1 THEN
+				ItemTransport.Destination := 2;
+			END_IF
+			// End addition	
 		fb_SorterTransportBuffer_P2140.AddItem(st_ItemToAdd := ItemTransport);
 		P2140_DefaultDestination := DefDestination;
 	END_IF
@@ -888,6 +895,8 @@ TransportResponse := String1;]]></ST>
       <LineId Id="1391" Count="0" />
       <LineId Id="1939" Count="2" />
       <LineId Id="1930" Count="0" />
+      <LineId Id="2287" Count="5" />
+      <LineId Id="2285" Count="0" />
       <LineId Id="1933" Count="1" />
       <LineId Id="1932" Count="0" />
       <LineId Id="2123" Count="3" />

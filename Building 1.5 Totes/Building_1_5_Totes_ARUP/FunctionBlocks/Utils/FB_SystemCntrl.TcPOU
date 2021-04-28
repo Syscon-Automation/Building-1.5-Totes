@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_SystemCntrl" Id="{35f3f1a5-d376-44b6-8b57-8c08aa22e010}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SystemCntrl
 
@@ -131,6 +131,7 @@ Out_Stop := In_o_EquipStatePB.StopPB OR In_p_EquipStatePB.StopPB;
 Out_Reset := In_o_EquipStatePB.ResetPB OR In_p_EquipStatePB.ResetPB;
 
 // Populate the Sts Output Variables
+Sts_EquipState.Sts_EquipmentState.CrntState := 1;
 Sts_EquipState.Sts_All_Intlks_OK  := Sts_All_Intlks_OK;
 Sts_EquipState.Sts_All_Evnts_OK  := Sts_All_Evnts_OK;
 Sts_EquipState.Sts_FaultActive := Sts_FaultActive;
@@ -141,7 +142,9 @@ Sts_EquipState.Sts_WarnActive := Sts_WarnActive;]]></ST>
       <LineId Id="7279" Count="0" />
       <LineId Id="7281" Count="2" />
       <LineId Id="7280" Count="0" />
-      <LineId Id="7215" Count="3" />
+      <LineId Id="7215" Count="0" />
+      <LineId Id="7349" Count="0" />
+      <LineId Id="7216" Count="2" />
       <LineId Id="6809" Count="0" />
     </LineIds>
   </POU>

@@ -163,6 +163,9 @@ tEncoderOK_P2140(PT:=T#1S);
 
 // OK when Q is not on, but the alarm is reversed
   GVL_IO.ENC_9031_OK := tEncoderOK_P2140.Q;
+  
+// Publish the sorter name
+  GVL_IO.Sorter_P2140Name := st_Sorter_P2140Cfg.Name;
 
 // Sorter
 (*
@@ -366,7 +369,11 @@ P2150_DivertLog(DivertArray := aSorterDiverts_P2150,
       <LineId Id="1347" Count="6" />
       <LineId Id="630" Count="11" />
       <LineId Id="1529" Count="0" />
-      <LineId Id="642" Count="4" />
+      <LineId Id="642" Count="3" />
+      <LineId Id="1618" Count="0" />
+      <LineId Id="1620" Count="0" />
+      <LineId Id="1619" Count="0" />
+      <LineId Id="646" Count="0" />
       <LineId Id="650" Count="12" />
       <LineId Id="1354" Count="1" />
       <LineId Id="663" Count="0" />

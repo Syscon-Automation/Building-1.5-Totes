@@ -91,9 +91,9 @@ fb_TransportBuffer.LogEntries := .nItemBufferLogEnable.TRANSPORT;
 fb_UpdateBuffer.LogEntries := .nItemBufferLogEnable.UPDATE;
 
 // Provide names for the buffers
-fb_ArrivalBuffer.Name := 'SRT ARRIVAL';
-fb_TransportBuffer.Name := 'SRT TRANSPORT';
-fb_UpdateBuffer.Name := 'SRT UPDATE';
+fb_ArrivalBuffer.Name := '2150 SRT ARRIVAL';
+fb_TransportBuffer.Name := '2150 SRT TRANSPORT';
+fb_UpdateBuffer.Name := '2150 SRT UPDATE';
 
 // Initialize the FB_ItemExtBuffer Instances
 fb_ArrivalBuffer(st_BufferData := st_SorterArrivalBuffer_P2150
