@@ -5,11 +5,11 @@
 VAR
 	SortSingulation_P2140	:	FB_Singulation;
 	RetryLimit_P2140		:	UINT := 1;
-	ReleaseDist_P2140		:	UINT;
+	ReleaseDist_P2140		:	UINT :=200;
 	
 	SortSingulation_P2150	:	FB_Singulation;
 	RetryLimit_P2150		:	UINT := 1;
-	ReleaseDist_P2150		:	UINT;
+	ReleaseDist_P2150		:	UINT :=150;
 
 END_VAR
 ]]></Declaration>

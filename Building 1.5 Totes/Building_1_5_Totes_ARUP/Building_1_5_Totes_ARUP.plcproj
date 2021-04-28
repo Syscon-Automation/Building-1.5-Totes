@@ -18,6 +18,9 @@
     <MultiuserActive>true</MultiuserActive>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DUTs\EAP\E_EAP_PubType.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\EAP\ST_EAP_DEVICE.TcDUT">
       <SubType>Code</SubType>
     </Compile>

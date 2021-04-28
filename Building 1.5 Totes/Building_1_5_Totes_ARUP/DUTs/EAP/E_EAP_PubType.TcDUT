@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="E_EAP_PubType" Id="{2c01c7e2-5182-4d06-b16c-45c1a03a8357}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_EAP_PubType :
+(
+	e_AmsNetID 	:= 0,
+	e_IPAddr	:= 1,
+	e_MAC_ID	:= 2
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
