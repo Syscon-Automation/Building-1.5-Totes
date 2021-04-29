@@ -34,7 +34,7 @@ GVL_IO.INIT := FALSE;
 
 
 // Reset when Timer is Done
-tonPersistentSave(IN := NOT tonPersistentSave.Q);
+tonPersistentSave(IN := NOT tpBroadcastSave.Q);
 
 // Catch the .Q of the persistent save timer to trigger a save pulse
 tpBroadcastSave(IN := tonPersistentSave.Q);
@@ -43,25 +43,19 @@ PLCPersistentSave := tpBroadcastSave.Q;
 
 // Check for persistent item save
 //rStartPersistentSave(CLK := tpBroadcastSave.Q);
-IF rStartPersistentSave.Q THEN
-	// Execute a Persistent save here
-	// System PORT is 851
-	fbWritePersistentData(netid:= '', PORT:=851, Start:=rStartPersistentSave.Q, tmout:=T#1S);
+// Execute a Persistent save here
+// System PORT is 851
+fbWritePersistentData(netid:= '', PORT:=851, Start:=rStartPersistentSave.Q, tmout:=T#1S);
+
+// Convert HMI EAP IP Address(es) to correct format
+MEMCPY(destAddr    := ADR(EAP_205.Publisher.HMI_IPAddrDisp),srcaddr :=ADR(EAP_205.Publisher.IPAddr), n := 4);
+IF ((EAP_205.Publisher.HMI_IPAddrDisp[0] <> EAP_205.Publisher.HMI_IPAddr[0]) AND EAP_205.Publisher.HMI_IPAddr[0] > 0)
+   OR ((EAP_205.Publisher.HMI_IPAddrDisp[1] <> EAP_205.Publisher.HMI_IPAddr[1]) AND EAP_205.Publisher.HMI_IPAddr[1] > 0)
+   OR ((EAP_205.Publisher.HMI_IPAddrDisp[2] <> EAP_205.Publisher.HMI_IPAddr[2]) AND EAP_205.Publisher.HMI_IPAddr[2] > 0)
+   OR ((EAP_205.Publisher.HMI_IPAddrDisp[3] <> EAP_205.Publisher.HMI_IPAddr[3]) AND EAP_205.Publisher.HMI_IPAddr[3] > 0)
+   THEN
+    MEMCPY(destAddr    := ADR(EAP_205.Publisher.IPAddr),srcaddr :=ADR(EAP_205.Publisher.HMI_IPAddr), n := 4);
 END_IF]]></ST>
     </Implementation>
-    <LineIds Name="MAIN">
-      <LineId Id="203" Count="0" />
-      <LineId Id="126" Count="1" />
-      <LineId Id="187" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="129" Count="0" />
-      <LineId Id="170" Count="0" />
-      <LineId Id="131" Count="3" />
-      <LineId Id="137" Count="0" />
-      <LineId Id="202" Count="0" />
-      <LineId Id="139" Count="16" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

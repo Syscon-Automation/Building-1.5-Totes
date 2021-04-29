@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.10" ClassName="CDevEthernetProtocolNvDef" SubType="112">
+	<Device Id="3" DevType="112" AmsPort="28675" AmsNetId="5.84.5.4.4.1" RemoteName="Communition with 205 (EtherCAT Automation Protocol)">
+		<Name>__FILENAME__</Name>
+		<AddressInfo>
+			<TcCom>
+				<ObjectId>#x03010021</ObjectId>
+			</TcCom>
+		</AddressInfo>
+		<Image Id="3" AddrType="1" ImageType="3">
+			<Name>Image</Name>
+		</Image>
+		<Box Id="33" BoxType="9051">
+			<Name>Pub_To_205 (Publisher)</Name>
+			<ImageId>99</ImageId>
+			<Vars VarGrpType="1">
+				<Name>Inputs</Name>
+				<Var BoxStateVariable="true">
+					<Name>FrameState</Name>
+					<Comment><![CDATA[0x0001 = Not sent (frame skipped)
+0x0002 = Error (frame oversized)
+0x0004 = Subscriber missing (Unicast only)
+]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+			</Vars>
+			<Vars VarGrpType="2">
+				<Name>Outputs</Name>
+				<Var BoxStateVariable="true">
+					<Name>FrameCtrl</Name>
+					<Comment><![CDATA[0x0001 = Disable sending
+0x0002 = Remove destination MAC from ARP cache
+]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>IpAddr</Name>
+					<Type>UDINT</Type>
+					<BitOffs>16</BitOffs>
+				</Var>
+			</Vars>
+			<Eap InOut="1" Publisher="0342440a0000" NetIdPublisherAsIpAddress="true" TargetChangeable="true" TargetChangeableInTree="true" ArpRetryInterval="1000" GatewayIpAddr="173721857">
+				<EapVar Id="1" VarInOut="1" NvId="1" NvLength="1" IdChangeable="true" IdChangeableInTree="true">
+					<Name>To205_P2130_IsRunning</Name>
+					<ImageId>97</ImageId>
+					<Vars VarGrpType="1">
+						<Name>Inputs</Name>
+						<Var BoxStateVariable="true">
+							<Name>VarState</Name>
+							<Comment><![CDATA[0x0001 = Not sent (variable skipped)
+]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>16</BitOffs>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2">
+						<Name>Outputs</Name>
+						<Var>
+							<Name>VarId</Name>
+							<Type>UINT</Type>
+							<BitOffs>48</BitOffs>
+						</Var>
+						<Var BoxStateVariable="true">
+							<Name>VarCtrl</Name>
+							<Comment><![CDATA[0x0001 = Disable publishing
+]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>64</BitOffs>
+						</Var>
+						<Var>
+							<Name>VarData</Name>
+							<Type>BOOL</Type>
+							<BitOffs>80</BitOffs>
+						</Var>
+					</Vars>
+				</EapVar>
+				<EapVar Id="2" VarInOut="1" NvId="2" NvLength="1" IdChangeable="true" IdChangeableInTree="true">
+					<Name>To205_P3095_SendingProduct</Name>
+					<ImageId>97</ImageId>
+					<Vars VarGrpType="1">
+						<Name>Inputs</Name>
+						<Var BoxStateVariable="true">
+							<Name>VarState</Name>
+							<Comment><![CDATA[0x0001 = Not sent (variable skipped)
+]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>32</BitOffs>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2">
+						<Name>Outputs</Name>
+						<Var>
+							<Name>VarId</Name>
+							<Type>UINT</Type>
+							<BitOffs>88</BitOffs>
+						</Var>
+						<Var BoxStateVariable="true">
+							<Name>VarCtrl</Name>
+							<Comment><![CDATA[0x0001 = Disable publishing
+]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>104</BitOffs>
+						</Var>
+						<Var>
+							<Name>VarData</Name>
+							<Type>BOOL</Type>
+							<BitOffs>120</BitOffs>
+						</Var>
+					</Vars>
+				</EapVar>
+			</Eap>
+		</Box>
+		<Box Id="34" BoxType="9052">
+			<Name>Sub_To_205 (Subscriber)</Name>
+			<ImageId>100</ImageId>
+			<Vars VarGrpType="1">
+				<Name>Inputs</Name>
+				<Var BoxStateVariable="true">
+					<Name>FrameState</Name>
+					<Type>UINT</Type>
+					<BitOffs>48</BitOffs>
+				</Var>
+			</Vars>
+			<Vars VarGrpType="2">
+				<Name>Outputs</Name>
+				<Var BoxStateVariable="true">
+					<Name>FrameCtrl</Name>
+					<Type>UINT</Type>
+					<BitOffs>128</BitOffs>
+				</Var>
+			</Vars>
+			<Eap Publisher="0554050c0e01">
+				<EapVar Id="1" NvId="117" NvLength="1" IdChangeable="true" IdChangeableInTree="true">
+					<Name>From205_P3100_IsRunning</Name>
+					<ImageId>98</ImageId>
+					<Vars VarGrpType="1">
+						<Name>Inputs</Name>
+						<Var BoxStateVariable="true">
+							<Name>VarState</Name>
+							<Comment><![CDATA[0x0001 = Invalid hash value received
+0x0002 = Invalid variable length received
+]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>64</BitOffs>
+						</Var>
+						<Var>
+							<Name>Quality</Name>
+							<Comment><![CDATA[Duration the variable is not refreshed (in 100µs)]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>80</BitOffs>
+						</Var>
+						<Var>
+							<Name>CycleIndex</Name>
+							<Comment><![CDATA[Incremented each publisher cycle]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>96</BitOffs>
+						</Var>
+						<Var>
+							<Name>VarData</Name>
+							<Type>BOOL</Type>
+							<BitOffs>112</BitOffs>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2">
+						<Name>Outputs</Name>
+						<Var>
+							<Name>VarId</Name>
+							<Type>UINT</Type>
+							<BitOffs>144</BitOffs>
+						</Var>
+						<Var BoxStateVariable="true">
+							<Name>VarCtrl</Name>
+							<Comment><![CDATA[0x0001 = Ignore hash value
+]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>160</BitOffs>
+						</Var>
+					</Vars>
+				</EapVar>
+				<EapVar Id="3" NvId="118" NvLength="1">
+					<Name>From205_P2125_SendingProduct</Name>
+					<ImageId>98</ImageId>
+					<Vars VarGrpType="1">
+						<Name>Inputs</Name>
+						<Var BoxStateVariable="true">
+							<Name>VarState</Name>
+							<Comment><![CDATA[0x0001 = Invalid hash value received
+0x0002 = Invalid variable length received
+]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>120</BitOffs>
+						</Var>
+						<Var>
+							<Name>Quality</Name>
+							<Comment><![CDATA[Duration the variable is not refreshed (in 100µs)]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>136</BitOffs>
+						</Var>
+						<Var>
+							<Name>CycleIndex</Name>
+							<Comment><![CDATA[Incremented each publisher cycle]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>152</BitOffs>
+						</Var>
+						<Var>
+							<Name>VarData</Name>
+							<Type>BOOL</Type>
+							<BitOffs>168</BitOffs>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2">
+						<Name>Outputs</Name>
+						<Var BoxStateVariable="true">
+							<Name>VarCtrl</Name>
+							<Comment><![CDATA[0x0001 = Ignore hash value
+]]></Comment>
+							<Type>UINT</Type>
+							<BitOffs>176</BitOffs>
+						</Var>
+					</Vars>
+				</EapVar>
+			</Eap>
+		</Box>
+		<Ethernet/>
+		<Eap EapDeviceGuid="{5502FE29-6EED-4403-8DAB-6A63833E65CA}"/>
+	</Device>
+</TcSmItem>
