@@ -177,7 +177,7 @@
 						</Var>
 					</Vars>
 				</EapVar>
-				<EapVar Id="3" NvId="118" NvLength="1">
+				<EapVar Id="2" NvId="118" NvLength="1" IdChangeable="true" IdChangeableInTree="true">
 					<Name>From205_P2125_SendingProduct</Name>
 					<ImageId>98</ImageId>
 					<Vars VarGrpType="1">
@@ -210,12 +210,17 @@
 					</Vars>
 					<Vars VarGrpType="2">
 						<Name>Outputs</Name>
+						<Var>
+							<Name>VarId</Name>
+							<Type>UINT</Type>
+							<BitOffs>176</BitOffs>
+						</Var>
 						<Var BoxStateVariable="true">
 							<Name>VarCtrl</Name>
 							<Comment><![CDATA[0x0001 = Ignore hash value
 ]]></Comment>
 							<Type>UINT</Type>
-							<BitOffs>176</BitOffs>
+							<BitOffs>192</BitOffs>
 						</Var>
 					</Vars>
 				</EapVar>

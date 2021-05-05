@@ -2082,6 +2082,7 @@ Published]]></Comment>
 			<OwnerB Name="TIID^Communition with 205 (EtherCAT Automation Protocol)^Pub_To_205 (Publisher)">
 				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Publisher.FrameState" VarB="Inputs^FrameState"/>
 				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Publisher.Variables[0].VarState" VarB="To205_P2130_IsRunning^Inputs^VarState"/>
+				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Publisher.Variables[1].VarState" VarB="To205_P3095_SendingProduct^Inputs^VarState"/>
 				<Link VarA="PlcTask Outputs^GVL_IO.To205_P2130_IsRunning" VarB="To205_P2130_IsRunning^Outputs^VarData"/>
 				<Link VarA="PlcTask Outputs^GVL_IO.To205_P3095_SendingProduct" VarB="To205_P3095_SendingProduct^Outputs^VarData"/>
 				<Link VarA="PlcTask Outputs^MAIN.EAP_205.Publisher.FrameCtrl" VarB="Outputs^FrameCtrl"/>
@@ -2094,17 +2095,18 @@ Published]]></Comment>
 			<OwnerB Name="TIID^Communition with 205 (EtherCAT Automation Protocol)^Sub_To_205 (Subscriber)">
 				<Link VarA="PlcTask Inputs^GVL_IO.From205_P2125_SendingProduct" VarB="From205_P2125_SendingProduct^Inputs^VarData"/>
 				<Link VarA="PlcTask Inputs^GVL_IO.From205_P3100_IsRunning" VarB="From205_P3100_IsRunning^Inputs^VarData"/>
-				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Publisher.Variables[1].VarState" VarB="From205_P2125_SendingProduct^Inputs^VarState"/>
 				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Subscriber.FrameState" VarB="Inputs^FrameState"/>
 				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Subscriber.Variables[0].CycleIndex" VarB="From205_P3100_IsRunning^Inputs^CycleIndex"/>
 				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Subscriber.Variables[0].Quality" VarB="From205_P3100_IsRunning^Inputs^Quality"/>
 				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Subscriber.Variables[0].VarState" VarB="From205_P3100_IsRunning^Inputs^VarState"/>
 				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Subscriber.Variables[1].CycleIndex" VarB="From205_P2125_SendingProduct^Inputs^CycleIndex"/>
 				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Subscriber.Variables[1].Quality" VarB="From205_P2125_SendingProduct^Inputs^Quality"/>
-				<Link VarA="PlcTask Outputs^MAIN.EAP_205.Publisher.Variables[1].VarCtrl" VarB="From205_P2125_SendingProduct^Outputs^VarCtrl"/>
+				<Link VarA="PlcTask Inputs^MAIN.EAP_205.Subscriber.Variables[1].VarState" VarB="From205_P2125_SendingProduct^Inputs^VarState"/>
 				<Link VarA="PlcTask Outputs^MAIN.EAP_205.Subscriber.FrameCtrl" VarB="Outputs^FrameCtrl"/>
 				<Link VarA="PlcTask Outputs^MAIN.EAP_205.Subscriber.Variables[0].VarCtrl" VarB="From205_P3100_IsRunning^Outputs^VarCtrl"/>
 				<Link VarA="PlcTask Outputs^MAIN.EAP_205.Subscriber.Variables[0].VarId" VarB="From205_P3100_IsRunning^Outputs^VarId"/>
+				<Link VarA="PlcTask Outputs^MAIN.EAP_205.Subscriber.Variables[1].VarCtrl" VarB="From205_P2125_SendingProduct^Outputs^VarCtrl"/>
+				<Link VarA="PlcTask Outputs^MAIN.EAP_205.Subscriber.Variables[1].VarId" VarB="From205_P2125_SendingProduct^Outputs^VarId"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^PLC-10081 (EK1122)^RIO-10161 (EP2339-0022)">
 				<Link VarA="PlcTask Inputs^GVL_IO.DS_P2135" VarB="Channel 8^P2135 Motor Disconnect" Size="1"/>

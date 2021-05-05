@@ -12,7 +12,7 @@ VAR
 //Transport
 //----------------------------------------P2130--------------------------------------------------------------
    cfgP2130Label:	STRING(20) :=  'P2130';
-   cfgP2130SleepTime:	TIME := T#180S;
+   cfgP2130SleepTime:	TIME := T#10M;
    cfgP2130JamDetectTime:	TIME := T#30S;
    P2130SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2130: FB_CnvyrCnfig_1;
@@ -22,7 +22,7 @@ VAR
 //Transport
 //----------------------------------------P2135--------------------------------------------------------------
    cfgP2135Label:	STRING(20) :=  'P2135';
-   cfgP2135SleepTime:	TIME := T#180S;
+   cfgP2135SleepTime:	TIME := T#10M;
    cfgP2135JamDetectTime:	TIME := T#30S;
    P2135SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2135: FB_CnvyrCnfig_1;
@@ -32,7 +32,7 @@ VAR
 //Transport
 //----------------------------------------P2140--------------------------------------------------------------
    cfgP2140Label:	STRING(20) :=  'P2140';
-   cfgP2140SleepTime:	TIME := T#180S;
+   cfgP2140SleepTime:	TIME := T#10M;
    cfgP2140JamDetectTime:	TIME := T#30S;
    P2140SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2140: FB_CnvyrCnfig_1;
@@ -42,7 +42,7 @@ VAR
 //Transport
 //----------------------------------------P2143--------------------------------------------------------------
    cfgP2143Label:	STRING(20) :=  'P2143';
-   cfgP2143SleepTime:	TIME := T#180S;
+   cfgP2143SleepTime:	TIME := T#10M;
    cfgP2143JamDetectTime:	TIME := T#30S;
    P2143SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2143: FB_CnvyrCnfig_1;
@@ -52,7 +52,7 @@ VAR
 //Spiral
 //----------------------------------------P2141--------------------------------------------------------------
    cfgP2141Label:	STRING(20) :=  'P2141';
-   cfgP2141SleepTime:	TIME := T#180S;
+   cfgP2141SleepTime:	TIME := T#10M;
    cfgP2141JamDetectTime:	TIME := T#30S;
    P2141SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2141: FB_CnvyrCnfig_1;
@@ -64,7 +64,7 @@ VAR
 //Transport
 //----------------------------------------P2142--------------------------------------------------------------
    cfgP2142Label:	STRING(20) :=  'P2142';
-   cfgP2142SleepTime:	TIME := T#180S;
+   cfgP2142SleepTime:	TIME := T#10M;
    cfgP2142JamDetectTime:	TIME := T#30S;
    P2142SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2142: FB_CnvyrCnfig_1;
@@ -74,7 +74,7 @@ VAR
 //Transport
 //----------------------------------------P2145--------------------------------------------------------------
    cfgP2145Label:	STRING(20) :=  'P2145';
-   cfgP2145SleepTime:	TIME := T#180S;
+   cfgP2145SleepTime:	TIME := T#10M;
    cfgP2145JamDetectTime:	TIME := T#30S;
    P2145SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2145: FB_CnvyrCnfig_1;
@@ -84,7 +84,7 @@ VAR
 //Spiral
 //----------------------------------------P2146--------------------------------------------------------------
    cfgP2146Label:	STRING(20) :=  'P2146';
-   cfgP2146SleepTime:	TIME := T#180S;
+   cfgP2146SleepTime:	TIME := T#10M;
    cfgP2146JamDetectTime:	TIME := T#30S;
    P2146SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2146: FB_CnvyrCnfig_1;
@@ -96,7 +96,7 @@ VAR
 //Sorter
 //----------------------------------------P2150--------------------------------------------------------------
    cfgP2150Label:	STRING(20) :=  'P2150';
-   cfgP2150SleepTime:	TIME := T#180S;
+   cfgP2150SleepTime:	TIME := T#10M;
    cfgP2150JamDetectTime:	TIME := T#30S;
    P2150SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P2150: FB_CnvyrCnfig_1;
@@ -108,7 +108,7 @@ VAR
 //Spiral
 //----------------------------------------P3080--------------------------------------------------------------
    cfgP3080Label:	STRING(20) :=  'P3080';
-   cfgP3080SleepTime:	TIME := T#180S;
+   cfgP3080SleepTime:	TIME := T#10M;
    cfgP3080JamDetectTime:	TIME := T#30S;
    P3080SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P3080: FB_CnvyrCnfig_1;
@@ -121,7 +121,7 @@ VAR
 //Transport
 //----------------------------------------P3085--------------------------------------------------------------
    cfgP3085Label:	STRING(20) :=  'P3085';
-   cfgP3085SleepTime:	TIME := T#180S;
+   cfgP3085SleepTime:	TIME := T#10M;
    cfgP3085JamDetectTime:	TIME := T#30S;
    P3085SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P3085: FB_CnvyrCnfig_1;
@@ -131,7 +131,7 @@ VAR
 //Transport
 //----------------------------------------P3090--------------------------------------------------------------
    cfgP3090Label:	STRING(20) :=  'P3090';
-   cfgP3090SleepTime:	TIME := T#180S;
+   cfgP3090SleepTime:	TIME := T#10M;
    cfgP3090JamDetectTime:	TIME := T#30S;
    P3090SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P3090: FB_CnvyrCnfig_1;
@@ -141,7 +141,7 @@ VAR
 //Transport
 //----------------------------------------P3095--------------------------------------------------------------
    cfgP3095Label:	STRING(20) :=  'P3095';
-   cfgP3095SleepTime:	TIME := T#180S;
+   cfgP3095SleepTime:	TIME := T#10M;
    cfgP3095JamDetectTime:	TIME := T#30S;
    P3095SleepWakeTrig: ARRAY[1..5] OF BOOL;
    P3095: FB_CnvyrCnfig_1;
@@ -413,6 +413,7 @@ P2130(
    Out_ConvCrntMtr => GVL_IO.P2130_RUN);
 
 P2130_Status.Sts_IsRunning := GVL_IO.P2130_RUN;
+
 //Transport
 //----------------------------------------P2135--------------------------------------------------------------
 P2135_StatePB.AutoPB := System.Cnvyr_Auto;
@@ -1166,42 +1167,5 @@ END_IF
 
 ]]></ST>
     </Implementation>
-    <LineIds Name="Conveyors">
-      <LineId Id="3942" Count="22" />
-      <LineId Id="4726" Count="0" />
-      <LineId Id="3965" Count="0" />
-      <LineId Id="5086" Count="0" />
-      <LineId Id="3966" Count="39" />
-      <LineId Id="5089" Count="0" />
-      <LineId Id="4006" Count="33" />
-      <LineId Id="4041" Count="10" />
-      <LineId Id="5092" Count="0" />
-      <LineId Id="4052" Count="40" />
-      <LineId Id="5094" Count="0" />
-      <LineId Id="4093" Count="40" />
-      <LineId Id="5096" Count="0" />
-      <LineId Id="4134" Count="39" />
-      <LineId Id="4175" Count="5" />
-      <LineId Id="5098" Count="0" />
-      <LineId Id="4181" Count="40" />
-      <LineId Id="5100" Count="0" />
-      <LineId Id="4222" Count="39" />
-      <LineId Id="5102" Count="0" />
-      <LineId Id="4262" Count="49" />
-      <LineId Id="5475" Count="0" />
-      <LineId Id="4312" Count="6" />
-      <LineId Id="5104" Count="0" />
-      <LineId Id="4319" Count="44" />
-      <LineId Id="5106" Count="0" />
-      <LineId Id="4364" Count="45" />
-      <LineId Id="5108" Count="0" />
-      <LineId Id="4410" Count="40" />
-      <LineId Id="5109" Count="0" />
-      <LineId Id="4451" Count="40" />
-      <LineId Id="4729" Count="0" />
-      <LineId Id="5111" Count="0" />
-      <LineId Id="4492" Count="233" />
-      <LineId Id="188" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>
