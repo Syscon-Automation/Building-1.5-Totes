@@ -164,7 +164,7 @@ Conv_IntlksArry[11] := In_EquipIntlks.11;
 Conv_IntlksArry[12] := In_EquipIntlks.12;
 Conv_IntlksArry[13] := In_EquipIntlks.13;
 Conv_IntlksArry[14] := In_EquipIntlks.14;
-Conv_IntlksArry[15] := In_EquipIntlks.15;
+Conv_IntlksArry[15] := Conv_StartAllowed;
 	
 // Call Interlock block
 Conv_fbIntrlks(
@@ -250,7 +250,7 @@ Sts_ConvSleepingActive := Sts_EquipState.Sts_SleepingActive;
 *)
 IF Sts_EquipState.Sts_EquipmentState.StsAuto THEN
 	IF NOT Conv_StartAllowed THEN
-		Conv_StartAllowed := In_ConvDwnStrmMtrStatus OR In_o_EquipStatePB.AutoPB;
+		Conv_StartAllowed := In_ConvDwnStrmMtrStatus OR In_o_EquipStatePB.AutoPB OR (Cfg_ConvType = E_ConvType.end) OR (NOT Cfg_UseStartUpDelay);
 	END_IF
 ELSE
 	Conv_StartAllowed := FALSE;
@@ -311,41 +311,5 @@ Sts_All_Evnts_OK  := Sts_EquipState.Sts_All_Evnts_OK;
 Sts_FaultActive := Sts_EquipState.Sts_FaultActive;
 Sts_WarnActive := Sts_EquipState.Sts_WarnActive;]]></ST>
     </Implementation>
-    <LineIds Name="FB_CnvyrCnfig_1">
-      <LineId Id="6856" Count="0" />
-      <LineId Id="6859" Count="3" />
-      <LineId Id="6858" Count="0" />
-      <LineId Id="6857" Count="0" />
-      <LineId Id="6772" Count="1" />
-      <LineId Id="6775" Count="0" />
-      <LineId Id="6836" Count="0" />
-      <LineId Id="6841" Count="4" />
-      <LineId Id="6777" Count="0" />
-      <LineId Id="6776" Count="0" />
-      <LineId Id="6837" Count="0" />
-      <LineId Id="6846" Count="4" />
-      <LineId Id="6779" Count="0" />
-      <LineId Id="6778" Count="0" />
-      <LineId Id="6838" Count="0" />
-      <LineId Id="6780" Count="1" />
-      <LineId Id="6839" Count="0" />
-      <LineId Id="6851" Count="4" />
-      <LineId Id="6774" Count="0" />
-      <LineId Id="6840" Count="0" />
-      <LineId Id="6511" Count="25" />
-      <LineId Id="6538" Count="28" />
-      <LineId Id="6574" Count="20" />
-      <LineId Id="6879" Count="1" />
-      <LineId Id="6885" Count="3" />
-      <LineId Id="6595" Count="9" />
-      <LineId Id="6817" Count="13" />
-      <LineId Id="6832" Count="3" />
-      <LineId Id="6607" Count="36" />
-      <LineId Id="6657" Count="0" />
-      <LineId Id="6652" Count="4" />
-      <LineId Id="6651" Count="0" />
-      <LineId Id="6644" Count="4" />
-      <LineId Id="3659" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

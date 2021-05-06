@@ -91,9 +91,6 @@
 				<Text><![CDATA[faulted]]></Text>
 				<Enum>12</Enum>
 			</EnumInfo>
-			<Hides>
-				<Hide GUID="{84F1E854-EED7-7ACD-B4CE-3BAD2631D2E4}"/>
-			</Hides>
 		</DataType>
 		<DataType>
 			<Name GUID="{3AB4C627-A758-0E1E-7675-A1F136EB5998}" AutoDeleteType="true">ST_StateCntrlPB</Name>
@@ -418,12 +415,9 @@
 					</Property>
 				</Properties>
 			</SubItem>
-			<Hides>
-				<Hide GUID="{D6D20213-A374-FEAE-0825-A80B50BFB908}"/>
-			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{B705C051-BDF3-BC2D-EB52-CEC3C4A70B71}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
+			<Name IecBaseType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
 			<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
 			<BitSize>8960</BitSize>
 			<BaseType GUID="{CC62C8ED-804B-A109-7E53-39AAE4C55D91}">ST_StateCntrlSts</BaseType>

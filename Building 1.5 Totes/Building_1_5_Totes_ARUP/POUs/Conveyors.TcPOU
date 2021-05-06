@@ -408,6 +408,8 @@ P2130(
    Cfg_EquipEvntsArry:= cfgP2130EvntsArry,
    cfg_JamDetectTime:= cfgP2130JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP2130SleepTime,
    Sts_EquipState := P2130_Status,
    Out_ConvCrntMtr => GVL_IO.P2130_RUN);
@@ -450,6 +452,8 @@ P2135(
    Cfg_EquipEvntsArry:= cfgP2135EvntsArry,
    cfg_JamDetectTime:= cfgP2135JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP2135SleepTime,
    Sts_EquipState := P2135_Status,
    Out_ConvCrntMtr => GVL_IO.P2135_RUN);
@@ -497,6 +501,8 @@ P2140(
    Cfg_EquipEvntsArry:= cfgP2140EvntsArry,
    cfg_JamDetectTime:= cfgP2140JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP2140SleepTime,
    Sts_EquipState := P2140_Status,
    Out_ConvCrntMtr => GVL_IO.P2140_RUN);
@@ -539,6 +545,8 @@ P2143(
    Cfg_EquipEvntsArry:= cfgP2143EvntsArry,
    cfg_JamDetectTime:= cfgP2143JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP2143SleepTime,
    Sts_EquipState := P2143_Status,
    Out_ConvCrntMtr => GVL_IO.P2143_RUN);
@@ -581,6 +589,8 @@ P2141(
    Cfg_EquipEvntsArry:= cfgP2141EvntsArry,
    cfg_JamDetectTime:= cfgP2141JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP2141SleepTime,
    Sts_EquipState := P2141_Status);
 
@@ -629,6 +639,8 @@ P2142(
    Cfg_EquipEvntsArry:= cfgP2142EvntsArry,
    cfg_JamDetectTime:= cfgP2142JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP2142SleepTime,
    Sts_EquipState := P2142_Status,
    Out_ConvCrntMtr => GVL_IO.P2142_RUN);
@@ -670,6 +682,8 @@ P2145(
    Cfg_EquipEvntsArry:= cfgP2145EvntsArry,
    cfg_JamDetectTime:= cfgP2145JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP2145SleepTime,
    Sts_EquipState := P2145_Status,
    Out_ConvCrntMtr => GVL_IO.P2145_RUN);
@@ -711,6 +725,7 @@ P2146(
    Cfg_EquipEvntsArry:= cfgP2146EvntsArry,
    cfg_JamDetectTime:= cfgP2146JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := FALSE,
    Cfg_SleepWaitTime:= cfgP2146SleepTime,
    Sts_EquipState := P2146_Status);
 
@@ -816,6 +831,8 @@ P3080(
    Cfg_EquipEvntsArry:= cfgP3080EvntsArry,
    cfg_JamDetectTime:= cfgP3080JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP3080SleepTime,
    Sts_EquipState := P3080_Status);
 
@@ -863,6 +880,8 @@ P3085(
    Cfg_EquipEvntsArry:= cfgP3085EvntsArry,
    cfg_JamDetectTime:= cfgP3085JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := TRUE,
+   Cfg_StartUpDelayTime := T#500MS,
    Cfg_SleepWaitTime:= cfgP3085SleepTime,
    Sts_EquipState := P3085_Status,
    Out_ConvCrntMtr => GVL_IO.P3085_RUN);
@@ -905,6 +924,7 @@ P3090(
    Cfg_EquipEvntsArry:= cfgP3090EvntsArry,
    cfg_JamDetectTime:= cfgP3090JamDetectTime,
    Cfg_UseSleepTmr := TRUE,
+   Cfg_UseStartUpDelay := FALSE,
    Cfg_SleepWaitTime:= cfgP3090SleepTime,
    Sts_EquipState := P3090_Status,
    Out_ConvCrntMtr => GVL_IO.P3090_RUN);
@@ -1164,6 +1184,9 @@ IF Conveyors.P3095_Status.Sts_EquipmentState.Index > 0 THEN
   //Prepare the Equipment Status data item
   GVL_EquipArrays.aEquipStatusArray_In[Conveyors.P3095_Status.Sts_EquipmentState.Index] := Conveyors.P3095_Status.Sts_EquipmentState;
 END_IF
+
+
+
 
 ]]></ST>
     </Implementation>
