@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <GVL Name="GVL_EquipArrays" Id="{58e11c02-9b81-4241-a2cb-8209c0b8af45}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
@@ -19,7 +19,7 @@ VAR_GLOBAL
 END_VAR
 
 VAR_GLOBAL CONSTANT
-	cEQUIP_COUNT_MAX : DINT := 10;	//Adjust when adding equipment to monitor
+	cEQUIP_COUNT_MAX : DINT := 50;	//Adjust when adding equipment to monitor
 END_VAR
 ]]></Declaration>
   </GVL>

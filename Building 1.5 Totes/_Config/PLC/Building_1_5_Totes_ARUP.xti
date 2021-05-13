@@ -417,13 +417,13 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name IecBaseType="true">ARRAY [1..10] OF ST_StateCntrlSts</Name>
+			<Name IecBaseType="true">ARRAY [1..50] OF ST_StateCntrlSts</Name>
 			<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
-			<BitSize>8960</BitSize>
+			<BitSize>44800</BitSize>
 			<BaseType GUID="{CC62C8ED-804B-A109-7E53-39AAE4C55D91}">ST_StateCntrlSts</BaseType>
 			<ArrayInfo>
 				<LBound>1</LBound>
-				<Elements>10</Elements>
+				<Elements>50</Elements>
 			</ArrayInfo>
 		</DataType>
 		<DataType>
@@ -1025,11 +1025,6 @@
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
-					<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
-					<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
-					<Type GUID="{B705C051-BDF3-BC2D-EB52-CEC3C4A70B71}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
-				</Var>
-				<Var>
 					<Name>GVL_IO.SystemAirPressure</Name>
 					<Type>BOOL</Type>
 				</Var>
@@ -1483,6 +1478,11 @@
 					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
 					<Type>UINT</Type>
 				</Var>
+				<Var>
+					<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
+					<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
+					<Type GUID="{9CD98C58-0C76-D688-6805-B3307896BC8F}">ARRAY [1..50] OF ST_StateCntrlSts</Type>
+				</Var>
 			</Vars>
 			<Vars VarGrpType="2">
 				<Name>PlcTask Outputs</Name>
@@ -1610,11 +1610,6 @@
 					<Name>GVL_EquipArrays.nEquip_Count</Name>
 					<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
 					<Type>DINT</Type>
-				</Var>
-				<Var>
-					<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
-					<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
-					<Type GUID="{B705C051-BDF3-BC2D-EB52-CEC3C4A70B71}">ARRAY [1..10] OF ST_StateCntrlSts</Type>
 				</Var>
 				<Var>
 					<Name>GVL_IO.HornMainPanel</Name>
@@ -2049,6 +2044,11 @@ Published]]></Comment>
 					<Name>MAIN.EAP_205.Subscriber.Variables[9].VarCtrl</Name>
 					<Comment><![CDATA[ VarCtrl.1 = Ignore Hash/Version]]></Comment>
 					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
+					<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
+					<Type GUID="{9CD98C58-0C76-D688-6805-B3307896BC8F}">ARRAY [1..50] OF ST_StateCntrlSts</Type>
 				</Var>
 			</Vars>
 			<Contexts>

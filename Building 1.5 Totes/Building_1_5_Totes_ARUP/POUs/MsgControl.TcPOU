@@ -110,13 +110,6 @@ IF RxCounter_Old <> ServerControl.fbServer.aApplications[nConnectionIndex].RxCou
 	//	If there is only one possible DeviceID, this IF statement can be removed, but the fb_(TransportBuffer).AddItem call still has to be made
 	//	Also, the default destination needs to be passed per DeviceID
 	IF DeviceID = Sorter.st_Sorter_P2140Cfg.EquipID THEN
-		// Added temporaily because code change needed on ARUP side 
-			IF ItemTransport.Destination =0 THEN
-			ItemTransport.Destination := 1;
-			ELSIF ItemTransport.Destination =1 THEN
-				ItemTransport.Destination := 2;
-			END_IF
-			// End addition	
 		fb_SorterTransportBuffer_P2140.AddItem(st_ItemToAdd := ItemTransport);
 		P2140_DefaultDestination := DefDestination;
 	END_IF
@@ -222,8 +215,7 @@ IF st_SorterUpdateBuffer.nInPointer <> fb_SorterUpdateBuffer.OutPointer THEN
 END_IF
 
 // Transmit on Device Status Change
-//DeviceStatus();1
-
+DeviceStatus();
 
 (* -------------------- Reset The Transmit Triger after the message is succesfully added to the buffer ------------------- *)
 IF ((ServerControl.fbServer.aApplications[nConnectionIndex].bTransmitTrigger = TRUE) OR ServerControl.TransmitTrigger = TRUE)  AND (TxCounter_Old <> ServerControl.fbServer.aApplications[nConnectionIndex].TxCounter) THEN
@@ -382,67 +374,72 @@ END_IF
 nEquipStatusIndex := 0;
 
 FOR nSystemStatusIndex := 1 TO gvl_equiparrays.nSystemEquip_Count BY 1 DO
-	// Capture Offline State
-	IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stOffline THEN
-		nTempOperState := E_EquipmentUpdate.Offline;
-	ELSE
-		// Capture Faulted State, or a specific Fault (in this instance, OverHeight)
-		IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stFaulted THEN
+	// Test for a valid label, ignore if there isn't a label
+	IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].Label <> '' THEN
+		// Capture Offline State
+		IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stOffline THEN
+			nTempOperState := E_OperStateCntrl.Offline;
+		ELSE
+			// Check for OverHeight
+			// Initialise the stop register with the conveyor stop register
+			fb_CheckStopRegister(aCodeRegister := GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].stsStopRegister);
 			// Check for an OverHeight in the Stop Register
 			fb_CheckStopRegister.Check(nCodeToCheck := E_StopCodes.OverHeightFLT,
 				bCodeSet => bOverHeight);
 			// Set over Height
 			IF bOverHeight THEN
-				nTempOperState := E_EquipmentUpdate.OverHeight;
+				nTempOperState := E_OperStateCntrl.OverHeight;
 			ELSE
-				// Otherwise, set Faulted
-				nTempOperState := E_EquipmentUpdate.Faulted;
+				// Capture Faulted State, or a specific Fault (in this instance, OverHeight)
+				IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stFaulted THEN
+						nTempOperState := E_OperStateCntrl.Faulted;
+				ELSE
+					// Capture Auto/Manual States and Running/Sleeping states where appropriate
+					IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stAuto THEN
+						// Capture Auto-Running
+						IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.running THEN
+							nTempOperState := E_OperStateCntrl.running;
+						// Capture Auto-Sleeping
+						ELSIF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.sleeping THEN
+							nTempOperState := E_OperStateCntrl.sleeping;
+						// Capture Auto
+						ELSE
+							nTempOperState := E_OperStateCntrl.Auto;
+						END_IF
+					ELSE
+						// Capture Manual-Running
+						IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.running THEN
+							nTempOperState := E_OperStateCntrl.running;
+						// Capture Manual
+						ELSE
+							nTempOperState := E_OperStateCntrl.Manual;
+						END_IF
+					END_IF
+				END_IF
 			END_IF
-		ELSE
-			// Capture Auto/Manual States and Running/Sleeping states where appropriate
-			IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntState = E_StateCntrl.stAuto THEN
-				// Capture Auto-Running
-				IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.running THEN
-					nTempOperState := E_OperStateCntrl.running;
-				// Capture Auto-Sleeping
-				ELSIF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.sleeping THEN
-					nTempOperState := E_OperStateCntrl.sleeping;
-				// Capture Auto
-				ELSE
-					nTempOperState := E_StateCntrl.stAuto;
-				END_IF
-			else
-				// Capture Manual-Running
-				IF GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].CrntOperState = E_OperStateCntrl.running THEN
-					nTempOperState := E_OperStateCntrl.running;
-				// Capture Manual
-				ELSE
-					nTempOperState := E_StateCntrl.stManual;
-				END_IF
-			end_if
 		END_IF
-	END_IF
-	// Test for a change in Operatinal state or a non-initialized Storage array
-	IF GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].LstOperState <> nTempOperState OR GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].Index = 0 THEN
-		IF GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].Index = 0 THEN
-			// Initialise the Storage Data Record
-			GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex] := GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex];
+		// Test for a change in Operational state or a non-initialized Storage array
+		IF GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].LstOperState <> nTempOperState OR GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].Index = 0 THEN
+			IF GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].Index = 0 THEN
+				// Initialise the Storage Data Record
+				GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex] := GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex];
+			END_IF
+			// Capture the nTempOperState for future comparisons
+			GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].LstOperState := TO_INT(nTempOperState);
+			// Increment the status index and check for roll-over
+			nEquipStatusIndex := nEquipStatusIndex + 1;
+			IF nEquipStatusIndex > 7 THEN
+				// When there are 7 status updates, create the message
+				TransmitMsgBuffer[TransmitMsgBuffer_Index] := EquipStatUpdate(Msg_EquipStatArry);
+				// Increment the buffer index
+				TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
+				// Set the index for the next message
+				nEquipStatusIndex := 1;
+			END_IF
+			// Capture the Label and Index of the current Equipment status record
+			Msg_EquipStatArry[nEquipStatusIndex].DeviceID := GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].Label;
+			Msg_EquipStatArry[nEquipStatusIndex].Status := TO_INT(nTempOperState);
 		END_IF
-		// Capture the nTempOperState for future comparisons
-		GVL_EquipArrays.aSystemEquipStatusArray_last[nSystemStatusIndex].LstOperState := TO_INT(nTempOperState);
-		// Increment the status index and check for roll-over
-		nEquipStatusIndex := nEquipStatusIndex + 1;
-		IF nEquipStatusIndex > 7 THEN
-			// When there are 7 status updates, create the message
-			TransmitMsgBuffer[TransmitMsgBuffer_Index] := EquipStatUpdate(Msg_EquipStatArry);
-			// Increment the buffer index
-			TransmitMsgBuffer_Index := IncIndex(TransmitMsgBuffer_Index,1,TransmitMsgBuffer_Size);
-			// Set the index for the next message
-			nEquipStatusIndex := 1;
-		END_IF
-		// Capture the Label and Index of the current Equipment status record
-		Msg_EquipStatArry[nEquipStatusIndex].DeviceID := GVL_EquipArrays.aSystemEquipStatusArray[nSystemStatusIndex].Label;
-		Msg_EquipStatArry[nEquipStatusIndex].Status := TO_INT(nTempOperState);
 	END_IF
 END_FOR
 
@@ -881,209 +878,5 @@ String1 := CONCAT(String1,'$03');
 TransportResponse := String1;]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="MsgControl">
-      <LineId Id="1370" Count="2" />
-      <LineId Id="2117" Count="0" />
-      <LineId Id="1373" Count="3" />
-      <LineId Id="2118" Count="0" />
-      <LineId Id="1377" Count="3" />
-      <LineId Id="2119" Count="0" />
-      <LineId Id="1381" Count="6" />
-      <LineId Id="2120" Count="2" />
-      <LineId Id="1388" Count="2" />
-      <LineId Id="1929" Count="0" />
-      <LineId Id="1391" Count="0" />
-      <LineId Id="1939" Count="2" />
-      <LineId Id="1930" Count="0" />
-      <LineId Id="2287" Count="5" />
-      <LineId Id="2285" Count="0" />
-      <LineId Id="1933" Count="1" />
-      <LineId Id="1932" Count="0" />
-      <LineId Id="2123" Count="3" />
-      <LineId Id="1938" Count="0" />
-      <LineId Id="1392" Count="8" />
-      <LineId Id="2033" Count="2" />
-      <LineId Id="2031" Count="0" />
-      <LineId Id="1474" Count="0" />
-      <LineId Id="1531" Count="0" />
-      <LineId Id="1533" Count="0" />
-      <LineId Id="1631" Count="0" />
-      <LineId Id="1483" Count="0" />
-      <LineId Id="1534" Count="0" />
-      <LineId Id="1536" Count="0" />
-      <LineId Id="1632" Count="0" />
-      <LineId Id="1492" Count="0" />
-      <LineId Id="1537" Count="0" />
-      <LineId Id="1539" Count="0" />
-      <LineId Id="1633" Count="0" />
-      <LineId Id="1636" Count="0" />
-      <LineId Id="1549" Count="0" />
-      <LineId Id="1403" Count="18" />
-      <LineId Id="1819" Count="6" />
-      <LineId Id="1828" Count="0" />
-      <LineId Id="1836" Count="1" />
-      <LineId Id="1829" Count="4" />
-      <LineId Id="1422" Count="10" />
-      <LineId Id="1734" Count="1" />
-      <LineId Id="1443" Count="2" />
-      <LineId Id="1718" Count="0" />
-      <LineId Id="1721" Count="5" />
-      <LineId Id="1736" Count="1" />
-      <LineId Id="1733" Count="0" />
-      <LineId Id="1446" Count="10" />
-      <LineId Id="2201" Count="0" />
-      <LineId Id="1457" Count="6" />
-      <LineId Id="271" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.Arrival">
-      <LineId Id="20" Count="51" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.BarCodeMessage">
-      <LineId Id="6" Count="1" />
-      <LineId Id="32" Count="1" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="10" Count="1" />
-      <LineId Id="23" Count="1" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.CustomMessage">
-      <LineId Id="6" Count="1" />
-      <LineId Id="32" Count="1" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="10" Count="1" />
-      <LineId Id="23" Count="1" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.DeviceStatus">
-      <LineId Id="2" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="12" Count="2" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="17" Count="1" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="3" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="26" Count="2" />
-      <LineId Id="4" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="54" Count="1" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="88" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="116" Count="0" />
-      <LineId Id="119" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="125" Count="0" />
-      <LineId Id="122" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="124" Count="0" />
-      <LineId Id="121" Count="0" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="90" Count="0" />
-      <LineId Id="71" Count="0" />
-      <LineId Id="92" Count="0" />
-      <LineId Id="73" Count="1" />
-      <LineId Id="93" Count="0" />
-      <LineId Id="76" Count="1" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="78" Count="1" />
-      <LineId Id="75" Count="0" />
-      <LineId Id="72" Count="0" />
-      <LineId Id="95" Count="0" />
-      <LineId Id="80" Count="1" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="84" Count="2" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="113" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="112" Count="0" />
-      <LineId Id="110" Count="1" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="100" Count="1" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="102" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="107" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="49" Count="0" />
-      <LineId Id="108" Count="0" />
-      <LineId Id="45" Count="1" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="60" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.EquipStatUpdate">
-      <LineId Id="18" Count="44" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.KeepAliveResponse">
-      <LineId Id="12" Count="14" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.LocationUpdate">
-      <LineId Id="20" Count="54" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.RECEIVE">
-      <LineId Id="207" Count="38" />
-      <LineId Id="247" Count="19" />
-      <LineId Id="268" Count="5" />
-      <LineId Id="275" Count="5" />
-      <LineId Id="282" Count="3" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.TRANSMIT">
-      <LineId Id="20" Count="1" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="14" Count="1" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="33" Count="1" />
-      <LineId Id="36" Count="1" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="13" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.TransportComplete">
-      <LineId Id="21" Count="62" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="MsgControl.TransportResponse">
-      <LineId Id="20" Count="51" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

@@ -936,7 +936,7 @@ P3095_StatePB.AutoPB := System.Cnvyr_Auto;
 P3095_StatePB.ManPB := System.Cnvyr_Manual;
 P3095_StatePB.ResetPB := System.Cnvyr_Reset;
 P3095_StatePB.OfflinePB := System.Cnvyr_Offline;
-P3095SleepWakeTrig[1] := Photoeyes.PE_12271.out;
+P3095SleepWakeTrig[1] := Photoeyes.PE_12271.out OR Photoeyes.PE_9191.out;;
 P3095SleepWakeTrig[2] := Photoeyes.PE_12091.out;
 P3095SleepWakeTrig[3] := GVL_IO.PB_RemoteReset_8251;
 
