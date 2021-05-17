@@ -417,7 +417,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name IecBaseType="true">ARRAY [1..50] OF ST_StateCntrlSts</Name>
+			<Name GUID="{9CD98C58-0C76-D688-6805-B3307896BC8F}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..50] OF ST_StateCntrlSts</Name>
 			<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
 			<BitSize>44800</BitSize>
 			<BaseType GUID="{CC62C8ED-804B-A109-7E53-39AAE4C55D91}">ST_StateCntrlSts</BaseType>
@@ -460,6 +460,221 @@
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 			<Vars VarGrpType="1">
 				<Name>PlcTask Inputs</Name>
+				<Var>
+					<Name>MAIN.EAP_205.DevState</Name>
+					<Comment><![CDATA[ EAP Device State]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.FrameState</Name>
+					<Comment><![CDATA[ EAP FrameState, FrameState.0 = Not Transmitting, .1 = Frame too large, .2 = Subscriber Miissing]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[0].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[1].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[2].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[3].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[4].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[5].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[6].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[7].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[8].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Publisher.Variables[9].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.FrameState</Name>
+					<Comment><![CDATA[ EAP FrameState, unused]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[0].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[0].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[0].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[1].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[1].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[1].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[2].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[2].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[2].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[3].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[3].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[3].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[4].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[4].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[4].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[5].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[5].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[5].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[6].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[6].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[6].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[7].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[7].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[7].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[8].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[8].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[8].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[9].VarState</Name>
+					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[9].Quality</Name>
+					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MAIN.EAP_205.Subscriber.Variables[9].CycleIndex</Name>
+					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
+					<Type>UINT</Type>
+				</Var>
 				<Var>
 					<Name>SystemSafety.System_SafetyState.ComErr</Name>
 					<Type>BOOL</Type>
@@ -840,6 +1055,30 @@
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
+					<Name>Conveyors.P2141_VFD.ActualVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2141_VFD.StatusWord</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2146_VFD.ActualVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2146_VFD.StatusWord</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P3080_VFD.ActualVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P3080_VFD.StatusWord</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
 					<Name>Photoeyes.PE_2101.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 					<Type>BOOL</Type>
@@ -1029,6 +1268,11 @@
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
+					<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
+					<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
+					<Type GUID="{9CD98C58-0C76-D688-6805-B3307896BC8F}">ARRAY [1..50] OF ST_StateCntrlSts</Type>
+				</Var>
+				<Var>
 					<Name>GVL_IO.PanelEstop_OK</Name>
 					<Type>BOOL</Type>
 				</Var>
@@ -1161,24 +1405,19 @@
 					<Type>UINT</Type>
 				</Var>
 				<Var>
-					<Name>GVL_IO.ENC_9031_Period</Name>
-					<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
-					<Type>UDINT</Type>
-				</Var>
-				<Var>
 					<Name>GVL_IO.ENC_9091_Raw</Name>
 					<Comment><![CDATA[ Raw Encoder Value]]></Comment>
 					<Type>UINT</Type>
 				</Var>
 				<Var>
+					<Name>GVL_IO.ENC_9031_Period</Name>
+					<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
+					<Type>UDINT</Type>
+				</Var>
+				<Var>
 					<Name>GVL_IO.RIO1151_WcState</Name>
 					<Comment><![CDATA[ Remote IO Block 1151]]></Comment>
 					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.ENC_9091_Period</Name>
-					<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
-					<Type>UDINT</Type>
 				</Var>
 				<Var>
 					<Name>GVL_IO.RIO2151_WcState</Name>
@@ -1189,6 +1428,11 @@
 					<Name>GVL_IO.RIO3171_WcState</Name>
 					<Comment><![CDATA[ Remote IO Block 3171]]></Comment>
 					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.ENC_9091_Period</Name>
+					<Comment><![CDATA[ Encoder Period, channel 1, 100ns resolution]]></Comment>
+					<Type>UDINT</Type>
 				</Var>
 				<Var>
 					<Name>GVL_IO.RIO4141_WcState</Name>
@@ -1239,581 +1483,12 @@
 					<Name>GVL_IO.From205_P2125_SendingProduct</Name>
 					<Type>BOOL</Type>
 				</Var>
-				<Var>
-					<Name>Conveyors.P2141_VFD.ActualVelocity</Name>
-					<Type>INT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2141_VFD.StatusWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2146_VFD.ActualVelocity</Name>
-					<Type>INT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2146_VFD.StatusWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P3080_VFD.ActualVelocity</Name>
-					<Type>INT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P3080_VFD.StatusWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.DevState</Name>
-					<Comment><![CDATA[ EAP Device State]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.FrameState</Name>
-					<Comment><![CDATA[ EAP FrameState, FrameState.0 = Not Transmitting, .1 = Frame too large, .2 = Subscriber Miissing]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[0].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[1].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[2].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[3].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[4].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[5].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[6].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[7].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[8].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Publisher.Variables[9].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Not Sent, 1 = Transmission Suspended, 0 = Transmission OK]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.FrameState</Name>
-					<Comment><![CDATA[ EAP FrameState, unused]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[0].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[0].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[0].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[1].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[1].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[1].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[2].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[2].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[2].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[3].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[3].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[3].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[4].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[4].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[4].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[5].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[5].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[5].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[6].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[6].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[6].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[7].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[7].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[7].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[8].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[8].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[8].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[9].VarState</Name>
-					<Comment><![CDATA[ VarState.0 = Invalid Hash/Version, .1 = Invalid Variable Length]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[9].Quality</Name>
-					<Comment><![CDATA[ <>0, Duration the variable is not refreshed (in 100µs)]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>MAIN.EAP_205.Subscriber.Variables[9].CycleIndex</Name>
-					<Comment><![CDATA[ Incremented each publisher cycle]]></Comment>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>GVL_EquipArrays.aEquipStatusArray_In</Name>
-					<Comment><![CDATA[Array of Equipment Status Inbound]]></Comment>
-					<Type GUID="{9CD98C58-0C76-D688-6805-B3307896BC8F}">ARRAY [1..50] OF ST_StateCntrlSts</Type>
-				</Var>
 			</Vars>
 			<Vars VarGrpType="2">
 				<Name>PlcTask Outputs</Name>
 				<Var>
 					<Name>MAIN.PLCPersistentSave</Name>
 					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>SystemSafety.System_SafetyState.Reset</Name>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>SystemSafety.System_SafetyState.Run</Name>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>SystemSafety.System_SafetyState.ErrAck</Name>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>SystemSafety.System_SafetyState.CommErrAck</Name>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2140_01.TriggerEnable</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2140_01.Trigger</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2140_01.ResultsAck</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2141_01.TriggerEnable</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2141_01.Trigger</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2141_01.ResultsAck</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2150_01.TriggerEnable</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2150_01.Trigger</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S2150_01.ResultsAck</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S3080_01.TriggerEnable</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S3080_01.Trigger</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>BarCodeReaders.BCR_S3080_01.ResultsAck</Name>
-					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>System.SysIntlksAllOk</Name>
-					<Comment><![CDATA[ Bit to show that System interlocks are OK   ]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>System.SysEventsAllOk</Name>
-					<Comment><![CDATA[ Bit to show that Syetem events are all OK If system events are needed use event manager FB tie to here]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>System.Sys_SimActive</Name>
-					<Comment><![CDATA[ Bit for simulation]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>System.ConvDefaultState</Name>
-					<Comment><![CDATA[ The default state of all conveyors]]></Comment>
-					<Type GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}">E_StateCntrl</Type>
-				</Var>
-				<Var>
-					<Name>System.Cnvyr_Auto</Name>
-					<Comment><![CDATA[ Bit to send to all conveyors to put them in Auto mode]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>System.Cnvyr_Manual</Name>
-					<Comment><![CDATA[ Bit to send to all conveyors to put them in Manual mode]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>System.Cnvyr_Offline</Name>
-					<Comment><![CDATA[ Bit to send to all conveyors to put them in Offline mode -- Not used here]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>System.Cnvyr_Reset</Name>
-					<Comment><![CDATA[ Bit to send to all conveyors to reset faults, safeties and etc]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_EquipArrays.nEquip_Count</Name>
-					<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
-					<Type>DINT</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.HornMainPanel</Name>
-					<Comment><![CDATA[Panel Tower Horn]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_MainPanelStack_Red</Name>
-					<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_MainPanelStack_Yellow</Name>
-					<Comment><![CDATA[Panel	Tower Yellow Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_MainPanelStack_Green</Name>
-					<Comment><![CDATA[Panel	Tower Green Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_3131_Red</Name>
-					<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_3151_Yellow</Name>
-					<Comment><![CDATA[Panel	Tower Yellow Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_3201_Green</Name>
-					<Comment><![CDATA[Panel	Tower Green Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_8181_Red</Name>
-					<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_8191_Yellow</Name>
-					<Comment><![CDATA[Panel	Tower Yellow Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_8231_Green</Name>
-					<Comment><![CDATA[Panel	Tower Green Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_10161_Red</Name>
-					<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_10171_Yellow</Name>
-					<Comment><![CDATA[Panel	Tower Yellow Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.LT_10201_Green</Name>
-					<Comment><![CDATA[Panel	Tower Green Light]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P2130_RUN</Name>
-					<Comment><![CDATA[P2130 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P2135_RUN</Name>
-					<Comment><![CDATA[P2135 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P2140_RUN</Name>
-					<Comment><![CDATA[P2140 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P2143_RUN</Name>
-					<Comment><![CDATA[P2143 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P2142_RUN</Name>
-					<Comment><![CDATA[P2142 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P2145_RUN</Name>
-					<Comment><![CDATA[P2145 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P2150_RUN</Name>
-					<Comment><![CDATA[P2150 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P3085_RUN</Name>
-					<Comment><![CDATA[P3085 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P3090_RUN</Name>
-					<Comment><![CDATA[P3090 Run Command]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.P3095_RUN</Name>
-					<Comment><![CDATA[P3095 Run Command	]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.GR2140_01_Extend</Name>
-					<Comment><![CDATA[ P2140 Solenoid Extend   ]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.GR2140_02_Extend</Name>
-					<Comment><![CDATA[ P2140 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.PI2140_01_Extend</Name>
-					<Comment><![CDATA[ P2140 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.PI2140_01_Retract</Name>
-					<Comment><![CDATA[ P2140 Solenoid Retract]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.PL2140_01_Extend</Name>
-					<Comment><![CDATA[ P2140 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.GR2150_01_Extend</Name>
-					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.PI2150_01_Extend</Name>
-					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.PU2150_01_Extend</Name>
-					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.PU2150_02_Extend</Name>
-					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.PU2150_03_Extend</Name>
-					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.PU2150_04_Extend</Name>
-					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.To205_P2130_IsRunning</Name>
-					<Comment><![CDATA[---------------------------------EAP-------------------------------------------------
-Published]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>GVL_IO.To205_P3095_SendingProduct</Name>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2141_VFD.ControlWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2141_VFD.TargetVelocity</Name>
-					<Type>INT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2146_VFD.ControlWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2146_VFD.TargetVelocity</Name>
-					<Type>INT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P3080_VFD.ControlWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P3080_VFD.TargetVelocity</Name>
-					<Type>INT</Type>
 				</Var>
 				<Var>
 					<Name>MAIN.EAP_205.DevCtrl</Name>
@@ -2046,9 +1721,334 @@ Published]]></Comment>
 					<Type>UINT</Type>
 				</Var>
 				<Var>
+					<Name>SystemSafety.System_SafetyState.Reset</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>SystemSafety.System_SafetyState.Run</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>SystemSafety.System_SafetyState.ErrAck</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>SystemSafety.System_SafetyState.CommErrAck</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2140_01.TriggerEnable</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2140_01.Trigger</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2140_01.ResultsAck</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2141_01.TriggerEnable</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2141_01.Trigger</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2141_01.ResultsAck</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2150_01.TriggerEnable</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2150_01.Trigger</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S2150_01.ResultsAck</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S3080_01.TriggerEnable</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S3080_01.Trigger</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>BarCodeReaders.BCR_S3080_01.ResultsAck</Name>
+					<Comment><![CDATA[ Barcode Reader Mapped VAR]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>System.SysIntlksAllOk</Name>
+					<Comment><![CDATA[ Bit to show that System interlocks are OK   ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>System.SysEventsAllOk</Name>
+					<Comment><![CDATA[ Bit to show that Syetem events are all OK If system events are needed use event manager FB tie to here]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>System.Sys_SimActive</Name>
+					<Comment><![CDATA[ Bit for simulation]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>System.ConvDefaultState</Name>
+					<Comment><![CDATA[ The default state of all conveyors]]></Comment>
+					<Type GUID="{4DFBEA5C-31FD-9D4B-60C4-AD0103B29CFD}">E_StateCntrl</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2141_VFD.ControlWord</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2141_VFD.TargetVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>System.Cnvyr_Auto</Name>
+					<Comment><![CDATA[ Bit to send to all conveyors to put them in Auto mode]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>System.Cnvyr_Manual</Name>
+					<Comment><![CDATA[ Bit to send to all conveyors to put them in Manual mode]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>System.Cnvyr_Offline</Name>
+					<Comment><![CDATA[ Bit to send to all conveyors to put them in Offline mode -- Not used here]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>System.Cnvyr_Reset</Name>
+					<Comment><![CDATA[ Bit to send to all conveyors to reset faults, safeties and etc]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2146_VFD.ControlWord</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2146_VFD.TargetVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P3080_VFD.ControlWord</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P3080_VFD.TargetVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.HornMainPanel</Name>
+					<Comment><![CDATA[Panel Tower Horn]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_MainPanelStack_Red</Name>
+					<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_MainPanelStack_Yellow</Name>
+					<Comment><![CDATA[Panel	Tower Yellow Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_MainPanelStack_Green</Name>
+					<Comment><![CDATA[Panel	Tower Green Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_3131_Red</Name>
+					<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_EquipArrays.nEquip_Count</Name>
+					<Comment><![CDATA[Count of Equipment to Process in System PLC]]></Comment>
+					<Type>DINT</Type>
+				</Var>
+				<Var>
 					<Name>GVL_EquipArrays.aEquipStatusArray_Out</Name>
 					<Comment><![CDATA[Array of Equipment Status Outbound]]></Comment>
 					<Type GUID="{9CD98C58-0C76-D688-6805-B3307896BC8F}">ARRAY [1..50] OF ST_StateCntrlSts</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_3151_Yellow</Name>
+					<Comment><![CDATA[Panel	Tower Yellow Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_3201_Green</Name>
+					<Comment><![CDATA[Panel	Tower Green Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_8181_Red</Name>
+					<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_8191_Yellow</Name>
+					<Comment><![CDATA[Panel	Tower Yellow Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_8231_Green</Name>
+					<Comment><![CDATA[Panel	Tower Green Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_10161_Red</Name>
+					<Comment><![CDATA[Panel	Tower Red Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_10171_Yellow</Name>
+					<Comment><![CDATA[Panel	Tower Yellow Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.LT_10201_Green</Name>
+					<Comment><![CDATA[Panel	Tower Green Light]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P2130_RUN</Name>
+					<Comment><![CDATA[P2130 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P2135_RUN</Name>
+					<Comment><![CDATA[P2135 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P2140_RUN</Name>
+					<Comment><![CDATA[P2140 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P2143_RUN</Name>
+					<Comment><![CDATA[P2143 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P2142_RUN</Name>
+					<Comment><![CDATA[P2142 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P2145_RUN</Name>
+					<Comment><![CDATA[P2145 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P2150_RUN</Name>
+					<Comment><![CDATA[P2150 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P3085_RUN</Name>
+					<Comment><![CDATA[P3085 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P3090_RUN</Name>
+					<Comment><![CDATA[P3090 Run Command]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.P3095_RUN</Name>
+					<Comment><![CDATA[P3095 Run Command	]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.GR2140_01_Extend</Name>
+					<Comment><![CDATA[ P2140 Solenoid Extend   ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.GR2140_02_Extend</Name>
+					<Comment><![CDATA[ P2140 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.PI2140_01_Extend</Name>
+					<Comment><![CDATA[ P2140 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.PI2140_01_Retract</Name>
+					<Comment><![CDATA[ P2140 Solenoid Retract]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.PL2140_01_Extend</Name>
+					<Comment><![CDATA[ P2140 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.GR2150_01_Extend</Name>
+					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.PI2150_01_Extend</Name>
+					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.PU2150_01_Extend</Name>
+					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.PU2150_02_Extend</Name>
+					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.PU2150_03_Extend</Name>
+					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.PU2150_04_Extend</Name>
+					<Comment><![CDATA[ P2150 Solenoid Extend]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.To205_P2130_IsRunning</Name>
+					<Comment><![CDATA[---------------------------------EAP-------------------------------------------------
+Published]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>GVL_IO.To205_P3095_SendingProduct</Name>
+					<Type>BOOL</Type>
 				</Var>
 			</Vars>
 			<Contexts>
