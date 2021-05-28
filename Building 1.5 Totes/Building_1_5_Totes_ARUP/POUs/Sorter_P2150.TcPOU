@@ -131,12 +131,12 @@ rInductPE(CLK:= st_Sorter.InductPE, Q =>);
 
 IF rInductPE.Q THEN
 	IF .nSorterLogEnable.SORTER_INDUCT THEN
-		sMessage := CONCAT(' Item: ', In_ItemToInduct.ID);
+		sMessage := CONCAT('Item: ', In_ItemToInduct.ID);
 		sMessage := CONCAT(sMessage, ' Pulses: ');
 		sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-			, msgFmtStr := 'Induct Info: %s'
+			, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Induct Info: %s')
 			, strArg := sMessage);
 	END_IF
 END_IF
@@ -146,12 +146,12 @@ fInductPE(CLK:= st_Sorter.InductPE, Q =>);
 
 IF fInductPE.Q THEN
 	IF .nSorterLogEnable.SORTER_INDUCT THEN
-		sMessage := CONCAT(' Item: ', In_ItemToInduct.ID);
+		sMessage := CONCAT('Item: ', In_ItemToInduct.ID);
 		sMessage := CONCAT(sMessage,' Pulses: ');
 		sMessage := CONCAT(sMEssage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-			, msgFmtStr := 'Cleared Induct Info: %s'
+			, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Cleared Induct Info: %s')
 			, strArg := sMessage);
 	END_IF
 	// Clear the record
@@ -173,14 +173,16 @@ WHILE st_Sorter.EncoderCounts <> testEncoderCount DO
 			In_InductingItem := In_ItemToInduct;
 			In_ItemToInduct := BlankItem;
 			IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
-				sMessage := CONCAT(' Item: ', In_InductingItem.ID);
+				sMessage := CONCAT('Item: ', In_InductingItem.ID);
 				sMessage := CONCAT(sMessage,' Pulses: ');
 				sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
 				sMessage := CONCAT(sMessage,' Dest: ');
 				sMessage := CONCAT(sMessage, DINT_TO_STRING(In_InductingItem.Destination));
+				sMessage := CONCAT(sMessage,' DestIdx: ');
+				sMessage := CONCAT(sMessage, DINT_TO_STRING(In_InductingItem.DestinationIdx));
 				// Write to the Error List
 				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-					, msgFmtStr := 'Inducting Info: %s'
+					, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Inducting Info: %s')
 					, strArg := sMessage);
 			END_IF
 		END_IF
@@ -225,6 +227,19 @@ WHILE st_Sorter.EncoderCounts <> testEncoderCount DO
 
 			// Process this the first time
 			IF st_tempItem.Item.Length = 0 THEN
+				IF nSorterLogEnable.SORTER_INDUCT_PE THEN
+					sMessage := CONCAT('Temp Item: ', st_tempItem.Item.ID);
+					sMessage := CONCAT(sMessage,' Pulses: ');
+					sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
+					sMessage := CONCAT(sMessage,' Dest: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_tempItem.Item.Destination));
+					sMessage := CONCAT(sMessage,' DestIdx: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_tempItem.Item.DestinationIdx));
+					// Write to the Error List
+					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+						, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Inducting Info: %s')
+						, strArg := sMessage);
+				END_IF
 				IF aDiverts[st_Sorter.Config.DefaultDestIdx].Full THEN
 					IF st_Sorter.Config.RecircUsed THEN
 						st_tempItem.Item.Destination := st_Sorter.Config.RecircDestination;
@@ -296,7 +311,7 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 		// Log Diverts
 		IF aItems[nTestItemIndex].DestinationIdx = divertIndex THEN
 			IF .nSorterLogEnable.SORTER_DIVERTS THEN
-				sMessage := CONCAT(' Item: ', aItems[nTestItemIndex].ID);
+				sMessage := CONCAT('Item: ', aItems[nTestItemIndex].ID);
 				sMessage := CONCAT(sMessage,' Index: ');
 				sMessage := CONCAT(sMessage, UDINT_TO_STRING(nTestItemIndex));
 				sMessage := CONCAT(sMessage,' Dest: ');
@@ -309,7 +324,7 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 				sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nTestItemIndex].Status));
 				// Write to the Error List
 				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-					, msgFmtStr := 'Item at Divert Index: %s'
+					, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Item at Divert Index: %s')
 					, strArg := sMessage);
 			END_IF
 		END_IF
@@ -324,9 +339,13 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 										, offset := -(Divertoffset + aDiverts[divertIndex].Config.ConfirmDist)
 										, BufferSize := (ItemsArrayMax + 1));
 		// Log Confirms
-		IF aItems[nConfirmItemIndex].Status = E_StatusCode.Diverting AND aItems[nConfirmItemIndex].UniqueID <> 0 THEN
+		IF aItems[nConfirmItemIndex].Status >= E_StatusCode.Diverting
+		   AND aItems[nConfirmItemIndex].Status <= E_StatusCode.Divert_Complete
+		   AND aItems[nConfirmItemIndex].UniqueID <> 0
+		   AND aItems[nConfirmItemIndex].DestinationIdx = DivertIndex
+		   THEN
 			IF .nSorterLogEnable.SORTER_CONFIRMS THEN
-				sMessage := CONCAT(' Item: ', aItems[nConfirmItemIndex].ID);
+				sMessage := CONCAT('Item: ', aItems[nConfirmItemIndex].ID);
 				sMessage := CONCAT(sMessage,' Index: ');
 				sMessage := CONCAT(sMessage, UDINT_TO_STRING(nConfirmItemIndex));
 				sMessage := CONCAT(sMessage,' Dest: ');
@@ -339,7 +358,7 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 				sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nTestItemIndex].Status));
 				// Write to the Error List
 				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-					, msgFmtStr := 'Item at Confirm Index: %s'
+					, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Item at Confirm Index: %s')
 					, strArg := sMessage);
 			END_IF
 		END_IF
@@ -358,17 +377,17 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 	END_IF
 
 	// Clear the Item array ahead of the current encoder count
-	nIndexToClear := f_CalculateIndex(Offset := 400, InitialValue:= exitEncoderCount, BufferSize := nItemArraySize);
+	nIndexToClear := f_CalculateIndex(Offset := 40, InitialValue:= exitEncoderCount, BufferSize := nItemArraySize);
 	IF aItems[nIndexToClear].ID <> '' THEN
 		IF .nSorterLogEnable.SORTER_DUMP THEN
-			sMessage := CONCAT(' Item: ', aItems[nIndexToClear].ID);
+			sMessage := CONCAT('Item: ', aItems[nIndexToClear].ID);
 			sMessage := CONCAT(sMessage,' Index: ');
 			sMessage := CONCAT(sMessage, UDINT_TO_STRING(nIndexToClear));
 			sMessage := CONCAT(sMessage,' Item Status: ');
 			sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nIndexToClear].Status));
 			// Write to the Error List
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Clear Ahead Dump Info: %s'
+				, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Clear Ahead Dump Info: %s')
 				, strArg := sMessage);
 		END_IF
 	END_IF
@@ -377,58 +396,5 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 END_WHILE
 ]]></ST>
     </Implementation>
-    <LineIds Name="Sorter_P2150">
-      <LineId Id="8175" Count="0" />
-      <LineId Id="6884" Count="13" />
-      <LineId Id="6901" Count="2" />
-      <LineId Id="8035" Count="2" />
-      <LineId Id="6907" Count="34" />
-      <LineId Id="7241" Count="0" />
-      <LineId Id="6942" Count="4" />
-      <LineId Id="7371" Count="0" />
-      <LineId Id="6947" Count="13" />
-      <LineId Id="7363" Count="0" />
-      <LineId Id="6961" Count="6" />
-      <LineId Id="7364" Count="0" />
-      <LineId Id="6968" Count="17" />
-      <LineId Id="7301" Count="0" />
-      <LineId Id="6986" Count="2" />
-      <LineId Id="7226" Count="1" />
-      <LineId Id="6989" Count="3" />
-      <LineId Id="7302" Count="0" />
-      <LineId Id="6993" Count="13" />
-      <LineId Id="8038" Count="12" />
-      <LineId Id="7016" Count="13" />
-      <LineId Id="8051" Count="15" />
-      <LineId Id="7041" Count="37" />
-      <LineId Id="8067" Count="0" />
-      <LineId Id="7080" Count="9" />
-      <LineId Id="7094" Count="3" />
-      <LineId Id="7140" Count="0" />
-      <LineId Id="8068" Count="18" />
-      <LineId Id="7154" Count="0" />
-      <LineId Id="7362" Count="0" />
-      <LineId Id="7100" Count="0" />
-      <LineId Id="7102" Count="2" />
-      <LineId Id="7571" Count="4" />
-      <LineId Id="8087" Count="18" />
-      <LineId Id="7565" Count="0" />
-      <LineId Id="7568" Count="2" />
-      <LineId Id="7876" Count="0" />
-      <LineId Id="7878" Count="0" />
-      <LineId Id="7564" Count="0" />
-      <LineId Id="7105" Count="0" />
-      <LineId Id="7798" Count="0" />
-      <LineId Id="7886" Count="0" />
-      <LineId Id="8106" Count="2" />
-      <LineId Id="7885" Count="0" />
-      <LineId Id="7107" Count="1" />
-      <LineId Id="7110" Count="0" />
-      <LineId Id="7365" Count="0" />
-      <LineId Id="7111" Count="2" />
-      <LineId Id="7437" Count="1" />
-      <LineId Id="7114" Count="8" />
-      <LineId Id="6452" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

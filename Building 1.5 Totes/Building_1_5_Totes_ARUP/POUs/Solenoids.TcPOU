@@ -357,7 +357,7 @@ PL2140_01(
    In_p_EquipStatePB:= PL2140_01_StatePB,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
-   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2140[2].Output1,
+   In_P_SVReqExtend:= Sorter.aSorterDiverts_P2140[1].Output1,
    In_EquipRtrcdFdbck := ProxSensors.PX_10231_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_10211_Extended.Out,
    Cfg_EquipIndex := nEquipIndex,
@@ -583,10 +583,5 @@ PU2150_04(
 
 ]]></ST>
     </Implementation>
-    <LineIds Name="Solenoids">
-      <LineId Id="7259" Count="206" />
-      <LineId Id="7467" Count="152" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

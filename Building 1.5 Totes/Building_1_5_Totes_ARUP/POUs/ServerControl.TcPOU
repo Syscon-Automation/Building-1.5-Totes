@@ -36,8 +36,7 @@ END_VAR
 
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[GVL_Logging.nServerLogEnable:= 1073741823;	
-(* On PLC reset or program download close all created/opened sockets/connections *)
+      <ST><![CDATA[(* On PLC reset or program download close all created/opened sockets/connections *)
 fbCloseAll( sSrvNetID := sSrvNetID, bExecute:= bInitialize );
 IF fbCloseAll.bBusy OR fbCloseAll.bError THEN
 	RETURN;
@@ -70,11 +69,5 @@ fbServer( TxMessage := TxMessage, aTransmitTrigger := aTransmitTrigger, sSrvNetI
 MsgControl(nConnectionIndex := nCurrentServerIndex);		// Control the messages being sent out via TCP/IP
 ]]></ST>
     </Implementation>
-    <LineIds Name="ServerControl">
-      <LineId Id="20" Count="0" />
-      <LineId Id="257" Count="29" />
-      <LineId Id="129" Count="0" />
-      <LineId Id="287" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

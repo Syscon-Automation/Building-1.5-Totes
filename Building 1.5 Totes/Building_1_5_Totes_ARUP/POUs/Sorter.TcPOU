@@ -120,13 +120,13 @@ fb_SorterEncoder_P2140(Encoder := st_SorterEncoder_P2140, Simulate := bSimulate)
 *)
 //Divert #1
 aSorterDiverts_P2140[1].Config := aSorterDiverts_P2140Cfgs[1];
-aSorterDiverts_P2140[1].ConfirmPE := Photoeyes.PE_10091.Out; 			
-aSorterDiverts_P2140[1].FullPE := Photoeyes.PE_10091.Out;   			
+aSorterDiverts_P2140[1].ConfirmPE := Photoeyes.PE_10302.Out; 			
+aSorterDiverts_P2140[1].FullPE := Photoeyes.PE_10302.Out_OnFltrd;   			
 
 //Divert #2
 aSorterDiverts_P2140[2].Config := aSorterDiverts_P2140Cfgs[2];
-aSorterDiverts_P2140[2].ConfirmPE := Photoeyes.PE_10302.Out; 		
-aSorterDiverts_P2140[2].FullPE := Photoeyes.PE_10302.Out;   		
+aSorterDiverts_P2140[2].ConfirmPE := Photoeyes.PE_10151.Out AND NOT Solenoids.PL2140_01.In_EquipRtrcdFdbck;	
+aSorterDiverts_P2140[2].FullPE := Photoeyes.PE_10091.Out_OnFltrd;
 
 fb_CommissionSorterDiverts_P2140(
 			InductTrigger := Photoeyes.PE_10081.Out,
@@ -153,7 +153,7 @@ IF DivertToCommission_P2140 > 0 THEN
 	st_Sorter_P2140Cfg.DefaultDestination := DivertToCommission_P2140;
 END_IF
 st_Sorter_P2140.EncoderCounts := st_SorterEncoder_P2140.CurrentCount;
-st_Sorter_P2140.InductPE := PhotoEyes.PE_10081.Out;
+st_Sorter_P2140.InductPE := PhotoEyes.PE_10081.Out_OnOffFltrd;
 st_Sorter_P2140.DischargePE := Photoeyes.PE_10091.Out;
 
 // Test the Encoder
@@ -297,7 +297,7 @@ IF DivertToCommission_P2150 > 0 THEN
 	st_Sorter_P2150Cfg.DefaultDestination := DivertToCommission_P2150;
 END_IF
 st_Sorter_P2150.EncoderCounts := st_SorterEncoder_P2150.CurrentCount;
-st_Sorter_P2150.InductPE := PhotoEyes.PE_2131.Out;
+st_Sorter_P2150.InductPE := PhotoEyes.PE_2131.Out_OffFltrd;
 st_Sorter_P2150.DischargePE := Photoeyes.PE_4161.Out;
 
 // Test the Encoder
@@ -361,55 +361,5 @@ P2150_DivertLog(DivertArray := aSorterDiverts_P2150,
 				EncoderCounts := st_SorterEncoder_P2150.CurrentCount);
 ]]></ST>
     </Implementation>
-    <LineIds Name="Sorter">
-      <LineId Id="593" Count="24" />
-      <LineId Id="1343" Count="3" />
-      <LineId Id="1333" Count="9" />
-      <LineId Id="619" Count="10" />
-      <LineId Id="1347" Count="6" />
-      <LineId Id="630" Count="11" />
-      <LineId Id="1529" Count="0" />
-      <LineId Id="642" Count="3" />
-      <LineId Id="1618" Count="0" />
-      <LineId Id="1620" Count="0" />
-      <LineId Id="1619" Count="0" />
-      <LineId Id="646" Count="0" />
-      <LineId Id="650" Count="12" />
-      <LineId Id="1354" Count="1" />
-      <LineId Id="663" Count="0" />
-      <LineId Id="1531" Count="0" />
-      <LineId Id="1530" Count="0" />
-      <LineId Id="664" Count="0" />
-      <LineId Id="1356" Count="5" />
-      <LineId Id="710" Count="9" />
-      <LineId Id="1368" Count="4" />
-      <LineId Id="720" Count="0" />
-      <LineId Id="1379" Count="0" />
-      <LineId Id="1375" Count="3" />
-      <LineId Id="1206" Count="1" />
-      <LineId Id="926" Count="26" />
-      <LineId Id="1380" Count="29" />
-      <LineId Id="953" Count="10" />
-      <LineId Id="1410" Count="6" />
-      <LineId Id="964" Count="11" />
-      <LineId Id="1523" Count="0" />
-      <LineId Id="976" Count="3" />
-      <LineId Id="1524" Count="0" />
-      <LineId Id="1526" Count="0" />
-      <LineId Id="1525" Count="0" />
-      <LineId Id="980" Count="0" />
-      <LineId Id="984" Count="12" />
-      <LineId Id="1417" Count="1" />
-      <LineId Id="997" Count="0" />
-      <LineId Id="1527" Count="1" />
-      <LineId Id="998" Count="0" />
-      <LineId Id="1419" Count="5" />
-      <LineId Id="1426" Count="0" />
-      <LineId Id="1043" Count="10" />
-      <LineId Id="1427" Count="4" />
-      <LineId Id="1054" Count="0" />
-      <LineId Id="1432" Count="4" />
-      <LineId Id="99" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>
