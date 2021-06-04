@@ -45,7 +45,7 @@ PLCPersistentSave := tpBroadcastSave.Q;
 //rStartPersistentSave(CLK := tpBroadcastSave.Q);
 // Execute a Persistent save here
 // System PORT is 851
-fbWritePersistentData(netid:= '', PORT:=851, Start:=rStartPersistentSave.Q, tmout:=T#1S);
+fbWritePersistentData(netid:= '', PORT:=851, Start:=tonPersistentSave.Q, tmout:=T#1S);
 
 // Convert HMI EAP IP Address(es) to correct format
 MEMCPY(destAddr    := ADR(EAP_205.Publisher.HMI_IPAddrDisp),srcaddr :=ADR(EAP_205.Publisher.IPAddr), n := 4);

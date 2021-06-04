@@ -772,24 +772,23 @@ P2150.In_EquipEvents.8:= NOT GVL_IO.P2150_Faulted;
 
 // Function Call
 P2150(
-   In_p_EquipStatePB:= P2150_StatePB,
-   In_P_ConvReqRun:= TRUE,
-   In_ConvDwnStrmMtrStatus:= TRUE,
-   In_ConvCrntExitPhotoEye:= PhotoEyes.PE_4161.Out,
-   Cfg_ConvType:= E_ConvType.end,
-   In_SimActive:= System.Sys_SimActive,
-   In_EquipInit:= GVL_IO.INIT,
-   In_WakeSlpTrigArry:= P2150SleepWakeTrig,
-   Cfg_EquipIndex := GVL_EquipArrays.nEquipIndex,
-   Cfg_EquipLabel := cfgP2150Label,
-   Cfg_EquipDefState:= System.ConvDefaultState,
-   Cfg_EquipIntlksArry:= cfgP2150IntlksArry,
-   Cfg_EquipEvntsArry:= cfgP2150EvntsArry,
-   cfg_JamDetectTime:= cfgP2150JamDetectTime,
-   Cfg_UseSleepTmr := TRUE,
-   Cfg_SleepWaitTime:= cfgP2150SleepTime,
-   Sts_EquipState := P2150_Status,
-   Out_ConvCrntMtr => GVL_IO.P2150_RUN);
+	In_p_EquipStatePB:= P2150_StatePB,
+	In_P_ConvReqRun:= TRUE,
+	In_ConvCrntExitPhotoEye:= PhotoEyes.PE_4161.Out,
+	Cfg_ConvType:= E_ConvType.end,
+	In_SimActive:= System.Sys_SimActive,
+	In_EquipInit:= GVL_IO.INIT,
+	In_WakeSlpTrigArry:= P2150SleepWakeTrig,
+	Cfg_EquipIndex := GVL_EquipArrays.nEquipIndex,
+	Cfg_EquipLabel := cfgP2150Label,
+	Cfg_EquipDefState:= System.ConvDefaultState,
+	Cfg_EquipIntlksArry:= cfgP2150IntlksArry,
+	Cfg_EquipEvntsArry:= cfgP2150EvntsArry,
+	cfg_JamDetectTime:= T#5S,
+	Cfg_UseSleepTmr := TRUE,
+	Cfg_SleepWaitTime:= cfgP2150SleepTime,
+	Sts_EquipState := P2150_Status,
+	Out_ConvCrntMtr => GVL_IO.P2150_RUN);
 
 P2150_Status.Sts_IsRunning := GVL_IO.P2150_RUN;
 //Conveyors Incoming 3000 (Green line)
