@@ -800,6 +800,9 @@ P3080_StatePB.ResetPB := System.Cnvyr_Reset OR GVL_IO.PB_RemoteReset_8251;
 P3080_StatePB.OfflinePB := System.Cnvyr_Offline;
 P3080_ResetWakeTmr(IN:= GVL_IO.PB_RemoteReset_8251, PT:= T#3S, Q=> );
 P3080SleepWakeTrig[1] := P3080_ResetWakeTmr.Q; //Reset Button
+P3080SleepWakeTrig[2] := Photoeyes.PE_9141.Out; //Photo Eye
+P3080SleepWakeTrig[3] := Photoeyes.PE_9161.Out; //Photo Eye
+P3080SleepWakeTrig[4] := Photoeyes.PE_9191.Out; //Photo Eye
 
 // Initialize the Equipment Type
 P3080_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
