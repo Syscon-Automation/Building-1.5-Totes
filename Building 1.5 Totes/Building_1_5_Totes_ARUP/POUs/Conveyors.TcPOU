@@ -476,7 +476,6 @@ P2140.In_EquipIntlks.3:= Solenoids.GR2140_01_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.4:= Solenoids.GR2140_02_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.5:= Solenoids.PI2140_01_Status.Sts_EquipmentState.StsAuto;
 P2140.In_EquipIntlks.6:= Solenoids.PL2140_01_Status.Sts_EquipmentState.StsAuto; 
-P2140.In_EquipIntlks.7:= Photoeyes.PE_10151.JamDetected; 
 //Events
 P2140.In_EquipEvents.2:= GVL_IO.DS_P2140;
 P2140.In_EquipEvents.3:= System.SysEventsAllOk;
@@ -484,6 +483,7 @@ P2140.In_EquipEvents.4:= NOT CommStatus.RIO10161_CommFault.Out;
 P2140.In_EquipEvents.5:= NOT CommStatus.BCR_S2140_01_CommFault.Out;
 P2140.In_EquipEvents.6:= FALSE;//Photoeyes.PE_10151.JamDetected AND Not Solenoids.PL2140_01.Out_ExtendCrntSV;
 P2140.In_EquipEvents.7:= NOT GVL_IO.P2140_Faulted;
+P2140.In_EquipEvents.8:= Photoeyes.PE_10151.JamDetected; 
 
 // Function Call
 P2140(
