@@ -70,11 +70,12 @@ PE_2131(
 
 //P2146 FULL PHOTOEYE
 PE_2201(
-   In_Status:= ,
+   In_Status:= Conveyors.P2146.Out_ConvCrntMtr,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
    CFG_JamDetTime:= JamDetectTime,
+   CFG_HoldWithStatus := TRUE,
    In_Sim:=
 );
 
@@ -160,11 +161,12 @@ PE_4201(
 
 //P2141 EXIT PHOTOEYE
 PE_8131(
-   In_Status:= ,
+   In_Status:= Conveyors.P2141.Out_ConvCrntMtr,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
    CFG_JamDetTime:= JamDetectTime,
+   CFG_HoldWithStatus := TRUE,
    In_Sim:=
 );
 
@@ -180,11 +182,12 @@ PE_8141(
 
 //P2143 EXIT PHOTOEYE
 PE_8161(
-   In_Status:= ,
+   In_Status:= Conveyors.P2143.Out_ConvCrntMtr,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
    CFG_JamDetTime:= JamDetectTime,
+   CFG_HoldWithStatus := TRUE,
    In_Sim:=
 );
 
@@ -210,11 +213,12 @@ PE_9161(
 
 //P3080 EXIT PHOTOEYE
 PE_9191(
-   In_Status:= ,
+   In_Status:= Conveyors.P3080.Out_ConvCrntMtr,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
    CFG_JamDetTime:= JamDetectTime,
+   CFG_HoldWithStatus := TRUE,
    In_Sim:=
 );
 
@@ -292,7 +296,7 @@ PE_11191(
 PE_11221(
    In_Status:= ,
    CFG_PEOKState:= 1,
-   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OnDlyTime:= T#750MS,
    CFG_OffDlyTime:= DebounceOffTime,
    CFG_JamDetTime:= JamDetectTime,
    In_Sim:=
@@ -360,10 +364,5 @@ PE_12271(
 
 ]]></ST>
     </Implementation>
-    <LineIds Name="Photoeyes">
-      <LineId Id="424" Count="307" />
-      <LineId Id="348" Count="1" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

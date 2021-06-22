@@ -206,9 +206,9 @@ IF st_SorterTransportBuffer_P2150.nInPointer <> fb_TransportBuffer.OutPointer TH
 	IF .nSortBufferLogEnable.BUFFER_DESTINDEX THEN
 		sMessage := CONCAT(' Item: ', st_ToUpdate.Item.ID);
 		sMessage := CONCAT(sMessage,' Destination: ');
-		sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_ToUpdate.Item.Destination));
+		sMessage := CONCAT(sMessage, DINT_TO_STRING(st_ToUpdate.Item.Destination));
 		sMessage := CONCAT(sMessage,' Index: ');
-		sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_ToUpdate.Item.DestinationIdx));
+		sMessage := CONCAT(sMessage, DINT_TO_STRING(st_ToUpdate.Item.DestinationIdx));
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
 			, msgFmtStr := 'Divert Index of Destination: %s'
@@ -616,13 +616,5 @@ END_IF
 
 ]]></ST>
     </Implementation>
-    <LineIds Name="ProcessBuffers_P2150">
-      <LineId Id="8796" Count="2" />
-      <LineId Id="8140" Count="0" />
-      <LineId Id="8799" Count="0" />
-      <LineId Id="8141" Count="534" />
-      <LineId Id="8037" Count="0" />
-      <LineId Id="6220" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

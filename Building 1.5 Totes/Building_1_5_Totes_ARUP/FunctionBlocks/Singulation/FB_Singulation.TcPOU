@@ -25,6 +25,8 @@ VAR_INPUT
 	In_PinStop_Extended		:	BOOL;
 	In_PinStop_Retracted	:	BOOL;
 
+	In_Hold_Request			:	BOOL;
+
 	Cfg_GappingDistance		:	UINT;	// Distance in encoder Pulses before the next item can be released
 	Cfg_TimeOutTime			:	TIME := T#3S;
 	Cfg_RetryLimit			:	UINT;
@@ -44,6 +46,7 @@ VAR_OUTPUT
 	Out_Homed				:	BOOL;
 	Out_Ready				:	BOOL;
 	Out_Running				:	BOOL;
+	Out_Holding				:	BOOL;
 	
 	Status_Output			:	UINT;
 	Status					:	UINT;
@@ -54,6 +57,8 @@ VAR
 	RolloverDetect			:	UINT;	// Capture the last Distance when the Encoder count goes to zero
 	GrabTrigger				:	R_TRIG;
 	ClearedTriggerPE		:	F_TRIG;
+	
+	resumeFromPause   : F_TRIG;
 	
 	StartUp					:	BOOL := TRUE;
 
@@ -100,9 +105,49 @@ VAR CONSTANT
 	RETURN_CONVEYOR_BUSY	:	UINT  := 7;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// Process the In_ResetState
+      <ST><![CDATA[(*
+	There are two states to the singulation device, releasing and not releasing
+	While releasing
+		The appropriate grippers are extended:
+			- the upsream gripper for all carriers
+			- the downstream gripper for racks, totes are detected by the tote sensor at the pin-stop
+		When the appropriate grippers are extended (detected using the not-retracted sensor, because the widths of the carriers vary)
+			- the pin stop is retracted
+			- the downstream photo-eye is monitored for a falling edge to determing if the carrier has exited the singulator
+		When the carrier has exited the singulator
+			- Releasing is turned off and the state for not releasing is activated
+	While not releasing
+		The pin stop is extended
+		The grippers are retracted when the pin stop is detected in the extended state
+		
+	The releasing state is enabled when:
+		- The distance that the carrier has to travel after exiting the singulator has been traveled by the carrier
+
+	The releasing state is set when:
+		- A carrier is detected at the pin stop
+
+	At start-up:
+		- the conveyor is not allowed to run
+		- all singulation photo-eyes must be clear
+			- PE_GrabTrigger, photo-eye at the pin-stop
+			- PE_ClearedTrigger, photo-eye downstream of the pin-stop
+			- PE_ToteTrigger, photo-eye that detects tote at the pin-stop
+		- the device is homed
+			- both grippers are retracted to detect home
+			- the pin-stop is retracted to detect home
+		- after homing, the device is put into a ready state
+			- the pin-stop is extended and detected in the extended state
+			- the grappers remain retracted are detected in the retracted state
+	A release fault is set if it takes too long for a carrier to clear the PE_ClearedTrigger PE (Cfg_TimeOutTime)
+	A release can be attempted multiple time (Cfg_RetryLimit). Practically, the release should be attempted once and failed to
+		prevent damage to carriers or the specimens they are transporting
+	A release fault can only be reset when the device PE's are all clear, to allow a the start-up sequence to be processed
+*)
+
+// Process the In_ResetState
 rResetState(CLK:=In_ResetState);
 
+// State reset or fault reset clear that current device state and cause the device to start-up again
 IF rResetState.Q OR (In_FaultReset AND Out_ReleaseFault) THEN
 	// Revert to the StartUp state
 	StartUp := TRUE;
@@ -125,16 +170,10 @@ IF rResetState.Q OR (In_FaultReset AND Out_ReleaseFault) THEN
 	In_ResetState := FALSE;
 END_IF
 
-(*
-// Clear Fault on fault reset
-IF In_FaultReset THEN
-	BadReleaseCount := 0;
-	Out_ReleaseFault := FALSE;
-	a_ResetGrabbers();
-END_IF
-*)
-
+// Use all photo-eyes to determine that the device is clear and can be started up
 SingulatorClear := (NOT In_PE_GrabTrigger AND NOT In_PE_ClearedTrigger AND NOT In_PE_ToteTrigger);
+
+// If a start-up is initiated with carriers in the device, set a release fault and cancel the start up
 IF StartUp AND NOT SingulatorClear THEN
 	Out_ReleaseFault := TRUE;
 	StartUp := FALSE;
@@ -168,7 +207,7 @@ IF (StartUp OR NOT Out_Homed OR NOT Out_Ready) AND SingulatorClear THEN
 
 	// Ready is Grabbers retracted and PinStop extended
 	// All PE's have to be clear for the equipment to be ready
-	tonReadyWait.IN := NOT Out_Ready AND Out_Homed AND NOT In_PE_GrabTrigger AND NOT In_PE_ClearedTrigger AND NOT In_PE_ToteTrigger;
+	tonReadyWait.IN := NOT Out_Ready AND Out_Homed AND SingulatorClear;
 	tonReadyWait();
 	IF NOT Out_Ready AND Out_Homed AND tonReadyWait.IN THEN
 		// PinStop
@@ -188,40 +227,31 @@ IF (StartUp OR NOT Out_Homed OR NOT Out_Ready) AND SingulatorClear THEN
 	Out_ReleaseFault := FALSE;
 	Releasing := FALSE;
 
-ELSIF In_Pause OR NOT In_ConveyorRunning THEN
-
-	// Grabber 1
-	Grabber_1_Retract := FALSE;
-	Grabber_1_Extend := FALSE;
-	// Grabber 2
-	Grabber_2_Retract := FALSE;
-	Grabber_2_Extend := FALSE;
-	// PinStop
-	PinStop_Retract := FALSE;
-	PinStop_Extend := FALSE;
-
 ELSIF NOT Out_Running THEN
 
+	// Run a timer when the conveyor is running to allow the conveyor to be up-to-speed before actuating any devices
 	tonRunningWait.IN := NOT OUT_Running AND Out_Ready AND Out_Homed AND In_ConveyorRunning;
 	tonRunningWait();
 	Out_Running := tonRunningWait.Q;
 
-ELSIF Out_Running THEN
-	
-	//Watch Grabbing Trig
-	GrabTrigger(CLK:= In_PE_GrabTrigger);
-
-	// Stop Product
-	IF GrabTrigger.Q THEN
-		a_HoldProduct();
+	// When Out_Running is turned on, capture the encoder count to allow the release of product when it is detected	
+	IF Out_Running THEN
+		ClearedPECount := In_EncoderCount;
+		Status.PRODUCT_PRESENT := FALSE;
 	END_IF
-
-	// Retry release if Bad release
-	BadReleaseRetry := (BadReleaseCount > 0) AND (BadReleaseCount <> BadReleaseCount_Old) AND NOT Out_ReleaseFault;
-	BadReleaseReTryTimer(IN:= BadReleaseRetry, PT:= T#1S);
-	IF BadReleaseReTryTimer.Q THEN
-		a_HoldProduct();
-		BadReleaseCount_Old := BadReleaseCount;
+	
+ELSIF Out_Running THEN
+	Status.PAUSED := FALSE;
+	
+	// Request to Hold all items
+	// Allows external control of the release according to programmed conditions
+	IF In_Hold_Request THEN
+		// When the pin stop is extended, turn on that the singlulator is holding
+		IF In_PinStop_Extended THEN
+			Out_Holding := TRUE;
+		END_IF
+	ELSE
+		Out_Holding := FALSE;
 	END_IF
 
 	// Singulation Distance Check
@@ -239,78 +269,148 @@ ELSIF Out_Running THEN
 	END_IF
 
 	// Release After Distance Requirement is satisfied
-	IF ClearedDistance > Cfg_GappingDistance THEN
-	
-		// Test for an item at the pin stop
-		IF In_PE_GrabTrigger THEN
-			// If upper PE is blocked then release gripper so Tote can move
-			IF In_PE_ToteTrigger THEN
-				// Grabber 2
-				Grabber_2_Retract := TRUE;
-				Grabber_2_Extend := FALSE;
-			END_IF
-		
-			// PinStop
-			PinStop_Retract := TRUE;
-			PinStop_Extend := FALSE;
-			Releasing := TRUE;
-		END_IF
+	IF ClearedDistance > Cfg_GappingDistance AND NOT Status.PRODUCT_PRESENT THEN
+		// Use bit 1 to indicate that the required distance has been cleared to allow the next carrier to be released
+		Status.PRODUCT_PRESENT := TRUE;
 	END_IF
 
-	// Watch release to make sure product comes through, set timer if not
-	ReleaseTimeOut(IN:= Releasing, PT:= Cfg_TimeOutTime, Q=> , ET=> );
+	// When "PRODUCT_PRESENT" which means that the release distance has been met
+	// 	begin to process the RELEASING status
+	IF Status.PRODUCT_PRESENT THEN
+		// Test for the Holding State
+		// Prevent transtion to Releasing while in the holding state
+		IF NOT Out_Holding THEN
+			// Trigger Releasing when the grab PE is blocked
+			IF In_PE_GrabTrigger THEN
+				Releasing := TRUE;
+			END_IF
+		END_IF	
+	END_IF
+
+	// Watch release and pin-stop state to make sure product comes through, run timer if not
+	ReleaseTimeOut(IN:= Releasing AND In_PinStop_Retracted, PT:= Cfg_TimeOutTime, Q=> , ET=> );
 
 	// Watch for released cleared PE
+	// This is a falling-edge trigger that will go true when the cleard photo-eye is blocked
+	//	and go false when the cleared photo-eye is cleared
+	// Releasing has to remain on while waiting for the cleared trigger photo-eye to transitino
 	ClearedTriggerPE(CLK:= (Releasing AND In_PE_ClearedTrigger));
 
+(*	Clearing the photo-eye will:
+		- Clear the bad release count
+		- Set the In_Encoder count to test for the next release
+		- Transition OUT of the releasing state
+*)
 	IF ClearedTriggerPE.Q THEN
 		BadReleaseCount := 0;
-		a_ResetGrabbers();
 		ClearedPECount := In_EncoderCount;
+		ClearedDistance := 0;
+		Releasing := FALSE;
+		Status.PRODUCT_PRESENT := FALSE;
+(*
+	If the release times out, the BadReleaseCount will be incremented
+	In the subsequent code, a non-zero bad release count that exceeds the release attempt limit will set a release fault
+	The release fault can only be reset when the device photo-eyes are clear and the reset in issued
+	The reset will cause the device to enter its start-up state and home and ready itself
+*)
 	ELSIF ReleaseTimeOut.Q THEN
-		a_ResetGrabbers();
 		BadReleaseCount := BadReleaseCount + 1;
 	END_IF
 
-	// Watch for Fault
+	// When the Cfg_RetryLimit is exceeded, set the fault
+	// This retry limit should always be zero to prevent damage to carriers and specimen because the carrier may be in the path of the 
+	// pin-stop
+	// Setting the fault does not change the releasing state to prevent carrier/specimen damage and requires the device to be reset
 	IF BadReleaseCount >= Cfg_RetryLimit THEN
 		Out_ReleaseFault := TRUE;
 	END_IF
 
-	// If fault Hold until user clears it
-	IF Out_ReleaseFault THEN
-		a_HoldProduct();
-		// PinStop
-		PinStop_Retract := FALSE;
-		PinStop_Extend := FALSE;
+	// Retry release if Bad release
+	// This process originally reset the grippers and pin-stop, along with clearing the releasing state
+	// It now only allows an X multiplier of the TimeOutTime for a longer release attempt
+	// Actuating the pin-stop could damage carriers/specimen and was disabled
+	BadReleaseRetry := (BadReleaseCount > 0) AND (BadReleaseCount <> BadReleaseCount_Old) AND NOT Out_ReleaseFault;
+	BadReleaseReTryTimer(IN:= BadReleaseRetry, PT:= T#1S);
+	IF BadReleaseReTryTimer.Q THEN
+		BadReleaseCount_Old := BadReleaseCount;
 	END_IF
-ELSE
-	// Grabber 1
-	Grabber_1_Retract := TRUE;
-	Grabber_1_Extend := FALSE;
-	// Grabber 2
-	Grabber_2_Retract := TRUE;
-	Grabber_2_Extend := FALSE;
-	// PinStop
-	PinStop_Retract := FALSE;
-	PinStop_Extend := TRUE;
 
+ELSE
+	// When we aren't detecting any valid state above, turn off Releasing to extend the grippers until the pin-stop is extended
+	// This should never be executed but is here just-in-case
+	// NOT Out_Running should catch all unknown states and prevent the transition to Out_Running based on the homed and ready states
+	Releasing := FALSE;
+END_IF
+
+// Only process if we are Ready
+// Actuation is controlled for all other states during start-up
+IF Out_Ready THEN
+	// Test for Releasing and actuate accordingly and pause request
+	// In_Pause and In_Hold_Request perform the samd function, but at different stages of the process
+	// In_Pause affect the system when it is releasing
+	// In_Hold prevent the system from transitioning into the Releasing state
+	IF Releasing AND NOT In_Pause THEN
+		// Grabber 1 - Always Extend
+		Grabber_1_Retract := FALSE;
+		Grabber_1_Extend := TRUE;
+		// Grabber 2 - Extend only when a tote is not detected
+		IF In_PE_ToteTrigger THEN
+			Grabber_2_Retract := TRUE;
+			Grabber_2_Extend := FALSE;
+		ELSE
+			Grabber_2_Retract := FALSE;
+			Grabber_2_Extend := TRUE;
+		END_IF
+		// Only process the pin-stop when the gripper(s) are not in the retracted state
+		// Only check grabber 1 because grabber 2 could remain retracted for a tote
+		IF NOT In_Grabber_1_Retracted THEN
+			// PinStop retract when the grippers are holding
+			PinStop_Retract := TRUE;
+			PinStop_Extend := FALSE;
+		END_IF
+	// When not releasing, only actuate the pin-stop when the device is clear to prevent damage to carriers and/or specimen
+	ELSE
+		IF SingulatorClear THEN
+			// PinStop extend when the device is clear
+			PinStop_Retract := FALSE;
+			PinStop_Extend := TRUE;
+			// Only process the grabbers when the pin-stop is in the extended state
+			IF In_PinStop_Extended THEN
+				// Grabber 1 - Always Retract
+				Grabber_1_Retract := TRUE;
+				Grabber_1_Extend := FALSE;
+				// Grabber 2 - Always Retract
+				Grabber_2_Retract := TRUE;
+				Grabber_2_Extend := FALSE;
+			END_IF
+		// When the device is not clear and we are not releasing, extend both grabbers
+		ELSE
+			// Grabber 1 - Always Extend when the singulator is not clear
+			Grabber_1_Retract := FALSE;
+			Grabber_1_Extend := TRUE;
+			// Grabber 2 - Always Extend when the singulator is not clear
+			Grabber_2_Retract := FALSE;
+			Grabber_2_Extend := TRUE;
+		END_IF
+	END_IF
 END_IF
 
 // Activate all the outputs in one place
 Status_Output.GRABBER_1_OCCUPIED := Grabber1(Active := In_Grabber_1_Auto, Extend:= Grabber_1_Extend, Retract := Grabber_1_Retract);
 Status_Output.GRABBER_2_OCCUPIED := Grabber2(Active := In_Grabber_2_Auto, Extend:= Grabber_2_Extend, Retract := Grabber_2_Retract);
-Status_Output.PINSTOP_OUT := PinStop(Active:= In_PinStop_Auto, Extend := PinStop_Extend, Retract:= PinStop_Retract);
-]]></ST>
+Status_Output.PINSTOP_OUT := PinStop(Active:= In_PinStop_Auto, Extend := PinStop_Extend, Retract:= PinStop_Retract);]]></ST>
     </Implementation>
     <Action Name="a_HoldProduct" Id="{7f5172fb-ebc5-4859-80c8-0ce199410c44}">
       <Implementation>
-        <ST><![CDATA[// Grabber 1
-Grabber_1_Retract := FALSE;
-Grabber_1_Extend := TRUE;
-// Grabber 2
-Grabber_2_Retract := FALSE;
-Grabber_2_Extend := TRUE;]]></ST>
+        <ST><![CDATA[	// Grabber 1
+	Grabber_1_Retract := FALSE;
+	Grabber_1_Extend := TRUE;
+	
+	// Grabber 2
+	Grabber_2_Retract := FALSE;
+	Grabber_2_Extend := TRUE;
+
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="a_ResetGrabbers" Id="{0f6d0a35-4d6a-444f-b0fc-0d8b5f006497}">
@@ -412,92 +512,5 @@ END_IF
 PinStop := Out_PinStop_Ext OR In_PinStop_Extended;]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="FB_Singulation">
-      <LineId Id="2462" Count="3" />
-      <LineId Id="2468" Count="10" />
-      <LineId Id="2735" Count="0" />
-      <LineId Id="2734" Count="0" />
-      <LineId Id="2736" Count="0" />
-      <LineId Id="2616" Count="1" />
-      <LineId Id="2739" Count="0" />
-      <LineId Id="2737" Count="1" />
-      <LineId Id="2481" Count="0" />
-      <LineId Id="2733" Count="0" />
-      <LineId Id="2740" Count="0" />
-      <LineId Id="2727" Count="5" />
-      <LineId Id="2461" Count="0" />
-      <LineId Id="2742" Count="1" />
-      <LineId Id="2741" Count="0" />
-      <LineId Id="2748" Count="0" />
-      <LineId Id="2752" Count="0" />
-      <LineId Id="2749" Count="0" />
-      <LineId Id="2751" Count="0" />
-      <LineId Id="2502" Count="5" />
-      <LineId Id="2573" Count="0" />
-      <LineId Id="2572" Count="0" />
-      <LineId Id="2508" Count="3" />
-      <LineId Id="2561" Count="2" />
-      <LineId Id="2512" Count="2" />
-      <LineId Id="2521" Count="0" />
-      <LineId Id="2564" Count="0" />
-      <LineId Id="2522" Count="0" />
-      <LineId Id="2525" Count="4" />
-      <LineId Id="2574" Count="0" />
-      <LineId Id="2571" Count="0" />
-      <LineId Id="2530" Count="5" />
-      <LineId Id="2539" Count="0" />
-      <LineId Id="2566" Count="0" />
-      <LineId Id="2565" Count="0" />
-      <LineId Id="2543" Count="6" />
-      <LineId Id="2569" Count="1" />
-      <LineId Id="2618" Count="0" />
-      <LineId Id="2606" Count="0" />
-      <LineId Id="2575" Count="0" />
-      <LineId Id="2276" Count="0" />
-      <LineId Id="2586" Count="0" />
-      <LineId Id="2577" Count="7" />
-      <LineId Id="2587" Count="1" />
-      <LineId Id="2605" Count="0" />
-      <LineId Id="2589" Count="4" />
-      <LineId Id="2585" Count="0" />
-      <LineId Id="2277" Count="4" />
-      <LineId Id="2613" Count="0" />
-      <LineId Id="2284" Count="5" />
-      <LineId Id="2614" Count="0" />
-      <LineId Id="2292" Count="23" />
-      <LineId Id="2619" Count="2" />
-      <LineId Id="2317" Count="1" />
-      <LineId Id="2622" Count="2" />
-      <LineId Id="2320" Count="26" />
-      <LineId Id="2629" Count="2" />
-      <LineId Id="2348" Count="0" />
-      <LineId Id="2594" Count="0" />
-      <LineId Id="2596" Count="8" />
-      <LineId Id="2595" Count="0" />
-      <LineId Id="870" Count="0" />
-      <LineId Id="2425" Count="2" />
-      <LineId Id="2459" Count="0" />
-      <LineId Id="2429" Count="0" />
-      <LineId Id="2424" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Singulation.a_HoldProduct">
-      <LineId Id="8" Count="5" />
-    </LineIds>
-    <LineIds Name="FB_Singulation.a_ResetGrabbers">
-      <LineId Id="5" Count="9" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Singulation.Grabber1">
-      <LineId Id="29" Count="15" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Singulation.Grabber2">
-      <LineId Id="20" Count="15" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Singulation.PinStop">
-      <LineId Id="21" Count="15" />
-      <LineId Id="10" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_PhotoEye" Id="{84687745-43e2-4a30-9d0e-0ad390900019}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_PhotoEye
 (*
@@ -12,6 +12,7 @@ VAR_INPUT
 	CFG_OnDlyTime: TIME;		// Time to delay Output turning On after Input is On
 	CFG_OffDlyTime: TIME;		// Time to delay Output turning Off after Input is Off
 	CFG_JamDetTime: TIME;		// Time to wait before sending Jam detected Output
+	CFG_HoldWithStatus: BOOL := FALSE;	// Hold Input state with Status input for items that are too samll to stop
 	{attribute 'OPC.UA.DA' := '1'}
 	In_Sim:	BOOL;		// Simulation Input Bit acts just like the input but can be forced from the program for testing
 END_VAR
@@ -29,20 +30,31 @@ VAR_OUTPUT
 END_VAR
 VAR
 	In_PE AT %I* : BOOL;		// Mapped IO input for PE
-	{attribute 'OPC.UA.DA' := '0'}
 	PEInFttr:	FB_DigDebnce;	
 	PEInJam: 	FB_JamDetect;
+	InputHold_SR: SR;
+	fStatusOff: F_TRIG;
+	PE_State : BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
+      <ST><![CDATA[// Get the PE_State such that a blocked PE is always ON
+PE_State := (In_PE OR In_Sim) XOR CFG_PEOKState;
+
+// Test for Input holding with Status for items that pass beyond the PE when the motor stops
+IF CFG_HoldWithStatus THEN
+	fStatusOff(CLK := In_Status);
+	InputHold_SR(SET1 :=(fStatusOff.Q AND PE_State)
+		, RESET := In_Status);
+END_IF
+
 // Filter the ON and OFF of a digital input
 PEInFttr(
-	In:= In_PE, 
-	CFG_OKState:= CFG_PEOKState, 
+	In:= (PE_State OR InputHold_SR.Q1), 
+	CFG_OKState:= 0, 
 	CFG_OnDlyTime:= CFG_OnDlyTime, 
 	CFG_OffDlyTime:= CFG_OffDlyTime, 
-	In_Sim:= In_Sim, 
+//	In_Sim:= In_Sim, 
 	Out=> Out, 
 	OutOnFltrd=> Out_OnFltrd, 
 	OutOffFltrd=> Out_OffFltrd, 
@@ -53,20 +65,12 @@ PEInFttr(
 	
 // Watch the time the photo eye is blocked 
 PEInJam(
-	In_PE:= In_PE, 
+//	In_PE:= (In_PE OR In_Sim), 
+	In_PE:= (PE_State OR InputHold_SR.Q1), 
 	In_Status:= In_Status, 
-	CFG_PEOKState:= CFG_PEOKState, 
+	CFG_PEOKState:= 0, 
 	JamDetTime:= CFG_JamDetTime, 
 	JamDetected=> JamDetected);]]></ST>
     </Implementation>
-    <LineIds Name="FB_PhotoEye">
-      <LineId Id="58" Count="1" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="26" Count="9" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="68" Count="2" />
-      <LineId Id="39" Count="4" />
-      <LineId Id="37" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

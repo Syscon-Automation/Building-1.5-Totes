@@ -307,7 +307,9 @@ PI2140_01_StatePB.StopPB := System.Cnvyr_Manual;
 PI2140_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_DA;
 
 // Interlocks
-PI2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//PI2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+PI2140_01.In_EquipIntlks.2:= Photoeyes.PE_8141.Out_OnOffFltrd;
+PI2140_01.In_EquipIntlks.3:= Photoeyes.PE_4161.Out_OnOffFltrd;
 //Events
 PI2140_01.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 PI2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -344,13 +346,15 @@ PL2140_01_StatePB.StopPB := System.Cnvyr_Manual;
 PL2140_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-PL2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
-PL2140_01.In_EquipIntlks.2:= Photoeyes.PE_10151.JamDetected;
+//PL2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+PL2140_01.In_EquipIntlks.2:= Photoeyes.PE_8141.Out_OnOffFltrd;
+PL2140_01.In_EquipIntlks.3:= Photoeyes.PE_4161.Out_OnOffFltrd;
 //Events
 PL2140_01.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 PL2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
 PL2140_01.In_EquipEvents.4:= SystemSafety.Safety_SystemEstopsOK;
 PL2140_01.In_EquipEvents.5:= NOT CommStatus.RIO10161_CommFault.Out;
+PL2140_01.In_EquipIntlks.6:= Photoeyes.PE_10151.JamDetected;
 
 // Function Call
 PL2140_01(
