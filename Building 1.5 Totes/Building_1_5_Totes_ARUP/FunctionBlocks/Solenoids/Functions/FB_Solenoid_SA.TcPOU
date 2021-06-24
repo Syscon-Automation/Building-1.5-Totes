@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_Solenoid_SA" Id="{3cbb05ee-b98d-47be-8309-91590ddcdbce}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Solenoid_SA
 
@@ -17,6 +17,8 @@ VAR_IN_OUT
 	CFG_EquipIndex				: DINT;	// Index used for local Equipment status array
 	{attribute 'OPC.UA.DA' := '1'}
 	Sts_EquipState					: ST_EquipmentStatus;		// State Status
+//	In_EquipEvents					: UINT;		// Event that is specific to the instance of the solenoid/actuator
+//	In_EquipIntlks					: UINT;		// Interlock that is specific to the instance of the solenoid/actuator
 END_VAR
 VAR_INPUT
 	{attribute 'OPC.UA.DA' := '1'}
@@ -36,6 +38,7 @@ VAR_INPUT
 
 	// Events
 	In_EquipEvents					: UINT;		// Event that is specific to the instance of the solenoid/actuator
+	
 	{attribute 'OPC.UA.DA' := '0'}
 	Cfg_EquipEvntsArry				: ARRAY [0..15] OF ST_CfgEvents;
 	Cfg_ExtendDetectTime		: TIME;
@@ -106,6 +109,8 @@ SV_IntlksArry[12] := In_EquipIntlks.12;
 SV_IntlksArry[13] := In_EquipIntlks.13;
 SV_IntlksArry[14] := In_EquipIntlks.14;
 SV_IntlksArry[15] := In_EquipIntlks.15;
+
+In_EquipIntlks:=0;
 	
 // Call Interlock block
 SV_fbIntrlks(
@@ -134,6 +139,8 @@ SV_EventArry[13]:= In_EquipEvents.13;
 SV_EventArry[14]:= In_EquipEvents.14;
 SV_EventArry[15]:= In_EquipEvents.15;
 
+//In_EquipEvents:=0;
+
 // Event Manager
 SV_EventManager(
 	sEquipStateCntrlSts := Sts_EquipState.Sts_EquipmentState,
@@ -153,9 +160,13 @@ SV_EventManager(
 		1 - If the SV is configured to use Extended feedback, check the input
 		2 - If the SV is not configured to use Extedned feedback, check that the output is on and the retracted input is not on
 *)
-SV_ExtendFault.In_PE := (Cfg_UseExtedFdbc AND NOT In_EquipExtdFdbck) OR (NOT Cfg_UseExtedFdbc AND (Out_ExtendCrntSV AND In_EquipRtrcdFdbck));
+SV_ExtendFault.In_PE := ((Cfg_UseExtedFdbc AND NOT In_EquipExtdFdbck)
+					OR (NOT Cfg_UseExtedFdbc AND (Out_ExtendCrntSV AND In_EquipRtrcdFdbck)))
+					AND NOT Sts_EquipState.Sts_EquipmentState.StsOffline
+					AND NOT In_o_EquipStatePB.ResetPB
+					AND NOT In_p_EquipStatePB.ResetPB;
 SV_ExtendFault(
-	In_Status:= Out_ExtendCrntSV, 
+	In_Status:= Out_ExtendCrntSV,
 	CFG_PEOKState:= 0, 
 	JamDetTime:= cfg_ExtendDetectTime);
 	
@@ -163,9 +174,13 @@ SV_ExtendFault(
  	For the Retract Fault, use the following condition
 		Output is off and the actuator is not in the retracted condition
 *)
-SV_RetractFault.In_PE := NOT Out_ExtendCrntSV AND NOT In_EquipRtrcdFdbck;
+SV_RetractFault.In_PE := NOT Out_ExtendCrntSV
+					AND NOT In_EquipRtrcdFdbck
+					AND NOT Sts_EquipState.Sts_EquipmentState.StsOffline
+					AND NOT In_o_EquipStatePB.ResetPB
+					AND NOT In_p_EquipStatePB.ResetPB;
 SV_RetractFault(
-	In_Status:= NOT Out_ExtendCrntSV, 
+	In_Status:= NOT Out_ExtendCrntSV,
 	CFG_PEOKState:= 0, 
 	JamDetTime:= cfg_RetractDetectTime);
 
@@ -219,7 +234,7 @@ ELSE
 END_IF
 
 // Turn OFF Extend and Retract when a stop is issued
-IF In_p_EquipStatePB.StopPB OR In_o_EquipStatePB.StopPB THEN
+IF In_p_EquipStatePB.StopPB OR In_o_EquipStatePB.StopPB OR Sts_FaultActive THEN
 	Out_ExtendCrntSV := FALSE;
 	Sts_ExtendCrntSV := FALSE;
 END_IF
@@ -276,10 +291,5 @@ Sts_EquipState.Sts_All_Evnts_OK  := Sts_All_Evnts_OK;
 Sts_EquipState.Sts_FaultActive := Sts_FaultActive;
 Sts_EquipState.Sts_WarnActive := Sts_WarnActive;]]></ST>
     </Implementation>
-    <LineIds Name="FB_Solenoid_SA">
-      <LineId Id="6726" Count="181" />
-      <LineId Id="7013" Count="2" />
-      <LineId Id="2581" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

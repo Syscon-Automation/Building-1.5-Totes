@@ -24,6 +24,8 @@ VAR_IN_OUT
 	CFG_EquipIndex				: DINT;	// Index used for local Equipment status array
 	{attribute 'OPC.UA.DA' := '1'}
 	Sts_EquipState				: ST_EquipmentStatus;		// State Status
+//	In_EquipEvents				: UINT;		// Events that are specific to the instance of the conveyor
+//	In_EquipIntlks				: UINT;		// Interlock that is specific to the instance of the conveyor
 END_VAR
 VAR_INPUT
 	{attribute 'OPC.UA.DA' := '1'}
@@ -46,15 +48,14 @@ VAR_INPUT
 	Cfg_JamDetectTime			: TIME;
 	
 	// Events
-	In_EquipEvents				: UINT;		// Events that are specific to the instance of the conveyor
 	{attribute 'OPC.UA.DA' := '0'}
 	Cfg_EquipEvntsArry			: ARRAY [0..15] OF ST_CfgEvents;
+	In_EquipEvents				: UINT;		// Events that are specific to the instance of the conveyor
 	
 	// Interlocks that can be Instance Specific
-	In_EquipIntlks				: UINT;		// Interlock that is specific to the instance of the conveyor
 	{attribute 'OPC.UA.DA' := '0'}
 	Cfg_EquipIntlksArry			: ARRAY [0..15] OF ST_CfgEvents;		// Descriptions of the Interlock 
-	
+	In_EquipIntlks				: UINT;		// Interlock that is specific to the instance of the conveyor
 	// Sleep Timer	
 	Cfg_UseSleepTmr				: BOOL;	// Configure sleep or not sleep this conveyor
 	In_WakeSlpTrigArry			: ARRAY [1..5] OF BOOL;		// Input to watch (or wake) for sleep timer
@@ -125,7 +126,10 @@ CASE Cfg_ConvType OF
 		Conv_IntlksArry[0] := In_ConvDwnStrmMtrStatus OR (NOT In_ConvDwnStrmMtrStatus AND NOT In_ConvCrntExitPhotoEye);
 		Conv_EventArry[0] := Conv_CrrntExitPEJamDetctd.JamDetected;
 		Conv_CrrntExitPEJamDetctd(
-			In_PE:= In_ConvCrntExitPhotoEye, 
+			In_PE:= In_ConvCrntExitPhotoEye 
+					AND NOT Sts_EquipState.Sts_EquipmentState.StsOffline 
+					AND NOT In_o_EquipStatePB.ResetPB 
+					AND NOT In_p_EquipStatePB.ResetPB, 
 			In_Status:= Out_ConvCrntMtr_Raw, 
 			CFG_PEOKState:= 0, 
 			JamDetTime:= cfg_JamDetectTime);
@@ -133,7 +137,10 @@ CASE Cfg_ConvType OF
 		Conv_IntlksArry[0] := Conv_CrrntExitPEJamDetctd.JamDetected;
 		Conv_EventArry[0] := In_EquipEvents.0;
 		Conv_CrrntExitPEJamDetctd(
-			In_PE:= In_ConvCrntExitPhotoEye, 
+			In_PE:= In_ConvCrntExitPhotoEye 
+					AND NOT Sts_EquipState.Sts_EquipmentState.StsOffline 
+					AND NOT In_o_EquipStatePB.ResetPB 
+					AND NOT In_p_EquipStatePB.ResetPB, 
 			In_Status:= Out_ConvCrntMtr_Raw, 
 			CFG_PEOKState:= 0, 
 			JamDetTime:= cfg_JamDetectTime);
@@ -144,7 +151,10 @@ CASE Cfg_ConvType OF
 		Conv_IntlksArry[0] := In_ConvDwnStrmMtrStatus OR (NOT In_ConvDwnStrmMtrStatus AND NOT In_ConvCrntExitPhotoEye);
 		Conv_EventArry[0] := Conv_CrrntExitPEJamDetctd.JamDetected;
 		Conv_CrrntExitPEJamDetctd(
-			In_PE:= In_ConvCrntExitPhotoEye, 
+			In_PE:= In_ConvCrntExitPhotoEye 
+					AND NOT Sts_EquipState.Sts_EquipmentState.StsOffline 
+					AND NOT In_o_EquipStatePB.ResetPB 
+					AND NOT In_p_EquipStatePB.ResetPB, 
 			In_Status:= Out_ConvCrntMtr_Raw, 
 			CFG_PEOKState:= 0, 
 			JamDetTime:= cfg_JamDetectTime);
@@ -166,6 +176,8 @@ Conv_IntlksArry[13] := In_EquipIntlks.13;
 Conv_IntlksArry[14] := In_EquipIntlks.14;
 Conv_IntlksArry[15] := Conv_StartAllowed;
 	
+
+
 // Call Interlock block
 Conv_fbIntrlks(
 	In_Intlks:= Conv_IntlksArry,
@@ -191,6 +203,8 @@ Conv_EventArry[12]:= In_EquipEvents.12;
 Conv_EventArry[13]:= In_EquipEvents.13;
 Conv_EventArry[14]:= In_EquipEvents.14;
 Conv_EventArry[15]:= In_EquipEvents.15;
+
+//In_EquipEvents := 0;
 
 // Event Manager
 Conv_EventManager(
@@ -226,7 +240,7 @@ Conv_fbEquipCntrl(
 
 //===Sleep Timer
 IF CFG_UseSleepTmr THEN
-	fbSleepCntrl.In_Trigs.0 := In_ConvCrntExitPhotoEye OR In_p_EquipStatePB.AutoPB;
+	fbSleepCntrl.In_Trigs.0 := In_ConvCrntExitPhotoEye OR In_p_EquipStatePB.AutoPB; 
 	fbSleepCntrl.In_Trigs.1 := In_WakeSlpTrigArry[1];
 	fbSleepCntrl.In_Trigs.2 := In_WakeSlpTrigArry[2];
 	fbSleepCntrl.In_Trigs.3 := In_WakeSlpTrigArry[3];
