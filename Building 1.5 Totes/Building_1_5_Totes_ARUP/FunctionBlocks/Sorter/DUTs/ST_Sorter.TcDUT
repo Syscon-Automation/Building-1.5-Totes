@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <DUT Name="ST_Sorter" Id="{bcb741d2-04a3-4056-8cd7-6667100128c7}">
     <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
 TYPE ST_Sorter :
@@ -10,6 +10,7 @@ STRUCT
 	EncoderCounts		: UDINT;
 	LastUniqueID		: UINT;
 	DischargePE			: BOOL;
+	RoundRobin			: ST_RoundRobin;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

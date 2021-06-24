@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_DivertControl" Id="{06e3e34a-7606-44cd-af9d-fd06b2e51262}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertControl
 VAR_IN_OUT
@@ -46,19 +46,5 @@ ELSE
 	Divert.Output2 := 0;				
 END_IF]]></ST>
     </Implementation>
-    <LineIds Name="FB_DivertControl">
-      <LineId Id="374" Count="8" />
-      <LineId Id="409" Count="0" />
-      <LineId Id="383" Count="0" />
-      <LineId Id="429" Count="0" />
-      <LineId Id="410" Count="0" />
-      <LineId Id="384" Count="5" />
-      <LineId Id="411" Count="0" />
-      <LineId Id="390" Count="0" />
-      <LineId Id="430" Count="0" />
-      <LineId Id="412" Count="0" />
-      <LineId Id="391" Count="1" />
-      <LineId Id="293" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

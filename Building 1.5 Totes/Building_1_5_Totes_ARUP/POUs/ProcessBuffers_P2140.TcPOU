@@ -6,15 +6,18 @@ VAR_IN_OUT
 	st_NextToInduct					: ST_ItemTemporary;
 	st_UpdateItem					: ST_ItemTemporary;
 	st_TempInductItem				: ST_ItemTemporary;
+	{attribute 'OPC.UA.DA' := '0'}
 	st_Sorter						: ST_Sorter;
+	{attribute 'OPC.UA.DA' := '0'}
 	aDiverts						: ARRAY[Sorter.DIVERTMIN_P2140..Sorter.NUMBEROFDIVERTS_P2140] OF ST_DIVERT;
 	aItems 							: ARRAY[Sorter.SORTERENCODERMIN_P2140..Sorter.SORTERENCODERMAX_P2140] OF ST_Item;
 END_VAR
 
 VAR_INPUT
+	DestinationOverride				: DINT;	// Pass in Divert to sent item to regardless of the direction received
 	DivertToCommission				: DINT;
-	ItemsArrayMax 			: UDINT;
-	ItemsArrayMin 			: UDINT;
+	ItemsArrayMax 					: UDINT;
+	ItemsArrayMin 					: UDINT;
 END_VAR
 
 VAR_OUTPUT
@@ -57,6 +60,7 @@ VAR
 	
 	st_DisplayItem		:st_Item;
 	LogSorterDump		:BOOL := FALSE;
+
 	fb_FindDestination		: FB_FindDestination;
 	fb_DefaultDestination	: FB_FindDestination;
 	fb_RecircDestination	: FB_FindDestination;
@@ -81,17 +85,17 @@ aTempDiverts := aDiverts;
 // Set Master for FB's that control the buffer
 fb_ArrivalBuffer.Master := FALSE;
 fb_TransportBuffer.Master := FALSE;
-fb_UpdateBuffer.Master := TRUE;
+fb_UpdateBuffer.Master := FALSE;
 
 // Turn ON/OFF Logging of all activity in/out
-fb_ArrivalBuffer.LogEntries := .nItemBufferLogEnable.ARRIVALS;
-fb_TransportBuffer.LogEntries := .nItemBufferLogEnable.TRANSPORT;
-fb_UpdateBuffer.LogEntries := .nItemBufferLogEnable.UPDATE;
+fb_ArrivalBuffer.LogEntries := nItemBufferLogEnable.ARRIVALS;
+fb_TransportBuffer.LogEntries := nItemBufferLogEnable.TRANSPORT;
+fb_UpdateBuffer.LogEntries := nItemBufferLogEnable.UPDATE;
 
 // Provide names for the buffers
-fb_ArrivalBuffer.Name := '2140 SRT ARRIVAL';
-fb_TransportBuffer.Name := '2140 SRT TRANSPORT';
-fb_UpdateBuffer.Name := '2140 SRT UPDATE';
+fb_ArrivalBuffer.Name := CONCAT(st_Sorter.Config.Name, ' SRT ARRIVAL');
+fb_TransportBuffer.Name := CONCAT(st_Sorter.Config.Name, ' SRT TRANSPORT');
+fb_UpdateBuffer.Name := CONCAT(st_Sorter.Config.Name, ' SRT UPDATE');
 
 // Initialize the FB_ItemExtBuffer Instances
 fb_ArrivalBuffer(st_BufferData := st_SorterArrivalBuffer_P2140
@@ -101,8 +105,8 @@ fb_TransportBuffer(st_BufferData := st_SorterTransportBuffer_P2140
 						, st_BufferFdbkIn := st_TransportFdbkOut_P2140
 						, st_BufferFdbkOut => st_TransportFdbkIn_P2140);
 fb_UpdateBuffer(st_BufferData := st_SorterUpdateBuffer
-						, st_BufferFdbkIn := st_UpdateFdbkIn
-						, st_BufferFdbkOut => st_UpdateFdbkOut);
+						, st_BufferFdbkIn := st_UpdateFdbkOut
+						, st_BufferFdbkOut => st_UpdateFdbkIn);
 
 IF GVL_IO.INIT THEN
 	fb_ArrivalBuffer.Clear();
@@ -129,23 +133,23 @@ END_IF
 
 // Input Item read at bar code reader from System PLC to sorter
 IF st_ArrivalItem.ID <> '' THEN
-	IF .nSortBufferLogEnable.BUFFER_ARRIVAL THEN
-		sMessage := CONCAT(' Item: ', st_ArrivalItem.ID);
+	IF nSortBufferLogEnable.BUFFER_ARRIVAL THEN
+		sMessage := CONCAT('Item: ', st_ArrivalItem.ID);
 		sMessage := CONCAT(sMessage,' Pulses: ');
 		sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-			, msgFmtStr := 'Arrival Processed: %s'
+			, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Arrival Processed: %s')
 			, strArg := sMessage);
 	END_IF
 	// Indicate that this item did not get added to the sorter and add to the exit buffer
 	//  Both as a TransportUpdate and TransportComplete message type 
 	IF st_NextToInduct.Item.ID <> '' THEN
-		IF .nSortBufferLogEnable.BUFFER_MISSINDUCT THEN
-			sMessage := CONCAT(' Item: ', st_NextToInduct.Item.ID);
+		IF nSortBufferLogEnable.BUFFER_MISSINDUCT THEN
+			sMessage := CONCAT('Item: ', st_NextToInduct.Item.ID);
 			// Write to the Error List
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Item Removed - Not Inducted: %s'
+				, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Item Removed - Not Inducted: %s')
 				, strArg := sMessage);
 		END_IF
 		// Transport Response
@@ -164,8 +168,25 @@ IF st_ArrivalItem.ID <> '' THEN
 	// Add the Sorter EquipID to the NextToInduct
 	st_NextToInduct.Item.DeviceID := st_Sorter.Config.EquipID;
 	// Set the Default Destination
-	st_NextToInduct.Item.Destination := st_Sorter.Config.DefaultDestination;
-	st_NextToInduct.Item.DestinationIdx := st_Sorter.Config.DefaultDestIdx;
+	IF DestinationOverride = 0 THEN
+		st_NextToInduct.Item.Destination := st_Sorter.Config.DefaultDestination;
+		st_NextToInduct.Item.DestinationIdx := st_Sorter.Config.DefaultDestIdx;
+	ELSE
+		st_NextToInduct.Item.Destination := DestinationOverride;
+		IF nSorterLogEnable.SORTER_DESTINATION_LU THEN
+			sMessage := CONCAT('Destination: ', DINT_TO_STRING(st_NextToInduct.Item.Destination));
+			// Write to the Error List
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Buffer Destination OR Lookup %s')
+				, strArg := sMessage);
+		END_IF
+		fb_FindDestination(RoundRobin := st_Sorter.RoundRobin
+						, SorterLogEnable := nSorterLogEnable
+						, aDiverts := aTempDiverts
+						, DestinationID := st_NextToInduct.Item.Destination
+						, DestinationIndex => st_NextToInduct.Item.DestinationIdx);
+		
+	END_IF
 	// Capture an encoder value that when the encoder count exceeds this value, NextToInduct item will be cleared
 	st_NextToInduct.Counts := st_Sorter.EncoderCounts;
 	// Clear the Last recieved item
@@ -179,9 +200,9 @@ IF st_ArrivalItem.ID <> '' THEN
 		st_ReplaceItem := st_TempInductItem.Item;
 		st_TempInductItem.Counts := 0;
 		st_TempInductItem.Item := BlankItem;
-		IF .nSortBufferLogEnable.BUFFER_TEMPINDUCT THEN
+		IF nSortBufferLogEnable.BUFFER_TEMPINDUCT THEN
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Temp ID Replaced : %s'
+				, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Temp ID Replaced : %s')
 				, strArg := st_ReplaceItem.ID); 
 		END_IF
 	END_IF
@@ -195,33 +216,46 @@ END_IF
 *)
 IF st_SorterTransportBuffer_P2140.nInPointer <> fb_TransportBuffer.OutPointer THEN
 	fb_TransportBuffer.RemoveItem(st_ItemToReturn => st_ToUpdate.Item);
+	// Override any received destination if there is an Override
+	IF DestinationOverride <> 0 THEN
+		st_ToUpdate.Item.Destination := DestinationOverride;
+	END_IF
 	// Lookup the index for the chosen destination
-	fb_FindDestination(RoundRobin := st_Sorter.Config.RoundRobin
-					, SorterLogEnable := .nSorterLogEnable
+	IF nSorterLogEnable.SORTER_DESTINATION_LU THEN
+		sMessage := CONCAT('Destination: ', DINT_TO_STRING(st_ToUpdate.Item.Destination));
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Buffer Update Lookup %s')
+			, strArg := sMessage);
+	END_IF
+	fb_FindDestination(RoundRobin := st_Sorter.RoundRobin
+					, SorterLogEnable := nSorterLogEnable
 					, aDiverts := aTempDiverts
 					, DestinationID := st_ToUpdate.Item.Destination
 					, DestinationIndex => st_ToUpdate.Item.DestinationIdx);
-	IF .nSortBufferLogEnable.BUFFER_DESTINDEX THEN
-		sMessage := CONCAT(' Item: ', st_ToUpdate.Item.ID);
+	IF nSortBufferLogEnable.BUFFER_DESTINDEX THEN
+		sMessage := CONCAT('Item: ', st_ToUpdate.Item.ID);
 		sMessage := CONCAT(sMessage,' Destination: ');
 		sMessage := CONCAT(sMessage, DINT_TO_STRING(st_ToUpdate.Item.Destination));
 		sMessage := CONCAT(sMessage,' Index: ');
 		sMessage := CONCAT(sMessage, DINT_TO_STRING(st_ToUpdate.Item.DestinationIdx));
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-			, msgFmtStr := 'Divert Index of Destination: %s'
+			, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Divert Index of Destination: %s')
 			, strArg := sMessage);
 	END_IF
 END_IF
 
 // Get the Default Destination Index
-fb_DefaultDestination(RoundRobin := st_Sorter.Config.RoundRobin
+fb_DefaultDestination(RoundRobin := st_Sorter.RoundRobin
+				, NoAssignment := TRUE
 				, aDiverts := aTempDiverts
 				, DestinationID := st_Sorter.Config.DefaultDestination
 				, DestinationIndex => DefaultDestIdx);
 
 // Get the Recirculation Destination Index
-fb_RecircDestination(RoundRobin := st_Sorter.Config.RoundRobin
+fb_RecircDestination(RoundRobin := st_Sorter.RoundRobin
+				, NoAssignment := TRUE
 				, aDiverts := aTempDiverts
 				, DestinationID := st_Sorter.Config.RecircDestination
 				, DestinationIndex => RecircDestIdx);
@@ -233,8 +267,10 @@ IF st_ToUpdate.Item.ID <> '' THEN
 		// Indicate that the transport command was received and a response was sent
 		st_NextToInduct.Item.MessageType := E_MessageIds.TransportResponse_25;
 		// Test the assigned lane for availability
-		IF aDiverts[st_ToUpdate.Item.DestinationIdx].Full
-		   OR aDiverts[st_ToUpdate.Item.DestinationIdx].Faulted THEN
+		IF (aDiverts[st_ToUpdate.Item.DestinationIdx].Full
+		   OR aDiverts[st_ToUpdate.Item.DestinationIdx].Faulted)
+		   AND DestinationOverride = 0
+		   THEN
 			// Prepare a message to indicate that the item cannot be assigned
 			st_ToUpdate.Item.Status := E_StatusCode.Assign_Full;
 			st_ToUpdate.Item.DeviceID := st_Sorter.Config.EquipID;
@@ -254,8 +290,8 @@ IF st_ToUpdate.Item.ID <> '' THEN
 			st_NextToInduct.Item.Destination := DivertToCommission;
 		END_IF
 		// Log the update
-		IF .nSortBufferLogEnable.BUFFER_INDUCT THEN
-			sMessage := CONCAT(' Item: ', st_ToUpdate.Item.ID);
+		IF nSortBufferLogEnable.BUFFER_INDUCT THEN
+			sMessage := CONCAT('Item: ', st_ToUpdate.Item.ID);
 			sMessage := CONCAT(sMessage,' Pulses: ');
 			sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
 			sMessage := CONCAT(sMessage,' Status: ');
@@ -264,7 +300,7 @@ IF st_ToUpdate.Item.ID <> '' THEN
 			sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_ToUpdate.Item.ExtStatus));
 			// Write to the Error List
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Found Before Induct: %s'
+				, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Found Before Induct: %s')
 				, strArg := sMessage);
 		END_IF
 		// We updated the item we were inducting, clear the Item to update
@@ -301,8 +337,8 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 	// NextToInduct is the item to replace the temporary with
 	IF st_ReplaceItem.ID <> '' THEN
 		IF st_ReplaceItem.ID = TransportItemInSorter.ID THEN
-			IF .nSortBufferLogEnable.BUFFER_REPLACEINDUCT THEN
-				sMessage := CONCAT(' Item: ', st_ReplaceItem.ID);
+			IF nSortBufferLogEnable.BUFFER_REPLACEINDUCT THEN
+				sMessage := CONCAT('Item: ', st_ReplaceItem.ID);
 				sMessage := CONCAT(sMessage,' New Item: ');
 				sMessage := CONCAT(sMessage, st_NextToInduct.Item.ID);
 				sMessage := CONCAT(sMessage,' Index: ');
@@ -317,7 +353,7 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 				sMessage := CONCAT(sMEssage, DINT_TO_STRING(st_ReplaceItem.DestinationIdx));
 				// Write to the Error List
 				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-					, msgFmtStr := 'Item ID Replaced After Induct: %s'
+					, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Item ID Replaced After Induct: %s')
 					, strArg := sMessage);
 			END_IF
 			TransportItemInSorter.ID := st_NextToInduct.Item.ID;
@@ -334,13 +370,13 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 	IF st_ToUpdate.Item.ID <> '' THEN
 		// Test the sorter item against the update item
 		IF st_ToUpdate.Item.ID = TransportItemInSorter.ID THEN
-			IF .nSortBufferLogEnable.BUFFER_UPDATEINDUCT THEN
-				sMessage := CONCAT(' Item: ', st_ToUpdate.Item.ID);
+			IF nSortBufferLogEnable.BUFFER_UPDATEINDUCT THEN
+				sMessage := CONCAT('Item: ', st_ToUpdate.Item.ID);
 				sMessage := CONCAT(sMessage,' Index: ');
 				sMessage := CONCAT(sMessage, UDINT_TO_STRING(TransportSorterIndex));
 				// Write to the Error List
 				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-					, msgFmtStr := 'Found After Induct: %s'
+					, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Found After Induct: %s')
 					, strArg := sMessage);
 			END_IF
 			// Copy the found item record, 
@@ -378,8 +414,8 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 		IF TransportItemFound.ID = TransportItemInSorter.ID THEN
 			// Only update if it is different
 			IF TransportItemFound.Destination <> TransportItemInSorter.Destination THEN
-				IF .nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
-					sMessage := CONCAT(' Item: ', TransportItemInSorter.ID);
+				IF nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
+					sMessage := CONCAT('Item: ', TransportItemInSorter.ID);
 					sMessage := CONCAT(sMessage,' Index: ');
 					sMessage := CONCAT(sMessage, UDINT_TO_STRING(TransportSorterIndex));
 					sMessage := CONCAT(sMessage,' Orig Dest: ');
@@ -390,7 +426,7 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 					sMessage := CONCAT(sMessage, TransportItemInSorter.DeviceID);
 					// Write to the Error List
 					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-						, msgFmtStr := 'Dest Updated After Induct: %s'
+						, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Dest Updated After Induct: %s')
 						, strArg := sMessage);
 				END_IF
 				// Update the Destination. If the destination is unavailable, it has been already been set to the default
@@ -401,8 +437,8 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 				TransportItemInSorter.Status := TransportItemFound.Status;
 				TransportItemInSorter.ExtStatus := TransportItemFound.ExtStatus;
 	
-				IF .nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
-					sMessage := CONCAT(' Item: ', TransportItemInSorter.ID);
+				IF nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
+					sMessage := CONCAT('Item: ', TransportItemInSorter.ID);
 					sMessage := CONCAT(sMessage,' Index: ');
 					sMessage := CONCAT(sMessage, UDINT_TO_STRING(TransportSorterIndex));
 					sMessage := CONCAT(sMessage,' New Dest: ');
@@ -413,7 +449,7 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 					sMessage := CONCAT(sMessage, TransportItemInSorter.DeviceID);
 					// Write to the Error List
 					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-						, msgFmtStr := 'Dest Updated After Induct: %s'
+						, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Dest Updated After Induct: %s')
 						, strArg := sMessage);
 				END_IF
 			END_IF
@@ -421,9 +457,9 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 			IF st_UpdateItem.Item.ID <> '' THEN
 				IF st_UpdateItem.Item.ID = TransportItemFound.ID THEN
 					IF st_UpdateItem.Item.Destination <> TransportItemFound.Destination THEN
-						IF .nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
+						IF nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
 							// Log the original destination
-							sMessage := CONCAT(' Item: ', st_UpdateItem.Item.ID);
+							sMessage := CONCAT('Item: ', st_UpdateItem.Item.ID);
 							sMessage := CONCAT(sMessage, ' Pulses: ');
 							sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
 							sMessage := CONCAT(sMessage,' Orig Dest: ');
@@ -432,15 +468,15 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 							sMessage := CONCAT(sMessage, DINT_TO_STRING(st_UpdateItem.Item.DestinationIdx));
 							// Write to the Error List
 							ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-								, msgFmtStr := 'Induct Dest Changed: %s'
+								, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Induct Dest Changed: %s')
 								, strArg := sMessage);
 						END_IF
 						// Update the Destination and Index
 						st_UpdateItem.Item.Destination := TransportItemFound.Destination;
 						st_UpdateItem.Item.DestinationIdx := TransportItemFound.DestinationIdx;
 						// Log the new destination
-						IF .nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
-							sMessage := CONCAT(' Item: ', st_UpdateItem.Item.ID);
+						IF nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
+							sMessage := CONCAT('Item: ', st_UpdateItem.Item.ID);
 							sMessage := CONCAT(sMessage, ' Pulses: ');
 							sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
 							sMessage := CONCAT(sMessage,' New Dest: ');
@@ -449,14 +485,14 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 							sMessage := CONCAT(sMessage, DINT_TO_STRING(st_UpdateItem.Item.DestinationIdx));
 							// Write to the Error List
 							ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-								, msgFmtStr := 'Induct Dest Changed: %s'
+								, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Induct Dest Changed: %s')
 								, strArg := sMessage);
 						END_IF
 					END_IF
 				END_IF
 			ELSE
-				IF .nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
-					sMessage := CONCAT(' Item: ', TransportItemInSorter.ID);
+				IF nSortBufferLogEnable.BUFFER_UPDATEDEST THEN
+					sMessage := CONCAT('Item: ', TransportItemInSorter.ID);
 					sMessage := CONCAT(sMessage,' Index: ');
 					sMessage := CONCAT(sMessage, UDINT_TO_STRING(TransportSorterIndex));
 					sMessage := CONCAT(sMessage,' Orig Dest: ');
@@ -465,9 +501,9 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 					sMessage := CONCAT(sMessage, DINT_TO_STRING(TransportItemInSorter.DestinationIdx));
 					// Write to the Error List
 					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-						, msgFmtStr := 'Dest Received After Induct: %s'
+						, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Dest Received After Induct: %s')
 						, strArg := sMessage);
-				END_IF	
+				END_IF
 			END_IF
 		END_IF
 	END_IF
@@ -507,8 +543,8 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 		IF ExitComplete THEN
 			IF ExitItemInSorter.ID = ExitItemFound.Item.ID THEN
 				IF aItems[ExitSorterIndex].ID <> '' THEN
-					IF .nSortBufferLogEnable.BUFFER_DUMP THEN
-						sMessage := CONCAT(' Item: ', aItems[ExitSorterIndex].ID);
+					IF nSortBufferLogEnable.BUFFER_DUMP THEN
+						sMessage := CONCAT('Item: ', aItems[ExitSorterIndex].ID);
 						sMessage := CONCAT(sMessage,' Index: ');
 						sMessage := CONCAT(sMessage, UDINT_TO_STRING(ExitSorterIndex));
 						sMessage := CONCAT(sMessage,' Item Status: ');
@@ -517,7 +553,7 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 						sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[ExitSorterIndex].ExtStatus));
 						// Write to the Error List
 						ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-							, msgFmtStr := 'Exit Complete Dump Info: %s'
+							, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Exit Complete Dump Info: %s')
 							, strArg := sMessage);
 					END_IF
 				END_IF
@@ -579,10 +615,14 @@ FOR UpdateIndexCounter := UDINT_TO_DINT(ItemsArrayMin) TO UDINT_TO_DINT(ItemsArr
 				IF ExitSuccess THEN
 					ExitItemFound.Item.Status := E_StatusCode.Divert_Success;
 				END_IF
-				ExitItemFound.Item.CapturedInMetrics := TRUE;
-				ExitItemFound.Item.MessageType := E_MessageIds.TransportComplete_26;
-				fb_UpdateBuffer.AddItem(ExitItemFound.Item);
-				aItems[ExitItemFound.Counts].Status := E_StatusCode.Divert_Complete;
+				IF NOT (ExitItemFound.Item.DestinationIdx = Sorter.NUMBEROFDIVERTS_P2140)
+				   OR (ExitItemFound.Item.DestinationIdx = Sorter.NUMBEROFDIVERTS_P2140 AND aDiverts[ExitItemFound.Item.DestinationIdx].Config.IsDischarge)
+				   THEN 
+					ExitItemFound.Item.CapturedInMetrics := TRUE;
+					ExitItemFound.Item.MessageType := E_MessageIds.TransportComplete_26;
+					fb_UpdateBuffer.AddItem(ExitItemFound.Item);
+					aItems[ExitItemFound.Counts].Status := E_StatusCode.Divert_Complete;
+				END_IF
 			END_IF
 		END_IF
 		// Clear the last detected Exit item
@@ -598,11 +638,11 @@ END_FOR
 
 // If the ID is populated, we didn't find a match to update
 IF st_ToUpdate.Item.ID <> '' THEN
-	IF .nSortBufferLogEnable.BUFFER_UNASSIGNED THEN
-		sMessage := CONCAT(' Item: ', st_ToUpdate.Item.ID);
+	IF nSortBufferLogEnable.BUFFER_UNASSIGNED THEN
+		sMessage := CONCAT('Item: ', st_ToUpdate.Item.ID);
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-			, msgFmtStr := 'Item Not Updated: %s'
+			, msgFmtStr := CONCAT(st_Sorter.Config.Name, ' Item Not Updated: %s')
 			, strArg := sMessage);
 	END_IF
 	st_ToUpdate.Item.Status := E_StatusCode.Assign_NotFound;

@@ -286,7 +286,7 @@ PE_10302(
 PE_11191(
    In_Status:= ,
    CFG_PEOKState:= 1,
-   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OnDlyTime:= T#1000MS, // Delay the tote detection just shorter than the pin stop detection
    CFG_OffDlyTime:= DebounceOffTime,
    CFG_JamDetTime:= JamDetectTime,
    In_Sim:=
@@ -296,13 +296,13 @@ PE_11191(
 PE_11221(
    In_Status:= ,
    CFG_PEOKState:= 1,
-   CFG_OnDlyTime:= T#750MS,
+   CFG_OnDlyTime:= T#1500MS,	// Use a custom delay at the pin stop
    CFG_OffDlyTime:= DebounceOffTime,
    CFG_JamDetTime:= JamDetectTime,
    In_Sim:=
 );
 
-//P2140 FULL PEPHOTOEYE
+//P2140 FULL PEP HOTOEYE
 PE_11241(
    In_Status:= ,
    CFG_PEOKState:= 1,

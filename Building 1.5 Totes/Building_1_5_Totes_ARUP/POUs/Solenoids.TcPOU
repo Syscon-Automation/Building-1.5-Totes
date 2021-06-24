@@ -308,8 +308,9 @@ PI2140_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_DA;
 
 // Interlocks
 //PI2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
-PI2140_01.In_EquipIntlks.2:= Photoeyes.PE_8141.Out_OnOffFltrd;
-PI2140_01.In_EquipIntlks.3:= Photoeyes.PE_4161.Out_OnOffFltrd;
+// Interlocks for downstream full when the pin stop is extended
+PI2140_01.In_EquipIntlks.2:= Photoeyes.PE_8141.Out_OnOffFltrd AND ProxSensors.PX_11181_Extended.Out;
+PI2140_01.In_EquipIntlks.3:= Photoeyes.PE_4161.Out_OnOffFltrd AND ProxSensors.PX_11181_Extended.Out;
 //Events
 PI2140_01.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 PI2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;

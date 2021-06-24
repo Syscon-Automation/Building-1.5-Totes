@@ -249,6 +249,12 @@
     <Compile Include="FunctionBlocks\Sorter\DUTs\ST_RoundRobin.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FunctionBlocks\Sorter\DUTs\ST_RoundRobinCfg.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FunctionBlocks\Sorter\DUTs\ST_RoundRobinDest.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FunctionBlocks\Sorter\DUTs\ST_Sorter.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -259,6 +265,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FunctionBlocks\Sorter\Functions\FB_SorterLog.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FunctionBlocks\Sorter\ProcessBuffers.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FunctionBlocks\Sorter\SorterExample.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FunctionBlocks\Sorter\SorterProgram.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FunctionBlocks\Sorter\VISUs\ArrayInspection.TcVIS">

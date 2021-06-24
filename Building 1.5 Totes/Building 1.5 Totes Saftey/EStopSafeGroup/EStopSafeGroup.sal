@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<safetyApplication Crc="2805828373" xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" dslVersion="1.3.0.0" Id="8f9a3992-352b-4597-8f8b-0d2ffca079d8" name="" mapState="false" mapDiag="false" groupOrderId="0" passificationAllowed="false" temporaryDeactivationAllowed="false" permamentDeactivationAllowed="false" xmlid="0" analogFBOutputReplacementValues="Zero" verifyAnalogFBInputsIfStart="false" userFbId="00000000-0000-0000-0000-000000000000" xmlns="http://schemas.microsoft.com/dsltools/SafetyApplicationLanguage">
+<safetyApplication Crc="1826348426" xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" dslVersion="1.3.0.0" Id="8f9a3992-352b-4597-8f8b-0d2ffca079d8" name="" mapState="false" mapDiag="false" groupOrderId="0" passificationAllowed="false" temporaryDeactivationAllowed="false" permamentDeactivationAllowed="false" xmlid="0" analogFBOutputReplacementValues="Zero" verifyAnalogFBInputsIfStart="false" userFbId="00000000-0000-0000-0000-000000000000" xmlns="http://schemas.microsoft.com/dsltools/SafetyApplicationLanguage">
   <networks>
     <safetyApplicationHasNetworks Id="174acd44-17d8-459e-9386-c6f459bdda1e">
       <Network Id="e6af0ed8-4288-45b3-b9b6-5a27897b6ebe" name="Network1" networkName="Panel_EStop" intId="1" networkOrderId="0">
@@ -444,7 +444,7 @@
       </Network>
     </safetyApplicationHasNetworks>
     <safetyApplicationHasNetworks Id="f43adeab-79db-403a-bcfd-6340bbc1ff51">
-      <Network Id="06d217b2-d0f1-4734-97dd-b2cde2e79c1c" name="Network7" networkName="EStop_Network" intId="7" networkOrderId="4">
+      <Network Id="06d217b2-d0f1-4734-97dd-b2cde2e79c1c" name="Network7" networkName="EStop_Network" intId="7" networkOrderId="3">
         <functionBlocks>
           <networkHasFunctionBlocks Id="27f5fd60-b370-45a4-8965-f0586107797c">
             <fBEstop Id="7e1017ec-3197-4e93-b4ff-de83c9526de3" name="FBEstop1" instanceName="FBEstop_System" orderOfExecution="13" mapState="false" mapDiag="false" functionName="safeEstop" safeInputsAfterDiscError="true">
@@ -1505,6 +1505,38 @@
               <usages>
                 <variableUsagesHasUsages Id="90e73a92-bf51-4fbb-a7a1-923f0919604a">
                   <aliasDeviceIoUsage Id="9afa72b1-8568-4443-b16e-4676d1fdd738" sdsId="28" channelId="1" functionId="1131179972" />
+                </variableUsagesHasUsages>
+              </usages>
+            </variableUsages>
+          </variableHasTargetUsages>
+        </targetUsages>
+      </variable>
+    </safetyApplicationHasVariables>
+    <safetyApplicationHasVariables Id="f43aca27-62c4-43db-86ca-523cccce3943">
+      <variable Id="60c61e7b-1037-426f-82bd-59e9da7b6ad7" name="GroupPort_In_Run" isLocal="false">
+        <sourceUsages>
+          <variableHasSourceUsages Id="754352a6-fa7b-4673-acc2-785c96894cc7">
+            <variableUsages Id="4f6ede12-1c1b-466c-a109-93f2b65f22d1">
+              <usages>
+                <variableUsagesHasUsages Id="0b03777b-6f60-4aea-87d1-c9fb16965e20">
+                  <groupPortUsage Id="1a921054-5043-4e22-aeca-752aff01d8bc">
+                    <twinSAFEGroupAliasPort>
+                      <groupPortUsageReferencesTwinSAFEGroupAliasPort Id="83dd844f-d1cd-4b2c-b727-c39fcf5b7361">
+                        <twinSAFEGroupAliasPortMoniker name="//InRun" />
+                      </groupPortUsageReferencesTwinSAFEGroupAliasPort>
+                    </twinSAFEGroupAliasPort>
+                  </groupPortUsage>
+                </variableUsagesHasUsages>
+              </usages>
+            </variableUsages>
+          </variableHasSourceUsages>
+        </sourceUsages>
+        <targetUsages>
+          <variableHasTargetUsages Id="9a61932d-7e1e-4aeb-bf52-e263842ed7fd">
+            <variableUsages Id="eafba640-2db9-45ac-8ee6-99cbe990afd5">
+              <usages>
+                <variableUsagesHasUsages Id="e2609cc9-27fa-48c5-80c4-7de086f7e9c7">
+                  <aliasDeviceIoUsage Id="6e99a979-cd45-400a-b8c3-746b7723e672" sdsId="30" channelId="1" functionId="1131179972" />
                 </variableUsagesHasUsages>
               </usages>
             </variableUsages>

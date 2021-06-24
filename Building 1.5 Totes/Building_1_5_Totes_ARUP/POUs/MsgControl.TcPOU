@@ -78,7 +78,7 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Create instances of Buffer Processing Functions to initialize the buffers and data
-fb_SorterUpdateBuffer.Master := FALSE;
+fb_SorterUpdateBuffer.Master := TRUE;
 fb_SorterTransportBuffer_P2140.Master := TRUE;
 fb_SorterTransportBuffer_P2150.Master := TRUE;
 
@@ -93,8 +93,8 @@ fb_SorterTransportBuffer_P2140.Name := 'P2140 SYS TRANSPORT';
 fb_SorterTransportBuffer_P2150.Name := 'P2150 SYS TRANSPORT';
 
 fb_SorterUpdateBuffer(st_BufferData := st_SorterUpdateBuffer
-					, st_BufferFdbkIn := st_UpdateFdbkOut
-					, st_BufferFdbkOut => st_UpdateFdbkIn);
+					, st_BufferFdbkIn := st_UpdateFdbkIn
+					, st_BufferFdbkOut => st_UpdateFdbkOut);
 fb_SorterTransportBuffer_P2140(st_BufferData := st_SorterTransportBuffer_P2140
 					, st_BufferFdbkIn := st_TransportFdbkIn_P2140
 					, st_BufferFdbkOut => st_TransportFdbkOut_P2140);

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_DivertLog" Id="{dffd4819-1436-437c-ba4c-f557df3024a3}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertLog
 VAR_IN_OUT
@@ -37,9 +37,9 @@ FOR DivertIndex := DivertCountMin TO DivertCountMax DO
 		IF ((DivertLogEnable AND LREAL_TO_UDINT(EXPT(2,DivertIndex))) > 0) THEN
 			sMessage := DINT_TO_STRING(DivertIndex);
 			sMessage := CONCAT(sMessage,' : ');
-			sMessage := CONCAT(sMEssage, UDINT_TO_STRING(EncoderCounts));
+			sMessage := CONCAT(sMessage, UDINT_TO_STRING(EncoderCounts));
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Extend Divert %s'
+				, msgFmtStr := CONCAT(DivertArray[DivertIndex].Config.ID, ' Extend Divert %s')
 				, strArg := sMessage); 
 		END_IF;
 	END_IF
@@ -50,7 +50,7 @@ FOR DivertIndex := DivertCountMin TO DivertCountMax DO
 			sMessage := CONCAT(sMessage,' : ');
 			sMessage := CONCAT(sMEssage, UDINT_TO_STRING(EncoderCounts));
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Retract Divert %s'
+				, msgFmtStr := CONCAT(DivertArray[DivertIndex].Config.ID, ' Retract Divert %s')
 				, strArg := sMessage); 
 		END_IF;
 	END_IF
@@ -66,7 +66,7 @@ FOR DivertIndex := DivertCountMin TO DivertCountMax DO
 			sMessage := CONCAT(sMessage,' Blocked: ');
 			sMessage := CONCAT(sMEssage, UDINT_TO_STRING(EncoderCounts));
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Configm PE %s'
+				, msgFmtStr := CONCAT(DivertArray[DivertIndex].Config.ID, ' Configm PE %s')
 				, strArg := sMessage); 
 		END_IF;
 	END_IF
@@ -77,39 +77,11 @@ FOR DivertIndex := DivertCountMin TO DivertCountMax DO
 			sMessage := CONCAT(sMessage,' Cleared: ');
 			sMessage := CONCAT(sMEssage, UDINT_TO_STRING(EncoderCounts));
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Configm PE %s'
+				, msgFmtStr := CONCAT(DivertArray[DivertIndex].Config.ID, ' Configm PE %s')
 				, strArg := sMessage); 
 		END_IF;
 	END_IF
 END_FOR]]></ST>
     </Implementation>
-    <LineIds Name="FB_DivertLog">
-      <LineId Id="9" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="21" Count="1" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="78" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="66" Count="2" />
-      <LineId Id="31" Count="5" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="71" Count="5" />
-      <LineId Id="41" Count="7" />
-      <LineId Id="79" Count="0" />
-      <LineId Id="49" Count="0" />
-      <LineId Id="80" Count="5" />
-      <LineId Id="53" Count="2" />
-      <LineId Id="92" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="86" Count="5" />
-      <LineId Id="60" Count="1" />
-      <LineId Id="25" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

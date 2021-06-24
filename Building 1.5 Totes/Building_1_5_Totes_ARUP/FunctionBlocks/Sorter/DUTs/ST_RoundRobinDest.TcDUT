@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_RoundRobinDest" Id="{804433d2-1834-49fe-bd54-9e2d315000a2}">
+    <Declaration><![CDATA[TYPE ST_RoundRobinDest :
+STRUCT
+	Enabled			:	BOOL;
+	Available		:	BOOL;
+	aDestination	:	DINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

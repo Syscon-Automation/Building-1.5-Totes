@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
-  <POU Name="FB_SorterLog" Id="{e2396a7d-6b34-4b02-83dc-f2c406ebff27}" SpecialFunc="None">
+  <POU Name="FB_SorterLog" Id="{c272d0ce-1b1c-4838-8478-8c07c216052c}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SorterLog
 VAR_IN_OUT
 END_VAR
@@ -39,7 +39,7 @@ IF rInductPE.Q OR fInductPE.Q THEN
 	IF SorterLogEnable.SORTER_DISCHARGE_PE THEN
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-			, msgFmtStr := 'Induct PE Blocked : %s'
+			, msgFmtStr := CONCAT(sortertolog.Config.Name,' Induct PE Blocked : %s')
 			, strArg := BOOL_TO_STRING(SorterToLog.InductPE)); 
 	END_IF
 END_IF
@@ -54,10 +54,11 @@ IF rInductPE.Q THEN
 		TempItem.Item.UniqueID :=  UDINT_TO_DINT(SorterToLog.EncoderCounts);
 		TempItem.Item.ID :=  CONCAT('T-', UDINT_TO_STRING(SorterToLog.EncoderCounts));
 		TempItem.Item.Destination := SorterToLog.Config.DefaultDestination;
+		TempItem.Item.DestinationIdx := SorterToLog.Config.DefaultDestIdx;
 		TempItem.Item.Status := E_StatusCode.UnidentifiedItem;
 		IF SorterLogEnable.SORTER_TEMPID THEN
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Temp ID Assigned : %s'
+				, msgFmtStr := CONCAT(sortertolog.Config.Name,' Temp ID Assigned : %s')
 				, strArg := TempItem.Item.ID);
 		END_IF
 	END_IF	
@@ -76,23 +77,10 @@ IF rDischargePE.Q OR fDischargePE.Q THEN
 	IF SorterLogEnable.SORTER_DISCHARGE_PE THEN
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-			, msgFmtStr := 'Discharge PE Blocked : %s'
+			, msgFmtStr := CONCAT(sortertolog.Config.Name,' Discharge PE Blocked : %s')
 			, strArg := BOOL_TO_STRING(SorterToLog.DischargePE)); 
 	END_IF
 END_IF]]></ST>
     </Implementation>
-    <LineIds Name="FB_SorterLog">
-      <LineId Id="135" Count="5" />
-      <LineId Id="226" Count="7" />
-      <LineId Id="141" Count="0" />
-      <LineId Id="235" Count="0" />
-      <LineId Id="234" Count="0" />
-      <LineId Id="142" Count="1" />
-      <LineId Id="150" Count="18" />
-      <LineId Id="175" Count="3" />
-      <LineId Id="187" Count="0" />
-      <LineId Id="189" Count="7" />
-      <LineId Id="211" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

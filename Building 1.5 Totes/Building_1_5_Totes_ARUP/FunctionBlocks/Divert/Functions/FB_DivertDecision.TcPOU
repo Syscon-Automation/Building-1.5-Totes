@@ -37,14 +37,14 @@ IF DivertIndex = Output1Item.DestinationIdx THEN
 			Divert.Status := E_StatusCode.Diverting;
 		END_IF
 		IF bLog THEN
-			sMessage := CONCAT(' Item: ', Output1Item.ID);
+			sMessage := CONCAT('Item: ', Output1Item.ID);
 			sMessage := CONCAT(sMessage,' Dest: ');
 			sMessage := CONCAT(sMessage, DINT_TO_STRING(Output1Item.Destination));
 			sMessage := CONCAT(sMessage,' Status: ');
 			sMessage := CONCAT(sMessage, DINT_TO_STRING(Divert.Status));
 			// Write to the Error List
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Divert Initiated: %s'
+				, msgFmtStr := CONCAT(Divert.Config.ID, ' Divert Initiated: %s')
 				, strArg := sMessage);
 		END_IF
 	END_IF;
@@ -88,21 +88,5 @@ ELSE
 				);
 END_IF]]></ST>
     </Implementation>
-    <LineIds Name="FB_DivertDecision">
-      <LineId Id="653" Count="10" />
-      <LineId Id="760" Count="0" />
-      <LineId Id="816" Count="0" />
-      <LineId Id="763" Count="1" />
-      <LineId Id="839" Count="1" />
-      <LineId Id="765" Count="3" />
-      <LineId Id="792" Count="0" />
-      <LineId Id="664" Count="2" />
-      <LineId Id="738" Count="0" />
-      <LineId Id="667" Count="9" />
-      <LineId Id="841" Count="0" />
-      <LineId Id="843" Count="0" />
-      <LineId Id="677" Count="22" />
-      <LineId Id="52" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

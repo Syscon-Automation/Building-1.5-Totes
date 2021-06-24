@@ -6,8 +6,8 @@
 				<Target>
 					<ManualSelect>{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</ManualSelect>
 					<ManualSelect>{3EBB9639-5FF3-42B6-8847-35C70DC013C8}</ManualSelect>
-					<TargetSelect TargetId="2">{66689887-CCBD-452C-AC9A-039D997C6E66}</TargetSelect>
 					<TargetSelect TargetId="2">{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</TargetSelect>
+					<TargetSelect TargetId="2">{66689887-CCBD-452C-AC9A-039D997C6E66}</TargetSelect>
 					<TargetSelect TargetId="2">{3EBB9639-5FF3-42B6-8847-35C70DC013C8}</TargetSelect>
 					<TargetSelect TargetId="2">{87DBEEFC-A548-4B37-9797-C9521D3A43A2}</TargetSelect>
 					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020002" DongleLevel="60" DongleSystemId="{1156FDF6-61BF-2B8D-72DF-BD765C93D8D6}" DongleSerialNumber="100084338"/>
@@ -35,21 +35,7 @@
 			<Project File="Building_1_5_Totes_ARUP.xti"/>
 		</Plc>
 		<Safety>
-			<Project GUID="{73D6BB41-CE6E-4107-83C1-D7B3E7AD5099}" Name="Building 1.5 Totes Saftey" PrjFilePath="Building 1.5 Totes Saftey\Building 1.5 Totes Saftey.splcproj" TmcFilePath="Building 1.5 Totes Saftey\Building 1.5 Totes Saftey.tmc" GeneralArchiveSettings="#x000f" TargetArchiveSettings="#x0007" FileArchiveSettings="#x000e">
-				<Instance Id="#x01010010" KeepUnrestoredLinks="2">
-					<Name>Building 1.5 Totes Saftey Instance</Name>
-					<TmcDesc GUID="{72A6D5B8-E98C-4604-8B90-09D1F8AB38A9}">
-						<Name>Safety</Name>
-						<InitSequence>PO</InitSequence>
-						<Contexts>
-							<Context>
-								<Id>1</Id>
-								<Name>Default</Name>
-							</Context>
-						</Contexts>
-					</TmcDesc>
-				</Instance>
-			</Project>
+			<Project File="Building 1.5 Totes Saftey.xti"/>
 		</Safety>
 		<Io>
 			<Device File="Device 1 (EtherCAT).xti" Id="1"/>

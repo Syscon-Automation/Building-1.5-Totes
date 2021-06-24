@@ -5,7 +5,7 @@
       <Data>
         <o xml:space="preserve" t="VisualObject">
           <n n="LastVisuLanguageModelEntry" />
-          <v n="UniqueIdGenerator">"7"</v>
+          <v n="UniqueIdGenerator">"3"</v>
           <o n="VisualElemList" t="VisualElemList">
             <l n="VisualElementList" t="VisualElemCollection" cet="GenericVisualElem">
               <o>
@@ -258,12 +258,12 @@
                               <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
                                 <v>Visible</v>
                                 <v>False</v>
-                                <v>DefaultArraySize</v>
-                                <v>5</v>
-                                <v>VisibleChildren</v>
-                                <v>True</v>
                                 <v>ieccodeconversion_array</v>
                                 <v></v>
+                                <v>VisibleChildren</v>
+                                <v>True</v>
+                                <v>DefaultArraySize</v>
+                                <v>5</v>
                                 <v>''NORMAL__COMMENT</v>
                                 <v> We hide this node to prevent having two References nodes
  Nevertheless we want to make sure that the children are displayed</v>
@@ -319,8 +319,8 @@
                         <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                           <v n="AttrFlags">81920UL</v>
                           <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                            <v>DisplayFrameReferencesConfiguration</v>
-                            <v></v>
+                            <v>conditionalshow</v>
+                            <v>visu_elemdev</v>
                             <v>DescriptionTextId</v>
                             <v>TL_ElementProperties.Desc_ReferencedVisus</v>
                             <v>SortFlag</v>
@@ -331,14 +331,14 @@
                             <v>Simple|Standard</v>
                             <v>DynamicArray</v>
                             <v></v>
-                            <v>conditionalshow</v>
-                            <v>visu_elemdev</v>
+                            <v>DisplayFrameReferencesConfiguration</v>
+                            <v></v>
                             <v>FrameReferences</v>
                             <v></v>
-                            <v>DisplayTextId</v>
-                            <v>TL_ElementProperties.References</v>
                             <v>Storable</v>
                             <v>True</v>
+                            <v>DisplayTextId</v>
+                            <v>TL_ElementProperties.References</v>
                           </d>
                           <v n="ConvDone">true</v>
                         </o>
@@ -1339,12 +1339,12 @@
                               <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
                                 <v>Visible</v>
                                 <v>False</v>
-                                <v>DefaultArraySize</v>
-                                <v>5</v>
-                                <v>VisibleChildren</v>
-                                <v>True</v>
                                 <v>ieccodeconversion_array</v>
                                 <v></v>
+                                <v>VisibleChildren</v>
+                                <v>True</v>
+                                <v>DefaultArraySize</v>
+                                <v>5</v>
                                 <v>''NORMAL__COMMENT</v>
                                 <v> We hide this node to prevent having two References nodes
  Nevertheless we want to make sure that the children are displayed</v>
@@ -1400,8 +1400,8 @@
                         <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                           <v n="AttrFlags">81920UL</v>
                           <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                            <v>DisplayFrameReferencesConfiguration</v>
-                            <v></v>
+                            <v>conditionalshow</v>
+                            <v>visu_elemdev</v>
                             <v>DescriptionTextId</v>
                             <v>TL_ElementProperties.Desc_ReferencedVisus</v>
                             <v>SortFlag</v>
@@ -1412,14 +1412,14 @@
                             <v>Simple|Standard</v>
                             <v>DynamicArray</v>
                             <v></v>
-                            <v>conditionalshow</v>
-                            <v>visu_elemdev</v>
+                            <v>DisplayFrameReferencesConfiguration</v>
+                            <v></v>
                             <v>FrameReferences</v>
                             <v></v>
-                            <v>DisplayTextId</v>
-                            <v>TL_ElementProperties.References</v>
                             <v>Storable</v>
                             <v>True</v>
+                            <v>DisplayTextId</v>
+                            <v>TL_ElementProperties.References</v>
                           </d>
                           <v n="ConvDone">true</v>
                         </o>
@@ -1483,7 +1483,7 @@
                         <l n="TypeNodeChildren" t="ArrayList" cet="BasicTypeNode">
                           <o>
                             <v n="Flags">2L</v>
-                            <v n="BasicTypeNodeValue">"ProcessBuffers_P2140.st_DisplayItem"</v>
+                            <v n="BasicTypeNodeValue">"ProcessBuffers.st_DisplayItem"</v>
                             <v n="BasicTypeNodeAcceptsExpression">true</v>
                             <n n="BasicTypeNodeFastAccess" />
                             <a n="BasicTypeNodeEnumValues" et="String" />
@@ -1539,7 +1539,7 @@
                     </o>
                     <o>
                       <v n="Id">991484643L</v>
-                      <v n="Value">"ProcessBuffers_P2140.st_DisplayItem"</v>
+                      <v n="Value">"ProcessBuffers.st_DisplayItem"</v>
                     </o>
                   </l>
                 </o>
@@ -1813,12 +1813,12 @@
                               <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
                                 <v>Visible</v>
                                 <v>False</v>
-                                <v>ieccodeconversion_array</v>
-                                <v></v>
-                                <v>VisibleChildren</v>
-                                <v>True</v>
                                 <v>DefaultArraySize</v>
                                 <v>5</v>
+                                <v>VisibleChildren</v>
+                                <v>True</v>
+                                <v>ieccodeconversion_array</v>
+                                <v></v>
                                 <v>''NORMAL__COMMENT</v>
                                 <v> We hide this node to prevent having two References nodes
  Nevertheless we want to make sure that the children are displayed</v>
@@ -1874,8 +1874,8 @@
                         <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                           <v n="AttrFlags">81920UL</v>
                           <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                            <v>conditionalshow</v>
-                            <v>visu_elemdev</v>
+                            <v>DisplayFrameReferencesConfiguration</v>
+                            <v></v>
                             <v>DescriptionTextId</v>
                             <v>TL_ElementProperties.Desc_ReferencedVisus</v>
                             <v>SortFlag</v>
@@ -1886,14 +1886,14 @@
                             <v>Simple|Standard</v>
                             <v>DynamicArray</v>
                             <v></v>
-                            <v>DisplayFrameReferencesConfiguration</v>
-                            <v></v>
+                            <v>conditionalshow</v>
+                            <v>visu_elemdev</v>
                             <v>FrameReferences</v>
                             <v></v>
-                            <v>Storable</v>
-                            <v>True</v>
                             <v>DisplayTextId</v>
                             <v>TL_ElementProperties.References</v>
+                            <v>Storable</v>
+                            <v>True</v>
                           </d>
                           <v n="ConvDone">true</v>
                         </o>
@@ -1953,7 +1953,7 @@
                         <l n="TypeNodeChildren" t="ArrayList" cet="BasicTypeNode">
                           <o>
                             <v n="Flags">2L</v>
-                            <v n="BasicTypeNodeValue">"Sorter_P2140.st_DisplayItem"</v>
+                            <v n="BasicTypeNodeValue">"SorterProgram.st_DisplayItem"</v>
                             <v n="BasicTypeNodeAcceptsExpression">true</v>
                             <n n="BasicTypeNodeFastAccess" />
                             <a n="BasicTypeNodeEnumValues" et="String" />
@@ -2013,7 +2013,7 @@
                     </o>
                     <o>
                       <v n="Id">991484643L</v>
-                      <v n="Value">"Sorter_P2140.st_DisplayItem"</v>
+                      <v n="Value">"SorterProgram.st_DisplayItem"</v>
                     </o>
                   </l>
                 </o>
@@ -2190,12 +2190,12 @@
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>
-                <v n="Id">6L</v>
+                <v n="Id">2L</v>
                 <n n="Tag" />
                 <v n="Text">"VAR_IN_OUT"</v>
               </o>
               <o>
-                <v n="Id">7L</v>
+                <v n="Id">3L</v>
                 <n n="Tag" />
                 <v n="Text">"	"</v>
               </o>

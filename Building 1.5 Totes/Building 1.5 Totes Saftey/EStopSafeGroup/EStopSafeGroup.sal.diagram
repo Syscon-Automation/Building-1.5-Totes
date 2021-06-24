@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<safetyApplicationLanguageDiagram Crc="3760821604" dslVersion="1.3.0.0" Id="b3a3c34b-e3fb-49f0-bb44-6ca44321b5d6" absoluteBounds="0, 0, 36.375, 29.75" name="TwinSAFE">
+<safetyApplicationLanguageDiagram Crc="3768186500" dslVersion="1.3.0.0" Id="b3a3c34b-e3fb-49f0-bb44-6ca44321b5d6" absoluteBounds="0, 0, 36.375, 29.75" name="TwinSAFE">
   <safetyApplicationMoniker name="/" />
   <nestedChildShapes>
     <networkSwimLane Id="977c1cb8-1121-4939-a49d-23e334b09bb6" absoluteBounds="0, 0, 36.375, 8">
@@ -506,7 +506,7 @@
         </wiredLinkConnector>
       </nestedChildShapes>
     </networkSwimLane>
-    <networkSwimLane Id="ba9d29cf-d743-4c99-9c4b-00cea7aebf1a" absoluteBounds="0, 15.73819303302, 36.375, 8.7474411391996973">
+    <networkSwimLane Id="ba9d29cf-d743-4c99-9c4b-00cea7aebf1a" absoluteBounds="0, 15.73819303302, 36.375, 8.7474411391997009">
       <networkMoniker name="//Network4" />
       <nestedChildShapes>
         <fBAndShape Id="8fbb9785-4106-4ab9-ab71-2a1cdd155ddd" absoluteBounds="2.75, 20.86319303302, 2.75, 3.25">

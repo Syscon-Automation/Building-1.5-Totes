@@ -9,6 +9,7 @@ VAR_IN_OUT
 END_VAR
 VAR_INPUT
 	SorterLogEnable	:	UDINT;
+	NoAssignment		:	BOOL;
 END_VAR
 VAR_OUTPUT
 	DestinationIndex	:	DINT;
@@ -17,9 +18,12 @@ END_VAR
 VAR
 	DivertArrayMin		:	DINT;
 	DivertArrayMax		:	DINT;
-	Last_Enabled	:	UINT;
-	IndexCheck		:	DINT;
-	sMessage		:	STRING;
+	Last_Enabled		:	UINT;
+	IndexCheck			:	DINT;
+	sMessage			:	STRING;
+	CheckEnableAvail	:	DINT;
+	Enabled				:	UINT;
+	Available			:	UINT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -30,118 +34,104 @@ DivertArrayMax := UPPER_BOUND(aDiverts,1);
 //When a response is received, find the designated Destination
 IF DestinationID >= 0 THEN
 	IF SorterLogEnable.SORTER_DESTINATION_LU THEN
-		sMessage := CONCAT(' Destination: ', DINT_TO_STRING(DestinationID));
+		sMessage := CONCAT('Destination: ', DINT_TO_STRING(DestinationID));
 		// Write to the Error List
 		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-			, msgFmtStr := 'Lookup: %s'
+			, msgFmtStr := 'Lookup %s'
 			, strArg := sMessage);
 	END_IF
 	// Check to see if the Destination is defined as a round-robin destination for this sorter
-	IF DestinationID = RoundRobin.Destination THEN
+	IF DestinationID = RoundRobin.Config.Destination THEN
+		// Set Enabled
+		Enabled.0 := RoundRobin.Config.Destinations[0].Enabled;
+		Enabled.1 := RoundRobin.Config.Destinations[1].Enabled;
+		Enabled.2 := RoundRobin.Config.Destinations[2].Enabled;
+		Enabled.3 := RoundRobin.Config.Destinations[3].Enabled;
+		Enabled.4 := RoundRobin.Config.Destinations[4].Enabled;
+		Enabled.5 := RoundRobin.Config.Destinations[5].Enabled;
+		Enabled.6 := RoundRobin.Config.Destinations[6].Enabled;
+		Enabled.7 := RoundRobin.Config.Destinations[7].Enabled;
+		Enabled.8 := RoundRobin.Config.Destinations[8].Enabled;
+		Enabled.9 := RoundRobin.Config.Destinations[9].Enabled;
+		Enabled.10 := RoundRobin.Config.Destinations[10].Enabled;
+		Enabled.11 := RoundRobin.Config.Destinations[11].Enabled;
+		Enabled.12 := RoundRobin.Config.Destinations[12].Enabled;
+		Enabled.13 := RoundRobin.Config.Destinations[13].Enabled;
+		Enabled.14 := RoundRobin.Config.Destinations[14].Enabled;
+		Enabled.15 := RoundRobin.Config.Destinations[15].Enabled;
+		// Set Available
+		Available.0 := RoundRobin.Config.Destinations[0].Available;
+		Available.1 := RoundRobin.Config.Destinations[1].Available;
+		Available.2 := RoundRobin.Config.Destinations[2].Available;
+		Available.3 := RoundRobin.Config.Destinations[3].Available;
+		Available.4 := RoundRobin.Config.Destinations[4].Available;
+		Available.5 := RoundRobin.Config.Destinations[5].Available;
+		Available.6 := RoundRobin.Config.Destinations[6].Available;
+		Available.7 := RoundRobin.Config.Destinations[7].Available;
+		Available.8 := RoundRobin.Config.Destinations[8].Available;
+		Available.9 := RoundRobin.Config.Destinations[9].Available;
+		Available.10 := RoundRobin.Config.Destinations[10].Available;
+		Available.11 := RoundRobin.Config.Destinations[11].Available;
+		Available.12 := RoundRobin.Config.Destinations[12].Available;
+		Available.13 := RoundRobin.Config.Destinations[13].Available;
+		Available.14 := RoundRobin.Config.Destinations[14].Available;
+		Available.15 := RoundRobin.Config.Destinations[15].Available;
 		// Test to see if the last enabled round robin destinations are still enabled
 		// If they are different, restart the round-robin assignment to accommodate differences 
-		IF RoundRobin.Enabled = Last_Enabled THEN
+		IF Enabled = Last_Enabled THEN
 			// Test to see if the round robin assignments have all been met
 			// If they have, clear and start over
-			IF RoundRobin.Available = RoundRobin.Sent THEN
+			IF Available = RoundRobin.Sent THEN
 				RoundRobin.Sent := 0;
 			END_IF
 		ELSE
 			// Capture the new enabled round-robin destinations
 			// Restart the round robin assignments
-			Last_Enabled := RoundRobin.Enabled;
+			Last_Enabled := Enabled;
 			RoundRobin.Sent := 0;
 		END_IF
 		FOR IndexCheck := 0 TO 15 DO
 			IF (
-			   ((RoundRobin.Enabled AND LREAL_TO_UINT(EXPT(2,IndexCheck))) > 0) 
-			   AND ((RoundRobin.Available AND LREAL_TO_UINT(EXPT(2,IndexCheck))) > 0)
+			   ((Enabled AND LREAL_TO_UINT(EXPT(2,IndexCheck))) > 0) 
+			   AND ((Available AND LREAL_TO_UINT(EXPT(2,IndexCheck))) > 0)
 			   AND NOT ((RoundRobin.Sent AND LREAL_TO_UINT(EXPT(2,IndexCheck))) > 0))
 			   THEN
-				RoundRobin.Sent := LREAL_TO_UINT(EXPT(2,IndexCheck)) OR RoundRobin.Sent;
-				IF RoundRobin.aDestinations[IndexCheck] >= DivertArrayMin
-				   AND RoundRobin.aDestinations[IndexCheck] <= DivertArrayMax
-				   THEN
-					DestinationIndex := RoundRobin.aDestinations[IndexCheck];
-					DestinationID := aDiverts[DestinationIndex].Config.Number;
-				ELSE
-					DestinationIndex := DivertArrayMax;
+				IF NOT NoAssignment THEN
+					RoundRobin.Sent := LREAL_TO_UINT(EXPT(2,IndexCheck)) OR RoundRobin.Sent;
+					DestinationID := RoundRobin.Config.Destinations[IndexCheck].aDestination;
+					IF SorterLogEnable.SORTER_DESTINATION_LU THEN
+						sMessage := DINT_TO_STRING(DestinationIndex);
+						sMessage := CONCAT('Dest ID: ', DINT_TO_STRING(DestinationID));
+						// Write to the Error List
+						ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+							, msgFmtStr := 'RoundRobin %s'
+							, strArg := sMessage);
+					END_IF
 				END_IF
 				DestinationState := 0;
 				EXIT;
 			END_IF
 		END_FOR
-		IF SorterLogEnable.SORTER_DESTINATION_LU THEN
-			sMessage := DINT_TO_STRING(DestinationIndex);
-			sMessage := CONCAT(' Dest ID: ', DINT_TO_STRING(DestinationID));
-			// Write to the Error List
-			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'RoundRobin Dest: %s'
-				, strArg := sMessage);
+	END_IF
+	// Always find the index for the destination, whether Round robin or assigned
+	DestinationIndex := DivertArrayMax;
+	FOR IndexCheck := DivertArrayMin TO DivertArrayMax  DO
+		IF aDiverts[IndexCheck].Config.Number = DestinationID THEN
+			DestinationIndex := IndexCheck;
+			DestinationState := 0;
+			EXIT;
 		END_IF
-	ELSE
-		DestinationIndex := DivertArrayMax;
-		FOR IndexCheck := DivertArrayMin TO DivertArrayMax  DO
-			IF aDiverts[IndexCheck].Config.Number = DestinationID THEN
-				DestinationIndex := IndexCheck;
-				DestinationState := 0;
-				EXIT;
-			END_IF
-		END_FOR
-		IF SorterLogEnable.SORTER_DESTINATION_LU THEN
-			sMessage := DINT_TO_STRING(DestinationIndex);
-			sMessage := CONCAT(' Dest ID: ', DINT_TO_STRING(DestinationID));
-			// Write to the Error List
-			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
-				, msgFmtStr := 'Lookup Dest: %s'
-				, strArg := sMessage);
-		END_IF
+	END_FOR
+	IF SorterLogEnable.SORTER_DESTINATION_LU THEN
+		sMessage := CONCAT('Dest ID: ', DINT_TO_STRING(DestinationID));
+		sMessage := CONCAT(sMessage,' Idx: ');
+		sMessage := CONCAT(sMessage, DINT_TO_STRING(DestinationIndex));
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Lookup %s'
+			, strArg := sMessage);
 	END_IF
 END_IF]]></ST>
     </Implementation>
-    <LineIds Name="FB_FindDestination">
-      <LineId Id="94" Count="0" />
-      <LineId Id="96" Count="1" />
-      <LineId Id="95" Count="0" />
-      <LineId Id="9" Count="1" />
-      <LineId Id="166" Count="1" />
-      <LineId Id="170" Count="4" />
-      <LineId Id="103" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="104" Count="1" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="106" Count="1" />
-      <LineId Id="14" Count="3" />
-      <LineId Id="108" Count="1" />
-      <LineId Id="18" Count="2" />
-      <LineId Id="110" Count="0" />
-      <LineId Id="113" Count="0" />
-      <LineId Id="123" Count="0" />
-      <LineId Id="119" Count="0" />
-      <LineId Id="116" Count="1" />
-      <LineId Id="124" Count="0" />
-      <LineId Id="136" Count="1" />
-      <LineId Id="142" Count="0" />
-      <LineId Id="140" Count="0" />
-      <LineId Id="146" Count="0" />
-      <LineId Id="143" Count="0" />
-      <LineId Id="145" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="112" Count="0" />
-      <LineId Id="176" Count="1" />
-      <LineId Id="183" Count="0" />
-      <LineId Id="178" Count="4" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="50" Count="2" />
-      <LineId Id="134" Count="0" />
-      <LineId Id="58" Count="2" />
-      <LineId Id="184" Count="7" />
-      <LineId Id="130" Count="0" />
-      <LineId Id="78" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

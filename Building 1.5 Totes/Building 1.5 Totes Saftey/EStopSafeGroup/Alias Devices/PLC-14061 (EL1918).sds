@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<SafetyDeviceDesc Crc="1981797910" FileFormatVersion="1.6">
+<SafetyDeviceDesc Crc="2086436609" FileFormatVersion="1.6">
   <AliasDeviceType>
     <Type>4</Type>
     <SubType>1050494</SubType>
@@ -19,7 +19,12 @@
     <ModuleFaultIsComErr>false</ModuleFaultIsComErr>
     <SafeAddress>2</SafeAddress>
     <Watchdog>100</Watchdog>
-    <ComErrAck Type="Unset" />
+    <ComErrAck Type="AliasDevice">
+      <Value1>31</Value1>
+      <Value2>In</Value2>
+      <Value3>0</Value3>
+      <Value4>1131179973</Value4>
+    </ComErrAck>
     <Params>
       <Param Index="4120" SubIndex="1">02000000</Param>
       <Param Index="4320" SubIndex="1">0000</Param>

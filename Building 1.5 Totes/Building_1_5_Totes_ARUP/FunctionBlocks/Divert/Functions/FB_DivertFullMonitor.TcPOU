@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_DivertFullMonitor" Id="{61f277c4-19da-4b53-b17c-0567be4f20bc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_DivertFullMonitor
 
@@ -27,23 +27,26 @@ Divert.FullTimer(PT := Cfg_FullTime);
 Divert.FullTimer(IN := Divert.FullPE);
 
 IF Divert.FullTimer.Q THEN
+	IF NOT Divert.Full THEN
+		IF nDivertLogEnable.LANEFULL THEN
+			// Write to the Error List
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := CONCAT(STR1 := Divert.Config.ID, STR2 := ' Full: %s')
+				, strArg := CONCAT (STR1 := ' Item: ', STR2 := Divert.Item.ID));
+		END_IF
+	END_IF
 	Divert.Full := TRUE;
 ELSE
+	IF Divert.Full THEN
+		IF nDivertLogEnable.LANEFULL THEN
+			// Write to the Error List
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := CONCAT(STR1 := Divert.Config.ID, STR2 := ' Not Full: %s')
+				, strArg := CONCAT (STR1 := ' Item: ', STR2 := Divert.Item.ID));
+		END_IF
+	END_IF
 	Divert.Full := FALSE;
 END_IF]]></ST>
     </Implementation>
-    <LineIds Name="FB_DivertFullMonitor">
-      <LineId Id="135" Count="5" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="141" Count="0" />
-      <LineId Id="149" Count="0" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="164" Count="0" />
-      <LineId Id="100" Count="2" />
-      <LineId Id="104" Count="0" />
-      <LineId Id="98" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

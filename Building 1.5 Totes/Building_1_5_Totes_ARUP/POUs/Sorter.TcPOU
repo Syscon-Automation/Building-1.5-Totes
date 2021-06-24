@@ -191,7 +191,14 @@ P2140_SorterLog(
 				SorterToLog := st_Sorter_P2140,
 				SorterLogEnable := .nSorterLogEnableP2140,
 				ToInduct := st_ToInduct_P2140,
-				TempItem => st_TempItem_P2140);
+				TempItem => );
+
+IF P2140_SorterLog.TempItem.Item.ID <> '' THEN
+	IF P2140_SorterLog.TempItem.Item.ID <> st_TempItem_P2140.Item.ID THEN
+		st_TempItem_P2140 := P2140_SorterLog.TempItem;
+	END_IF
+END_IF
+
 (*
 	SorterProgram is a separate Program
 	Config portion of the st_sorter is separate to allow it be be persistent.
@@ -335,8 +342,13 @@ P2150_SorterLog(
 				SorterToLog := st_Sorter_P2150,
 				SorterLogEnable := .nSorterLogEnableP2150,
 				ToInduct := st_ToInduct_P2150,
-				TempItem => st_TempItem_P2150);
+				TempItem => );
 
+IF P2150_SorterLog.TempItem.Item.ID <> '' THEN
+	IF P2150_SorterLog.TempItem.Item.ID <> st_TempItem_P2150.Item.ID THEN
+		st_TempItem_P2150 := P2150_SorterLog.TempItem;
+	END_IF
+END_IF
 
 (*
 	SorterProgram is a separate Program

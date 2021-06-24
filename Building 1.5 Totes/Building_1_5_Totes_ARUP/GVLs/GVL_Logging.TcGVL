@@ -59,6 +59,7 @@ VAR_GLOBAL CONSTANT
 	CONFIRM6		:	INT := 21;
 	CONFIRM7		:	INT := 22;
 	CONFIRM8		:	INT := 23;
+	LANEFULL		:	INT := 31;
 	// nSorterLogEnable constants
 	SORTER_INDUCT		:	INT	:= 0;
 	SORTER_INDUCT_PE	:	INT	:= 1;

@@ -14,8 +14,8 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[SortSingulation_P2140.In_Hold_Request := Solenoids.PL2140_01.Sts_IntlksArry[2].Status
-										OR Solenoids.PL2140_01.Sts_IntlksArry[3].Status;
+      <ST><![CDATA[SortSingulation_P2140.In_Hold_Request := Solenoids.PI2140_01.Sts_IntlksArry[2].Status
+										OR Solenoids.PI2140_01.Sts_IntlksArry[3].Status;
 
 SortSingulation_P2140(
 	In_ConveyorRunning := Conveyors.P2140_Status.Sts_IsRunning,

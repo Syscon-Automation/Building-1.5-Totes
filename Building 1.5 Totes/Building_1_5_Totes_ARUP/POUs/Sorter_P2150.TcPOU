@@ -7,12 +7,15 @@ VAR_IN_OUT
 	In_ItemToInduct					: ST_Item;
 	In_InductingItem				: ST_Item;
 	st_tempItem						: ST_ItemTemporary;	// Temporary record used when barcode not yet received
+	{attribute 'OPC.UA.DA' := '0'}
 	st_Sorter						: ST_Sorter;
+	{attribute 'OPC.UA.DA' := '0'}
 	aDiverts						: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF ST_DIVERT;
 	aItems 							: ARRAY[Sorter.SORTERENCODERMIN_P2150..Sorter.SORTERENCODERMAX_P2150] OF ST_Item;
 END_VAR
 
 VAR_INPUT
+	DestinationOverride	: DINT;	// Pass in Divert to sent item to regardless of the direction received
 	ItemsArrayMax		: UDINT;
 	ItemsArrayMin		: UDINT;
 	DivertArrayMax		: DINT;
@@ -40,8 +43,10 @@ VAR
 	inductindex 		: DINT;
 	
 	//Divert Variables
+	{attribute 'OPC.UA.DA' := '0'}
 	fb_DivertDecision 		: FB_DivertDecision;
-	fb_DivertFullMonitor  	: FB_DivertFullMonitor;
+	{attribute 'OPC.UA.DA' := '0'}
+	fb_DivertFullMonitor  	: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF FB_DivertFullMonitor;
 	DivertIndex				: DINT;
 	Divertoffset			: INT;
 	nTestItemIndex			: UDINT;
@@ -66,9 +71,22 @@ VAR
 	
 	LogSorterDump: BOOL := FALSE;
 
+	fb_FindDestination		: FB_FindDestination;
+	{attribute 'OPC.UA.DA' := '0'}
+	aTempDiverts			: ARRAY[Sorter.DIVERTMIN_P2150..Sorter.NUMBEROFDIVERTS_P2150] OF ST_DIVERT;
+
+	nItemBufferLogEnable	:	UDINT;
+	nSorterLogEnable		:	UDINT;
+	nDivertLogEnable		:	UDINT;
+	nSortBufferLogEnable	:	UDINT;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
+      <ST><![CDATA[nItemBufferLogEnable := GVL_Logging.nItemBufferLogEnable OR GVL_Logging.nItemBufferLogEnableP2150;
+nSorterLogEnable := GVL_Logging.nSorterLogEnable OR GVL_Logging.nSorterLogEnableP2150;
+nDivertLogEnable := GVL_Logging.nDivertLogEnable OR GVL_Logging.nDivertLogEnableP2150;
+nSortBufferLogEnable := GVL_Logging.nSortBufferLogEnable OR GVL_Logging.nSortBufferLogEnableP2150;
+aTempDiverts := aDiverts;
+
 // Initialize FB_ItemExtBuffer
 fbSorterDiagLog(st_BufferData := aSorterDiagLog);
 
@@ -87,7 +105,7 @@ ArrivalOut := ArrivalBuffer;
 nItemArraySize := ItemsArrayMax - ItemsArrayMin + 1;
 
 FOR divertIndex := DivertArrayMin TO DivertArrayMax DO
-	fb_DivertFullMonitor(Divert := aDiverts[divertIndex]);
+	fb_DivertFullMonitor[DivertIndex](Divert := aDiverts[divertIndex]);
 END_FOR
 
 (*
@@ -130,7 +148,7 @@ END_IF
 rInductPE(CLK:= st_Sorter.InductPE, Q =>);
 
 IF rInductPE.Q THEN
-	IF .nSorterLogEnable.SORTER_INDUCT THEN
+	IF nSorterLogEnable.SORTER_INDUCT THEN
 		sMessage := CONCAT('Item: ', In_ItemToInduct.ID);
 		sMessage := CONCAT(sMessage, ' Pulses: ');
 		sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
@@ -145,7 +163,7 @@ END_IF
 fInductPE(CLK:= st_Sorter.InductPE, Q =>);
 
 IF fInductPE.Q THEN
-	IF .nSorterLogEnable.SORTER_INDUCT THEN
+	IF nSorterLogEnable.SORTER_INDUCT THEN
 		sMessage := CONCAT('Item: ', In_ItemToInduct.ID);
 		sMessage := CONCAT(sMessage,' Pulses: ');
 		sMessage := CONCAT(sMEssage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
@@ -172,7 +190,32 @@ WHILE st_Sorter.EncoderCounts <> testEncoderCount DO
 	  	IF (In_ItemToInduct.ID <> '') THEN
 			In_InductingItem := In_ItemToInduct;
 			In_ItemToInduct := BlankItem;
-			IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
+			// If there is an override, use the value as the destination
+			IF DestinationOverride <> 0 THEN
+				IF nSorterLogEnable.SORTER_DESTINATION_LU THEN
+					sMessage := CONCAT(' Orig: ', DINT_TO_STRING(In_InductingItem.Destination));
+					sMessage := CONCAT(sMessage, 'New: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(DestinationOverride));
+					// Write to the Error List
+					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+						, msgFmtStr := CONCAT(st_sorter.Config.Name, ' DestinationOverride %s')
+						, strArg := sMessage);
+				END_IF
+				In_InductingItem.Destination := DestinationOverride;
+			END_IF
+			IF nSorterLogEnable.SORTER_DESTINATION_LU THEN
+				sMessage := CONCAT('Destination: ', DINT_TO_STRING(In_InductingItem.Destination));
+				// Write to the Error List
+				ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+					, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Sorter Lookup %s')
+					, strArg := sMessage);
+			END_IF
+			fb_FindDestination(RoundRobin := st_Sorter.RoundRobin
+							, SorterLogEnable := nSorterLogEnable
+							, aDiverts := aTempDiverts
+							, DestinationID := In_InductingItem.Destination
+							, DestinationIndex => In_InductingItem.DestinationIdx);
+			IF nSorterLogEnable.SORTER_INDUCT_PE THEN
 				sMessage := CONCAT('Item: ', In_InductingItem.ID);
 				sMessage := CONCAT(sMessage,' Pulses: ');
 				sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
@@ -199,8 +242,8 @@ WHILE st_Sorter.EncoderCounts <> testEncoderCount DO
 			In_InductingItem.Status := E_StatusCode.In_Sorter;
 
 			// Check for destination full on the first pass, then ignore it.
-			IF In_InductingItem.Length = 0 THEN
-				IF aDiverts[In_InductingItem.DestinationIdx].Full THEN
+			IF In_InductingItem.Length = 0 AND DestinationOverride = 0 THEN
+				IF aDiverts[In_InductingItem.DestinationIdx].Full AND DestinationOverride = 0 THEN
 					IF st_Sorter.Config.RecircUsed THEN
 						In_InductingItem.Destination := st_Sorter.Config.RecircDestination;
 						In_InductingItem.DestinationIdx := st_Sorter.Config.RecircDestIdx;
@@ -235,6 +278,8 @@ WHILE st_Sorter.EncoderCounts <> testEncoderCount DO
 					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_tempItem.Item.Destination));
 					sMessage := CONCAT(sMessage,' DestIdx: ');
 					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_tempItem.Item.DestinationIdx));
+					sMessage := CONCAT(sMessage,' Length: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_tempItem.Item.Length));
 					// Write to the Error List
 					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
 						, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Inducting Info: %s')
@@ -251,9 +296,37 @@ WHILE st_Sorter.EncoderCounts <> testEncoderCount DO
 						st_tempItem.Item.ExtStatus := E_StatusCode.Divert_Full;
 					END_IF
 				ELSE
-					st_tempItem.Item.Destination := st_Sorter.Config.DefaultDestination;
-					st_tempItem.Item.DestinationIdx := st_Sorter.Config.DefaultDestIdx;
+					IF DestinationOverride = 0 THEN
+						st_tempItem.Item.Destination := st_Sorter.Config.DefaultDestination;
+					ELSE
+						st_tempItem.Item.Destination := DestinationOverride;
+					END_IF
+					IF nSorterLogEnable.SORTER_DESTINATION_LU THEN
+						sMessage := CONCAT('Destination: ', DINT_TO_STRING(st_tempItem.Item.Destination));
+						// Write to the Error List
+						ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+							, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Temp Lookup %s')
+							, strArg := sMessage);
+					END_IF
+					fb_FindDestination(RoundRobin := st_Sorter.RoundRobin
+							, SorterLogEnable := nSorterLogEnable
+							, aDiverts := aTempDiverts
+							, DestinationID := st_tempItem.Item.Destination
+							, DestinationIndex => st_tempItem.Item.DestinationIdx);
 				END_IF		
+				IF nSorterLogEnable.SORTER_INDUCT_PE THEN
+					sMessage := CONCAT('Temp Item: ', st_tempItem.Item.ID);
+					sMessage := CONCAT(sMessage,' Pulses: ');
+					sMessage := CONCAT(sMessage, UDINT_TO_STRING(st_Sorter.EncoderCounts));
+					sMessage := CONCAT(sMessage,' Dest: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_tempItem.Item.Destination));
+					sMessage := CONCAT(sMessage,' DestIdx: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(st_tempItem.Item.DestinationIdx));
+					// Write to the Error List
+					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+						, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Inducting Info: %s')
+						, strArg := sMessage);
+				END_IF
 			END_IF
 			// Copy the tempItem.Item to the WorkingItem that will be inducted
 			workingItem := st_tempItem.Item;
@@ -310,7 +383,7 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 										, BufferSize := (ItemsArrayMax + 1));	
 		// Log Diverts
 		IF aItems[nTestItemIndex].DestinationIdx = divertIndex THEN
-			IF .nSorterLogEnable.SORTER_DIVERTS THEN
+			IF nSorterLogEnable.SORTER_DIVERTS THEN
 				sMessage := CONCAT('Item: ', aItems[nTestItemIndex].ID);
 				sMessage := CONCAT(sMessage,' Index: ');
 				sMessage := CONCAT(sMessage, UDINT_TO_STRING(nTestItemIndex));
@@ -328,7 +401,7 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 					, strArg := sMessage);
 			END_IF
 		END_IF
-		fb_DivertDecision( bLog := .nDivertLogEnable.DIVERT_DECISION 
+		fb_DivertDecision( bLog := nDivertLogEnable.DIVERT_DECISION 
 					 , Output1Item		:= aItems[nTestItemIndex]
 					 , Output2Item		:= aItems[Output2ItemIndex]
 					 , Divert 			:= aDiverts[DivertIndex]
@@ -344,7 +417,7 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 		   AND aItems[nConfirmItemIndex].UniqueID <> 0
 		   AND aItems[nConfirmItemIndex].DestinationIdx = DivertIndex
 		   THEN
-			IF .nSorterLogEnable.SORTER_CONFIRMS THEN
+			IF nSorterLogEnable.SORTER_CONFIRMS THEN
 				sMessage := CONCAT('Item: ', aItems[nConfirmItemIndex].ID);
 				sMessage := CONCAT(sMessage,' Index: ');
 				sMessage := CONCAT(sMessage, UDINT_TO_STRING(nConfirmItemIndex));
@@ -362,7 +435,7 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 					, strArg := sMessage);
 			END_IF
 		END_IF
-		fb_ConfirmCheck[divertIndex] ( bLog := .nDivertLogEnable.DIVERT_DECISION 
+		fb_ConfirmCheck[divertIndex] ( bLog := nDivertLogEnable.DIVERT_DECISION 
 					 , ConfirmItem		:= aItems[nConfirmItemIndex]
 					 , ConfirmPE 		:= aDiverts[DivertIndex].ConfirmPE
 					 , DivertIndex		:= DivertIndex
@@ -379,12 +452,16 @@ WHILE st_Sorter.EncoderCounts <> exitEncoderCount DO
 	// Clear the Item array ahead of the current encoder count
 	nIndexToClear := f_CalculateIndex(Offset := 40, InitialValue:= exitEncoderCount, BufferSize := nItemArraySize);
 	IF aItems[nIndexToClear].ID <> '' THEN
-		IF .nSorterLogEnable.SORTER_DUMP THEN
+		IF nSorterLogEnable.SORTER_DUMP THEN
 			sMessage := CONCAT('Item: ', aItems[nIndexToClear].ID);
 			sMessage := CONCAT(sMessage,' Index: ');
 			sMessage := CONCAT(sMessage, UDINT_TO_STRING(nIndexToClear));
 			sMessage := CONCAT(sMessage,' Item Status: ');
 			sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nIndexToClear].Status));
+			sMessage := CONCAT(sMessage,' Destination: ');
+			sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nIndexToClear].Destination));
+			sMessage := CONCAT(sMessage,' DestIndex: ');
+			sMessage := CONCAT(sMessage, DINT_TO_STRING(aItems[nIndexToClear].DestinationIDX));
 			// Write to the Error List
 			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
 				, msgFmtStr := CONCAT(st_sorter.Config.Name, ' Clear Ahead Dump Info: %s')

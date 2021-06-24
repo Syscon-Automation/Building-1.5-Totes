@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
   <POU Name="FB_ConfirmCheck" Id="{292012a5-c6f1-4846-b7d2-d1154be0ca6c}" SpecialFunc="None">
     <Declaration><![CDATA[(*
 	Each confirm location needs its own instance of this FunctionBlock in order to allow the LastDest to corretly detect sorted items
@@ -59,6 +59,9 @@ IF ConfirmPE THEN
 			ItemToLog.Length := DivertIndex;
 			fbDivertLog.AddItem(ItemToLog);
 		END_IF
+//		DetectedItem := ConfirmItem;
+		// Capture the Current item destination before exiting the function block to test against the next run
+		LastDest := ConfirmItem.Destination;
 	END_IF
 ELSE
 	// If we had a valid item, because we have a LastDest, set the Divert_Success to true under certain conditions
@@ -79,43 +82,11 @@ ELSE
 			ItemToLog.Length := DivertIndex;
 			fbDivertLog.AddItem(ItemToLog);
 		END_IF
+		LastDest := 0;
 	END_IF
 END_IF
 
-// Capture the Current item destination before exiting the function block to test against the next run
-LastDest := ConfirmItem.Destination;]]></ST>
+]]></ST>
     </Implementation>
-    <LineIds Name="FB_ConfirmCheck">
-      <LineId Id="1036" Count="0" />
-      <LineId Id="1034" Count="1" />
-      <LineId Id="702" Count="0" />
-      <LineId Id="716" Count="0" />
-      <LineId Id="1044" Count="0" />
-      <LineId Id="703" Count="0" />
-      <LineId Id="846" Count="0" />
-      <LineId Id="1090" Count="1" />
-      <LineId Id="707" Count="0" />
-      <LineId Id="1092" Count="0" />
-      <LineId Id="1088" Count="0" />
-      <LineId Id="711" Count="3" />
-      <LineId Id="1089" Count="0" />
-      <LineId Id="1047" Count="0" />
-      <LineId Id="1045" Count="0" />
-      <LineId Id="1093" Count="1" />
-      <LineId Id="1046" Count="0" />
-      <LineId Id="1078" Count="1" />
-      <LineId Id="1111" Count="0" />
-      <LineId Id="1118" Count="0" />
-      <LineId Id="1113" Count="1" />
-      <LineId Id="1116" Count="1" />
-      <LineId Id="1115" Count="0" />
-      <LineId Id="1108" Count="0" />
-      <LineId Id="1104" Count="3" />
-      <LineId Id="1109" Count="0" />
-      <LineId Id="715" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="1043" Count="0" />
-      <LineId Id="1041" Count="1" />
-    </LineIds>
   </POU>
 </TcPlcObject>

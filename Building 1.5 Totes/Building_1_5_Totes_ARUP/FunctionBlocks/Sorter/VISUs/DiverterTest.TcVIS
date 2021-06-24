@@ -4486,10 +4486,10 @@ Induct PE"</v>
               <d n="FbMethods" t="CaseInsensitiveHashtable_1" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>40c5e2f6-0df4-4f3a-90e4-69ed1c13cf21</v>
-                <v>FB_Exit</v>
-                <v>bb0c79aa-c5ed-4063-9590-74585c0ee011</v>
                 <v>FB_Reinit</v>
                 <v>e55c1245-5a0f-459f-831d-be6abe0c1d22</v>
+                <v>FB_Exit</v>
+                <v>bb0c79aa-c5ed-4063-9590-74585c0ee011</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{b1dd6c46-adf1-4c13-b49f-cadae413fff9}</v>

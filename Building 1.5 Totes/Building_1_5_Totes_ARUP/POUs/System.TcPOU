@@ -29,6 +29,12 @@ VAR
 	Cnvyr_Manual AT %Q*:	BOOL;	// Bit to send to all conveyors to put them in Manual mode
 	Cnvyr_Offline AT %Q*:	BOOL;	// Bit to send to all conveyors to put them in Offline mode -- Not used here
 	Cnvyr_Reset AT %Q*:	BOOL;		// Bit to send to all conveyors to reset faults, safeties and etc
+	Safety_Reset:	BOOL;
+	tpSafetyReset:		TP := (PT := T#250MS);
+	fSafetyReset:		F_TRIG;
+
+	tpConvReset:		TP := (PT := T#250MS);
+	
 	Cnvyr_AlertTime:	TIME := T#5S;	
 	Cnvyr_DelayTime:	TIME := T#1S;	
 	Start_PulseWidth:	TIME := T#100MS;
@@ -52,7 +58,9 @@ VAR PERSISTENT    {attribute 'OPC.UA.DA' := '1'}
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// Send out reset PB put here in case added logic was needed
+      <ST><![CDATA[tpConvReset.PT := T#3S;
+
+// Send out reset PB put here in case added logic was needed
 SysStateCntrl_StatePB.ResetPB := GVL_IO.PB_SysReset OR HMI_PBSysReset OR GVL_IO.PB_RemoteReset_3211 OR GVL_IO.PB_RemoteReset_8251 OR GVL_IO.PB_RemoteReset_10221;
 SysStateCntrl_StatePB.AutoPB := (HMI_PBSysStart OR GVL_IO.PB_SysStart) AND SysIntlksAllOk;
 SysStateCntrl_StatePB.StopPB := HMI_PBSysStop OR (NOT GVL_IO.PB_SysStop);
@@ -63,22 +71,30 @@ SysShrtPulseTmr(In_Trig:= TRUE , Cfg_OnTime:= SysShrtPlsOnTime, Cfg_OffTime:= Sy
 // Set up System Interlocks
 
 SysState.In_SystemIntlks.0 := GVL_IO.SystemAirPressure;
+SysState.In_SystemIntlks.1 := SystemSafety.System_SafetyState.InRun;
 
-
+(*
 // Setup the InterlockArray since persistent data items cannot by initilaized the same
 // Index 0
-
 cfgSysStateIntlksArry[0].Description := 'System Air Pressure';
 cfgSysStateIntlksArry[0].DeviceLabel := 'System';
 cfgSysStateIntlksArry[0].OKState := TRUE;
-
+// Index 1
+cfgSysStateIntlksArry[1].Description := 'Safety in Run';
+cfgSysStateIntlksArry[1].DeviceLabel := 'Safety';
+cfgSysStateIntlksArry[1].OKState := TRUE;
+*)
 
 // Set up System Events
 
 SysState.In_SystemEvents.0 := SystemSafety.Safety_PanelEstop;
 SysState.In_SystemEvents.1 := GVL_IO.Remote_PullCord2142_OK;
 SysState.In_SystemEvents.2 := GVL_IO.Remote_PullCord2150_OK;
+SysState.In_SystemEvents.3 := SystemSafety.System_SafetyState.ComErr;
+SysState.In_SystemEvents.4 := SystemSafety.System_SafetyState.FBErr;
+SysState.In_SystemEvents.5 := SystemSafety.System_SafetyState.OtherErr;
 
+(*
 // Setup the EventArray since persistent data items cannot by initilaized the same
 // Index 0
 cfgSysStateEvntsArry[0].Description := 'Panel E-Stop';
@@ -95,7 +111,22 @@ cfgSysStateEvntsArry[2].Description := 'P2150 Pull cord OK';
 cfgSysStateEvntsArry[2].DeviceLabel := 'P2150';
 cfgSysStateEvntsArry[2].OKState := TRUE;
 cfgSysStateEvntsArry[2].StopCode := E_StopCodes.SystemStop;
-
+// Index 3
+cfgSysStateEvntsArry[3].Description := 'Safety Comm Error';
+cfgSysStateEvntsArry[3].DeviceLabel := 'SYSTEM';
+cfgSysStateEvntsArry[3].OKState := FALSE;
+cfgSysStateEvntsArry[3].StopCode := E_StopCodes.SystemStop;
+// Index 4
+cfgSysStateEvntsArry[4].Description := 'Safety FunctionBlock Error';
+cfgSysStateEvntsArry[4].DeviceLabel := 'SYSTEM';
+cfgSysStateEvntsArry[4].OKState := FALSE;
+cfgSysStateEvntsArry[4].StopCode := E_StopCodes.SystemStop;
+// Index 5
+cfgSysStateEvntsArry[5].Description := 'Safety Error';
+cfgSysStateEvntsArry[5].DeviceLabel := 'SYSTEM';
+cfgSysStateEvntsArry[5].OKState := FALSE;
+cfgSysStateEvntsArry[5].StopCode := E_StopCodes.SystemStop;
+*)
 // Function Call
 SysState(
     In_p_EquipStatePB:= SysStateCntrl_StatePB,
@@ -103,11 +134,22 @@ SysState(
     Cfg_EquipIntlksArry:= cfgSysStateIntlksArry,
     Cfg_EquipEvntsArry:= cfgSysStateEvntsArry, 
     Sts_EquipState := SysStateCntrlSts,
-	Out_Reset => Cnvyr_Reset
+	Out_Reset => 
 );
 
 SysIntlksAllOk := SysState.Sts_All_Intlks_OK;
 SysEventsAllOk := SysState.Sts_All_Evnts_OK;
+
+// Separate Standard/safety resets
+tpSafetyReset(IN:= SysState.Out_Reset);
+// On While the timer is timing
+Safety_Reset := tpSafetyReset.Q;
+
+// On when the safety pulse goes low
+fSafetyReset(CLK := tpSafetyReset.Q);
+tpConvReset(IN := fSafetyReset.Q);
+// On while the timer is timing
+Cnvyr_Reset := tpConvReset.Q;
 
 // Set up Start up delay and Auto/Manual control for conveyors
 
@@ -239,54 +281,5 @@ ELSE
 END_IF
 ]]></ST>
     </Implementation>
-    <LineIds Name="System">
-      <LineId Id="797" Count="2" />
-      <LineId Id="935" Count="1" />
-      <LineId Id="800" Count="1" />
-      <LineId Id="815" Count="3" />
-      <LineId Id="821" Count="9" />
-      <LineId Id="833" Count="0" />
-      <LineId Id="1120" Count="0" />
-      <LineId Id="835" Count="20" />
-      <LineId Id="858" Count="6" />
-      <LineId Id="937" Count="0" />
-      <LineId Id="865" Count="0" />
-      <LineId Id="868" Count="3" />
-      <LineId Id="536" Count="17" />
-      <LineId Id="717" Count="13" />
-      <LineId Id="986" Count="0" />
-      <LineId Id="731" Count="1" />
-      <LineId Id="989" Count="0" />
-      <LineId Id="733" Count="9" />
-      <LineId Id="990" Count="0" />
-      <LineId Id="743" Count="3" />
-      <LineId Id="993" Count="0" />
-      <LineId Id="747" Count="1" />
-      <LineId Id="991" Count="0" />
-      <LineId Id="749" Count="18" />
-      <LineId Id="992" Count="0" />
-      <LineId Id="768" Count="7" />
-      <LineId Id="1059" Count="1" />
-      <LineId Id="1058" Count="0" />
-      <LineId Id="1065" Count="1" />
-      <LineId Id="1064" Count="0" />
-      <LineId Id="1068" Count="1" />
-      <LineId Id="1067" Count="0" />
-      <LineId Id="776" Count="3" />
-      <LineId Id="1043" Count="1" />
-      <LineId Id="1061" Count="0" />
-      <LineId Id="780" Count="3" />
-      <LineId Id="1046" Count="2" />
-      <LineId Id="784" Count="3" />
-      <LineId Id="1049" Count="2" />
-      <LineId Id="788" Count="1" />
-      <LineId Id="1053" Count="1" />
-      <LineId Id="1052" Count="0" />
-      <LineId Id="790" Count="4" />
-      <LineId Id="1056" Count="1" />
-      <LineId Id="1055" Count="0" />
-      <LineId Id="795" Count="1" />
-      <LineId Id="419" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

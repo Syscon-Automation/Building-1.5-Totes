@@ -1,0 +1,229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="SorterExample" Id="{ff5ae0e9-4c45-448f-8e66-07241b76a3b8}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SorterExample
+VAR
+	nSorterClearIdx				: DINT;
+	bSimulate					: BOOL := FALSE;	// Indicates when runing a simulation
+	BlankItem					: ST_Item := (ID := ''
+												, UniqueID := 0
+												, Destination := 0
+												, Status := E_StatusCode.No_Status
+												, ExtStatus := E_StatusCode.No_Status
+												, DeviceID := ''
+												, MessageType := E_MessageIds.NoMessage_00);
+	
+	st_ToInduct					: ST_ItemTemporary;	// This is the next item to be inducted onto the sorter
+	st_Inducting				: ST_ItemTemporary;	// This is the next item to be inducted onto the sorter
+	st_InductUpdate				: ST_ItemTemporary;	// This is to update an item already being inducted
+	{attribute 'OPC.UA.DA' := '1'}
+	st_Sorter					: ST_Sorter;
+	{attribute 'OPC.UA.DA' := '1'}
+	aSorterDiverts 				: ARRAY[DIVERTMIN..NUMBEROFDIVERTS] OF ST_Divert;
+
+	st_SorterEncoder 			: ST_Encoder;
+	fb_SorterEncoder 			: FB_ProcessEncoder;
+	{attribute 'OPC.UA.DA' := '1'}
+	ENC_Raw	AT %I*:	UINT;	// Raw Encoder Value
+	tEncoderOK			: TON;
+	nLastEncoderCount	: UDINT;
+
+	{attribute 'OPC.UA.DA' := '1'}
+	fb_SortMetrics				: FB_Metrics;
+
+	In_DefaultDestination AT %I*	: DINT;	// Input default destination update from Host messaging(MsgControl.RECEIVE)
+
+	fb_CommissionSorterDiverts	: FB_DivertCommission;
+	rInductPE					: R_TRIG; 	// Capture the Rising edge of the Induct PE
+	fInductPE					: F_TRIG; 	// Capture the Falling edge of the Induct PE
+
+	rDischargePE				: R_TRIG; 	// Capture the Rising edge of the Discharge PE
+	fDischargePE				: F_TRIG; 	// Capture the Falling edge of the Discharge PE
+
+	st_TempItem					: ST_ItemTemporary;	// Store temporary Item info until BCR data is received
+
+	DivertToCommission			: UINT := 0;	// Non-zero value will send all items to this divert
+
+	sMessage			: STRING;
+
+	ClearSorterArray	: BOOL;
+
+	FB_DivertLog		: FB_DivertLog;
+	
+	SorterDischargeItem	: ST_Item;
+
+END_VAR
+
+VAR PERSISTENT
+	aSorterItems 				: ARRAY[SORTERENCODERMIN..SORTERENCODERMAX] OF ST_Item;	// Persist the Items to Sort array
+	{attribute 'OPC.UA.DA' := '1'}
+	st_SorterCfg				: ST_SorterConfig; 	// Persist Sorter configuration
+	{attribute 'OPC.UA.DA' := '1'}
+	aSorterDivertsCfgs 			: ARRAY[DIVERTMIN..NUMBEROFDIVERTS] OF ST_DivertCfg; 	// Persist Sorter Configuration
+END_VAR
+
+VAR CONSTANT
+	SORTERMASKSIZE				: UINT := 11;		// Number of bits to mask into the Encoder Count, will define the size of the SORTERENCODERMAX value
+	{attribute 'OPC.UA.DA' := '1'}
+	NUMBEROFDIVERTS				: DINT := 3;
+	DIVERTMIN					: DINT := 1;
+	{attribute 'OPC.UA.DA' := '1'}
+	SORTERENCODERMAX			: UDINT := ((LREAL_TO_UDINT(EXPT(2,SORTERMASKSIZE)))-1); // Calculated size based on the bitmask 
+	{attribute 'OPC.UA.DA' := '1'}
+	SORTERENCODERMIN			: UDINT := 0;
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Sorter clear when the system is restarted or downloaded (INIT=TRUE for first scan)
+IF (GVL_IO.INIT AND NOT st_SorterCfg.RetainOnRestart) OR ClearSorterArray THEN
+	FOR nSorterClearIdx := UDINT_TO_DINT(SORTERENCODERMIN) TO UDINT_TO_DINT(SORTERENCODERMAX) BY 1 DO
+		IF nSorterLogEnable.SORTER_DUMP THEN
+			IF aSorterItems[nSorterClearIdx].ID <> '' THEN
+				IF .nSorterLogEnable.SORTER_DUMP THEN
+					sMessage := CONCAT(' Item: ', aSorterItems[nSorterClearIdx].ID);
+					sMessage := CONCAT(sMessage,' Index: ');
+					sMessage := CONCAT(sMessage, DINT_TO_STRING(nSorterClearIdx));
+					// Write to the Error List
+					ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+						, msgFmtStr := 'Array Dump Info: %s'
+						, strArg := sMessage);
+				END_IF
+			END_IF
+		END_IF
+		aSorterItems[nSorterClearIdx] := BlankItem;
+	END_FOR
+	ClearSorterArray := FALSE;
+END_IF
+
+// Setup and process the Sorter Encoder
+st_SorterEncoder.EncoderRawCount := ENC_Raw;
+st_SorterEncoder.BitMaskSize := SORTERMASKSIZE;
+fb_SorterEncoder(Encoder := st_SorterEncoder, Simulate := bSimulate);
+
+(*
+	Initializes the Diverts.  
+*)
+{warning 'TODO: Fix references to Full and Confirm PE'}
+{warning 'TODO: Add Configuration for all Diverts'}
+aSorterDiverts[1].Config := aSorterDivertsCfgs[1];
+aSorterDiverts[1].FullPE := TRUE;
+aSorterDiverts[1].ConfirmPE := TRUE;
+
+fb_CommissionSorterDiverts(
+			//InductTrigger := Photoeyes.PE_22441.Out,
+			ReferenceValue := st_SorterEncoder.CurrentCount, 
+			//DischargeTrigger := Photoeyes.PE_23121.Out_OffFltrd,
+			TestTime := T#10S, Diverts := aSorterDiverts);
+
+// Provide a "hard-coded" default destination.
+IF st_SorterCfg.DefaultDestination <= 0 THEN
+	st_SorterCfg.DefaultDestination := 1;
+END_IF						
+
+// Name of the sorter equipment
+//st_SorterCfg.Name := Conveyors.cfgP8005Label;
+st_SorterCfg.DivertCount := NUMBEROFDIVERTS;
+IF DivertToCommission > 0 THEN
+	st_SorterCfg.DefaultDestination := DivertToCommission;
+END_IF
+st_Sorter.EncoderCounts := st_SorterEncoder.CurrentCount;
+//st_Sorter.InductPE := PhotoEyes.PE_22441.Out_OnFltrd;
+//st_Sorter.DischargePE := Photoeyes.PE_23081.Out_OnFltrd;
+
+// Test the Encoder
+//tEncoderOK.IN := (Conveyors.P8005_VFD.IsRunning AND (st_Sorter.EncoderCounts = nLastEncoderCount));
+tEncoderOK(PT:=T#1S);
+
+// OK when Q is not on, but the alarm is reversed
+//GVL_IO.ENC_11321_OK := tEncoderOK.Q;
+
+// Publish the sorter name
+//GVL_IO.SorterName := st_SorterCfg.Name;
+
+// Sorter
+(*
+	ProcessBuffers processes all associated buffers (Sorter/Divert/Arrival/Transport/Update)
+	Items arriving at the sorter are detected and processed in this function block then deliverd to the SorterProgram
+	Items inducted into sorter produce TransportResponse messages in this function block
+	Items diverted off the sorter produce TransportComplete messages in this function block
+*)
+ProcessBuffers(st_NextToInduct := st_ToInduct
+				, st_TempInductItem := st_TempItem
+				, st_UpdateItem := st_Inducting
+				, st_Sorter := st_Sorter
+				, aDiverts := aSorterDiverts
+				, aItems := aSorterItems
+				, DivertToCommission := DivertToCommission
+				, ItemsArrayMax := SORTERENCODERMAX
+				, ItemsArrayMin := SORTERENCODERMIN);
+
+// Capture rising and falling edge Triggers of the configured Sorter PE (Induct/Discharge)
+rInductPE(CLK:= st_Sorter.InductPE, Q =>);
+fInductPE(CLK:= st_Sorter.InductPE, Q =>);
+rDischargePE(CLK:= st_Sorter.DischargePE, Q =>);
+fDischargePE(CLK:= st_Sorter.DischargePE, Q =>);
+
+// Prepare a dummy record for items that arrive before BCR data is received
+// On the rising edge of the Induct PE
+IF rInductPE.Q THEN
+	IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Induct PE Blocked : %s'
+			, strArg := BOOL_TO_STRING(st_Sorter.InductPE)); 
+	END_IF
+	// Test for a UniqueID, which indicates that a Barcode has been received
+	IF st_ToInduct.Item.UniqueID = 0 THEN
+		// Capture and create relevant info
+		st_TempItem.Counts := st_Sorter.EncoderCounts;
+		st_TempItem.Item.UniqueID :=  UDINT_TO_DINT(st_Sorter.EncoderCounts);
+		st_TempItem.Item.ID :=  CONCAT('T-', UDINT_TO_STRING(st_Sorter.EncoderCounts));
+		st_TempItem.Item.Destination := st_SorterCfg.DefaultDestination;
+		st_TempItem.Item.Status := E_StatusCode.UnidentifiedItem;
+		IF .nSorterLogEnable.SORTER_TEMPID THEN
+			ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+				, msgFmtStr := 'Temp ID Assigned : %s'
+				, strArg := st_TempItem.Item.ID);
+		END_IF
+	END_IF	
+END_IF
+
+// Clear the dummy record when the PE clears
+// Items can only be inducted when the BCR info is received before or while the induct PE is blocked
+IF fInductPE.Q THEN
+	IF .nSorterLogEnable.SORTER_INDUCT_PE THEN
+		// Write to the Error List
+		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG
+			, msgFmtStr := 'Induct PE Blocked : %s'
+			, strArg := BOOL_TO_STRING(st_Sorter.InductPE));
+	END_IF
+	// Clear the record
+	st_TempItem.Counts := 0;
+	st_TempItem.Item :=  BlankItem;
+END_IF
+
+(*
+	SorterProgram is a separate Program
+	Config portion of the st_sorter is separate to allow it be be persistent.
+*)
+st_sorter.Config := st_sorterCfg;
+SorterProgram(st_Sorter := st_Sorter
+		, In_ItemToInduct := st_ToInduct.Item
+		, In_InductingItem := st_Inducting.Item
+		, aItems := aSorterItems
+		, aDiverts := aSorterDiverts
+		, st_tempItem := st_TempItem
+		, ItemsArrayMax := SORTERENCODERMAX
+		, ItemsArrayMin := SORTERENCODERMIN
+		, DivertArrayMax := DIVERTMIN
+		, DivertArrayMin := NUMBEROFDIVERTS
+		, st_DischargeItem => SorterDischargeItem);
+
+// Log the diverts
+FB_DivertLog(DivertArray := aSorterDiverts,
+				DivertLogEnable := .nDivertLogEnable,
+				EncoderCounts := st_SorterEncoder.CurrentCount);
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

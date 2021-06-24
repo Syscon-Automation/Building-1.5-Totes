@@ -2285,7 +2285,9 @@ Published]]></Comment>
 				<Link VarA="PlcTask Inputs^SystemSafety.Safety_SystemEstopsOK" VarB="StandardInputs^Standard Out Var 15" Size="1"/>
 				<Link VarA="PlcTask Inputs^SystemSafety.System_SafetyState.ComErr" VarB="StandardInputs^Standard Out Var 16" Size="1"/>
 				<Link VarA="PlcTask Inputs^SystemSafety.System_SafetyState.FBErr" VarB="StandardInputs^Standard Out Var 17" Size="1"/>
+				<Link VarA="PlcTask Inputs^SystemSafety.System_SafetyState.InRun" VarB="StandardInputs^Standard Out Var 30" Size="1"/>
 				<Link VarA="PlcTask Inputs^SystemSafety.System_SafetyState.OtherErr" VarB="StandardInputs^Standard Out Var 18" Size="1"/>
+				<Link VarA="PlcTask Outputs^SystemSafety.System_SafetyState.CommErrAck" VarB="StandardOutputs^Standard In Var 31" Size="1"/>
 				<Link VarA="PlcTask Outputs^SystemSafety.System_SafetyState.ErrAck" VarB="StandardOutputs^Standard In Var 1" Size="1"/>
 				<Link VarA="PlcTask Outputs^SystemSafety.System_SafetyState.Reset" VarB="StandardOutputs^Standard In Var 5" Size="1"/>
 				<Link VarA="PlcTask Outputs^SystemSafety.System_SafetyState.Run" VarB="StandardOutputs^Standard In Var 2" Size="1"/>

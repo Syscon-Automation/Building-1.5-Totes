@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_RoundRobinCfg" Id="{fc95d95e-6da2-4ddd-8d81-77fbed5d34be}">
+    <Declaration><![CDATA[{attribute 'OPC.UA.DA' := '1'}
+TYPE ST_RoundRobinCfg :
+STRUCT
+	Destination		:	DINT;
+	Destinations	:	ARRAY [0..15] OF ST_RoundRobinDest;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
