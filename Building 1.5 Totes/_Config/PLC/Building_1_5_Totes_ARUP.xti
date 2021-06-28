@@ -1040,45 +1040,6 @@
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
-					<Name>ProxSensors.In_PX_11161_Retracted</Name>
-					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>ProxSensors.In_PX_12151_Extended</Name>
-					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>ProxSensors.In_PX_12251_Extended</Name>
-					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2141_VFD.ActualVelocity</Name>
-					<Type>INT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2141_VFD.StatusWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2146_VFD.ActualVelocity</Name>
-					<Type>INT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P2146_VFD.StatusWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P3080_VFD.ActualVelocity</Name>
-					<Type>INT</Type>
-				</Var>
-				<Var>
-					<Name>Conveyors.P3080_VFD.StatusWord</Name>
-					<Type>UINT</Type>
-				</Var>
-				<Var>
 					<Name>Photoeyes.PE_2101.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 					<Type>BOOL</Type>
@@ -1096,6 +1057,21 @@
 				<Var>
 					<Name>Photoeyes.PE_2231.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>ProxSensors.In_PX_11161_Retracted</Name>
+					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>ProxSensors.In_PX_12151_Extended</Name>
+					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>ProxSensors.In_PX_12251_Extended</Name>
+					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
@@ -1119,6 +1095,26 @@
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
+					<Name>Photoeyes.PE_3232.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Photoeyes.PE_3261.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Photoeyes.PE_3301.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Photoeyes.PE_3331.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
 					<Name>Photoeyes.PE_4091.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 					<Type>BOOL</Type>
@@ -1134,6 +1130,26 @@
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
+					<Name>Photoeyes.PE_4202.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Photoeyes.PE_4241.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Photoeyes.PE_4291.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Photoeyes.PE_4311.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
 					<Name>Photoeyes.PE_8131.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 					<Type>BOOL</Type>
@@ -1145,6 +1161,11 @@
 				</Var>
 				<Var>
 					<Name>Photoeyes.PE_8161.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Photoeyes.PE_8191.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 					<Type>BOOL</Type>
 				</Var>
@@ -1209,6 +1230,16 @@
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
+					<Name>Photoeyes.PE_11291.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Photoeyes.PE_11321.In_PE</Name>
+					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
 					<Name>Photoeyes.PE_12091.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 					<Type>BOOL</Type>
@@ -1232,6 +1263,30 @@
 					<Name>Photoeyes.PE_12271.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2141_VFD.ActualVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2141_VFD.StatusWord</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2146_VFD.ActualVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P2146_VFD.StatusWord</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P3080_VFD.ActualVelocity</Name>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>Conveyors.P3080_VFD.StatusWord</Name>
+					<Type>UINT</Type>
 				</Var>
 				<Var>
 					<Name>GVL_IO.PB_SysStart</Name>
@@ -2124,6 +2179,8 @@ Published]]></Comment>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_11191.In_PE" VarB="Channel 11^PE-11191" Size="1"/>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_11221.In_PE" VarB="Channel 12^PE11221" Size="1"/>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_11241.In_PE" VarB="Channel 13^????PE11421" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_11291.In_PE" VarB="Channel 15^PE_11291" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_11321.In_PE" VarB="Channel 16^PE_11321" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_11141_Extended" VarB="Channel 9^PX-11141" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_11161_Retracted" VarB="Channel 10^PX-11161" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_11181_Extended" VarB="Channel 3^PX-11181" Size="1"/>
@@ -2157,6 +2214,10 @@ Published]]></Comment>
 				<Link VarA="PlcTask Inputs^GVL_IO.RIO3171_WcState" VarB="WcState^WcState" Size="1"/>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_3111.In_PE" VarB="Channel 1^PE-3111" Size="1"/>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_3231.In_PE" VarB="Channel 5^PE-3231" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_3232.In_PE" VarB="Channel 13^PE_3232" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_3261.In_PE" VarB="Channel 14^PE_3261" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_3301.In_PE" VarB="Channel 15^PE_3301" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_3331.In_PE" VarB="Channel 16^PE_3331" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_3171_Extended" VarB="Channel 3^PX-3171" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_3191_Retracted" VarB="Channel 4^PX-3191" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_3301_Extended" VarB="Channel 7^PX-3301" Size="1"/>
@@ -2173,6 +2234,10 @@ Published]]></Comment>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_4091.In_PE" VarB="Channel 1^PE-4091" Size="1"/>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_4161.In_PE" VarB="Channel 11^PE-4161" Size="1"/>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_4201.In_PE" VarB="Channel 5^PE-4201" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_4202.In_PE" VarB="Channel 13^PE_4202" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_4241.In_PE" VarB="Channel 14^PE_4241" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_4291.In_PE" VarB="Channel 15^PE_4291" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_4311.In_PE" VarB="Channel 16^PE_4311" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_4151_Extended" VarB="Channel 3^PX-4151" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_4171_Retracted" VarB="Channel 4^PX-4171" Size="1"/>
 				<Link VarA="PlcTask Inputs^ProxSensors.In_PX_4291_Extended" VarB="Channel 7^PX-4291" Size="1"/>
@@ -2189,6 +2254,7 @@ Published]]></Comment>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_8131.In_PE" VarB="Channel 9^PE-8131" Size="1"/>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_8141.In_PE" VarB="Channel 2^PE-8141" Size="1"/>
 				<Link VarA="PlcTask Inputs^Photoeyes.PE_8161.In_PE" VarB="Channel 10^PE-8161" Size="1"/>
+				<Link VarA="PlcTask Inputs^Photoeyes.PE_8191.In_PE" VarB="Channel 11^PE_8191" Size="1"/>
 				<Link VarA="PlcTask Outputs^GVL_IO.LT_8181_Red" VarB="Channel 19^LT-8181" Size="1"/>
 				<Link VarA="PlcTask Outputs^GVL_IO.LT_8191_Yellow" VarB="Channel 20^LT-8191" Size="1"/>
 				<Link VarA="PlcTask Outputs^GVL_IO.LT_8231_Green" VarB="Channel 21^LT-8231" Size="1"/>

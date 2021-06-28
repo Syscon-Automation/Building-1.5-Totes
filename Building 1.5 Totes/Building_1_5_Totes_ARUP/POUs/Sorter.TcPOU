@@ -121,12 +121,12 @@ fb_SorterEncoder_P2140(Encoder := st_SorterEncoder_P2140, Simulate := bSimulate)
 //Divert #1
 aSorterDiverts_P2140[1].Config := aSorterDiverts_P2140Cfgs[1];
 aSorterDiverts_P2140[1].ConfirmPE := Photoeyes.PE_10302.Out; 			
-aSorterDiverts_P2140[1].FullPE := Photoeyes.PE_10302.Out_OnFltrd;   			
+aSorterDiverts_P2140[1].FullPE := Conveyors.P2142.Sts_WarnsArry[6].Status; // Full warning
 
 //Divert #2
 aSorterDiverts_P2140[2].Config := aSorterDiverts_P2140Cfgs[2];
-aSorterDiverts_P2140[2].ConfirmPE := Photoeyes.PE_10151.Out AND NOT Solenoids.PL2140_01.In_EquipRtrcdFdbck;	
-aSorterDiverts_P2140[2].FullPE := Photoeyes.PE_10091.Out_OnFltrd;
+aSorterDiverts_P2140[2].ConfirmPE := Photoeyes.PE_11321.Out;
+aSorterDiverts_P2140[2].FullPE := Conveyors.P2150.Sts_WarnsArry[9].Status; // Full Warning
 
 fb_CommissionSorterDiverts_P2140(
 			InductTrigger := Photoeyes.PE_10081.Out,
@@ -153,8 +153,8 @@ IF DivertToCommission_P2140 > 0 THEN
 	st_Sorter_P2140Cfg.DefaultDestination := DivertToCommission_P2140;
 END_IF
 st_Sorter_P2140.EncoderCounts := st_SorterEncoder_P2140.CurrentCount;
-st_Sorter_P2140.InductPE := PhotoEyes.PE_10081.Out_OnOffFltrd;
-st_Sorter_P2140.DischargePE := Photoeyes.PE_10091.Out;
+st_Sorter_P2140.InductPE := PhotoEyes.PE_11291.Out;
+st_Sorter_P2140.DischargePE := Photoeyes.PE_11321.Out;
 
 // Test the Encoder
 tEncoderOK_P2140.IN := (Conveyors.P2140_Status.Sts_IsRunning AND (st_Sorter_P2140.EncoderCounts = nLastEncoderCount_P2140));
@@ -256,23 +256,23 @@ fb_SorterEncoder_P2150(Encoder := st_SorterEncoder_P2150, Simulate := bSimulate)
 
 //Divert #1
 aSorterDiverts_P2150[1].Config := aSorterDiverts_P2150Cfgs[1];
-aSorterDiverts_P2150[1].ConfirmPE := Photoeyes.PE_3231.Out; 			
-aSorterDiverts_P2150[1].FullPE := Photoeyes.PE_3231.Out;   			
+aSorterDiverts_P2150[1].ConfirmPE := Photoeyes.PE_3231.Out;
+aSorterDiverts_P2150[1].FullPE := Photoeyes.PE_3232.Out_OnOffFltrd AND Photoeyes.PE_3261.Out_OnOffFltrd;   			
 
 //Divert #2
 aSorterDiverts_P2150[2].Config := aSorterDiverts_P2150Cfgs[2];
 aSorterDiverts_P2150[2].ConfirmPE := Photoeyes.PE_3111.Out; 		
-aSorterDiverts_P2150[2].FullPE := Photoeyes.PE_3111.Out;   		
+aSorterDiverts_P2150[2].FullPE := Photoeyes.PE_3301.Out_OnOffFltrd AND Photoeyes.PE_3331.Out_OnOffFltrd;
 
 //Divert #3 
 aSorterDiverts_P2150[3].Config := aSorterDiverts_P2150Cfgs[3];
 aSorterDiverts_P2150[3].ConfirmPE := Photoeyes.PE_4201.Out; 		
-aSorterDiverts_P2150[3].FullPE := Photoeyes.PE_4201.Out;   	
+aSorterDiverts_P2150[3].FullPE := Photoeyes.PE_4202.Out_OnOffFltrd AND Photoeyes.PE_4241.Out_OnOffFltrd;
 
 //Divert #4 
 aSorterDiverts_P2150[4].Config := aSorterDiverts_P2150Cfgs[4];
 aSorterDiverts_P2150[4].ConfirmPE := Photoeyes.PE_4091.Out; 		
-aSorterDiverts_P2150[4].FullPE := Photoeyes.PE_4091.Out; 
+aSorterDiverts_P2150[4].FullPE := Photoeyes.PE_4291.Out_OnOffFltrd AND Photoeyes.PE_4311.Out_OnOffFltrd;
 
 //Divert #5
 aSorterDiverts_P2150[5].Config := aSorterDiverts_P2150Cfgs[5];

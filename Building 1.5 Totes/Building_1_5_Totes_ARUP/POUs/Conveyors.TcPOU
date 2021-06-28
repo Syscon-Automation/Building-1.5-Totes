@@ -565,7 +565,8 @@ P2141SleepWakeTrig[2] := Photoeyes.PE_10151.Out;
 P2141_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-//P2141.In_EquipIntlks.2:= 
+// Interlock the full for a stop only when the warning is on for the downstream conveyor
+P2141.In_EquipIntlks.2:= Photoeyes.PE_8131.Out_OnOffFltrd AND P2142.Sts_WarnsArry[6].Status;
 
 //Events
 P2141.In_EquipEvents.2:= GVL_IO.DS_P2141;
@@ -577,7 +578,7 @@ P2141.In_EquipEvents.5:= NOT P2141_VFD.IsFaulted;
 P2141(
    In_p_EquipStatePB:= P2141_StatePB,
    In_P_ConvReqRun:= TRUE,
-   In_ConvDwnStrmMtrStatus:= P2142_Status.Sts_IsRunning,
+   In_ConvDwnStrmMtrStatus:= P2142_Status.Sts_IsRunning AND NOT P2142.Sts_WarnsArry[6].Status,
    In_ConvCrntExitPhotoEye:= Photoeyes.PE_8131.Out,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
@@ -614,20 +615,21 @@ P2142SleepWakeTrig[2] := Photoeyes.PE_8161.Out;
 P2142_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2142.In_EquipIntlks.2:= Photoeyes.PE_8141.Out_OnFltrd;
+//P2142.In_EquipIntlks.2:= Photoeyes.PE_8141.Out_OnFltrd;
 
 //Events
 P2142.In_EquipEvents.2:= GVL_IO.DS_P2142;
 P2142.In_EquipEvents.3:= System.SysEventsAllOk;
 P2142.In_EquipEvents.4:= NOT CommStatus.RIO8171_CommFault.Out;
 P2142.In_EquipEvents.5:= NOT GVL_IO.P2142_Faulted;
+P2142.In_EquipEvents.6 := Photoeyes.PE_8141.Out_OnOffFltrd AND Photoeyes.PE_8191.Out_OnOffFltrd;
 
 // Function Call
 P2142(
    In_p_EquipStatePB:= P2142_StatePB,
    In_P_ConvReqRun:= TRUE,
    In_ConvDwnStrmMtrStatus:= TRUE,
-   In_ConvCrntExitPhotoEye:=  Photoeyes.PE_8141.Out,
+   In_ConvCrntExitPhotoEye:=  FALSE,
    Cfg_ConvType:= E_ConvType.end,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
@@ -702,7 +704,7 @@ P2145SleepWakeTrig[2] := PhotoEyes.PE_10091.Out_OffFltrd;
 P2146_Status.Sts_EquipmentState.EquipType := E_EquipType.Conveyor;
 
 // Interlocks
-P2146.In_EquipIntlks.2:= Photoeyes.PE_2101.Out_OnFltrd;
+P2146.In_EquipIntlks.2:= Photoeyes.PE_2101.Out_OnOffFltrd AND Photoeyes.PE_2201.Out_OnOffFltrd;
 //Events
 P2146.In_EquipEvents.2:= GVL_IO.DS_P2146;
 P2146.In_EquipEvents.3:= System.SysEventsAllOk;
@@ -714,7 +716,7 @@ P2146(
    In_p_EquipStatePB:= P2146_StatePB,
    In_P_ConvReqRun:= TRUE,
    In_ConvDwnStrmMtrStatus:= P2150_Status.Sts_IsRunning,
-   In_ConvCrntExitPhotoEye:= FALSE,
+   In_ConvCrntExitPhotoEye:= Photoeyes.PE_2201.Out_OffFltrd,
    In_SimActive:= System.Sys_SimActive,
    In_EquipInit:= GVL_IO.INIT,
    In_WakeSlpTrigArry:= P2146SleepWakeTrig,
@@ -768,6 +770,7 @@ P2150.In_EquipEvents.5:= NOT CommStatus.RIO3171_CommFault.Out;
 P2150.In_EquipEvents.6:= NOT CommStatus.RIO4141_CommFault.Out;
 P2150.In_EquipEvents.7:= NOT CommStatus.BCR_S2150_01_CommFault.Out;
 P2150.In_EquipEvents.8:= NOT GVL_IO.P2150_Faulted;
+P2150.In_EquipEvents.9:= Photoeyes.PE_2101.Out_OnOffFltrd;
 
 
 // Function Call

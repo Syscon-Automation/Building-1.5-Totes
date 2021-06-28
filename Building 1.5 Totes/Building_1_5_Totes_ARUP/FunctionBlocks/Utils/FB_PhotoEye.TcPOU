@@ -30,7 +30,9 @@ VAR_OUTPUT
 END_VAR
 VAR
 	In_PE AT %I* : BOOL;		// Mapped IO input for PE
+	{attribute 'OPC.UA.DA' := '1'}
 	PEInFttr:	FB_DigDebnce;	
+	{attribute 'OPC.UA.DA' := '1'}
 	PEInJam: 	FB_JamDetect;
 	InputHold_SR: SR;
 	fStatusOff: F_TRIG;

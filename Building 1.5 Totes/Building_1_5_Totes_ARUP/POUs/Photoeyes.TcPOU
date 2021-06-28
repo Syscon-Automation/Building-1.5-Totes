@@ -16,12 +16,21 @@ PE_2301   : FB_PhotoEye;  //S2150 TRIGGER PHOTOEYE
 PE_2331   : FB_PhotoEye;  //P2150 PE SINGULATION GRABBER TRIGGER PHOTOEYE
 PE_3111   : FB_PhotoEye;  //P2150-02 TRANSFER COMPLETED PHOTOEYE
 PE_3231   : FB_PhotoEye;  //P2150-01 TRANSFER COMPLETED PHOTOEYE
+PE_3232   : FB_PhotoEye;  //P2150-01 LANE 1 FULL PE 1
+PE_3261   : FB_PhotoEye;  //P2150-01 LANE 1 FULL PE 2
+PE_3301   : FB_PhotoEye;  //P2150-02 LANE 2 FULL PE 1
+PE_3331   : FB_PhotoEye;  //P2150-02 LANE 2 FULL PE 2
 PE_4091   : FB_PhotoEye;  //P2150-04 TRANSFER COMPLETED PHOTOEYE
 PE_4161   : FB_PhotoEye;  //P2150 SORTER DISCHARGE PHOTOEYE
 PE_4201   : FB_PhotoEye;  //P2150-03 TRANSFER COMPLETED PHOTOEYE
+PE_4202   : FB_PhotoEye;  //P2150-03 LANE 3 FULL PE 1
+PE_4241   : FB_PhotoEye;  //P2150-03 LANE 3 FULL PE 2
+PE_4291   : FB_PhotoEye;  //P2150-04 LANE 4 FULL PE 1
+PE_4311   : FB_PhotoEye;  //P2150-04 LANE 4 FULL PE 2
 PE_8131   : FB_PhotoEye;  //P2141 EXIT PHOTOEYE
 PE_8141   : FB_PhotoEye;  //P2142 FULL PHOTOEYE
 PE_8161   : FB_PhotoEye;  //P2143 EXIT PHOTOEYE
+PE_8191   : FB_PhotoEye;  //P2142 FULL PE 2
 PE_9141   : FB_PhotoEye;  //P3080 EXIT PHOTOEYE
 PE_9161   : FB_PhotoEye;  //S3080-01 TRIGGER PHOTOEYE
 PE_9191   : FB_PhotoEye;  //P3080 EXIT PHOTOEYE
@@ -34,6 +43,8 @@ PE_10302   : FB_PhotoEye;  //S2141-01 TRIGGER PHOTOEYE
 PE_11191   : FB_PhotoEye;  //P2140 SINGULATION TOTE DETECT PHOTOEYE
 PE_11221   : FB_PhotoEye;  //P2140 SINGULATION GRAB TRIGGER PHOTOEYE
 PE_11241   : FB_PhotoEye;  //P2140 FULL PEPHOTOEYE
+PE_11291   : FB_PhotoEye;  //P2140 SORTER INDUCT PHOTOEYE
+PE_11321   : FB_PhotoEye;  //P2140 DIVERT CONFIRM PHOTOEYE
 PE_12091   : FB_PhotoEye;  //P3085 EXIT PHOTOEYE
 PE_12121   : FB_PhotoEye;  //P2130 FIRE DOOR PHOTOEYE
 PE_12171   : FB_PhotoEye;  //P2130 DISCHARGE PHOTOEYE
@@ -53,7 +64,7 @@ PE_2101(
    In_Status:= ,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
-   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_OffDlyTime:= T#5000MS,
    CFG_JamDetTime:= JamDetectTime,
    In_Sim:=
 );
@@ -81,7 +92,7 @@ PE_2201(
 
 //P2145 EXIT PHOTOEYE
 PE_2231(
-   In_Status:= ,
+   In_Status:= Conveyors.P2145.Out_ConvCrntMtr,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
@@ -175,7 +186,7 @@ PE_8141(
    In_Status:= ,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= T#3S,
-   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_OffDlyTime:= T#5S,
    CFG_JamDetTime:= JamDetectTime,
    In_Sim:=
 );
@@ -186,6 +197,17 @@ PE_8161(
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   CFG_HoldWithStatus := TRUE,
+   In_Sim:=
+);
+
+//P2142 FULL PHOTOEYE 2
+PE_8191(
+   In_Status:= Conveyors.P2143.Out_ConvCrntMtr,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= T#3S,
+   CFG_OffDlyTime:= T#5S,
    CFG_JamDetTime:= JamDetectTime,
    CFG_HoldWithStatus := TRUE,
    In_Sim:=
@@ -244,7 +266,7 @@ PE_10081(
 
 //P2140 EXIT PEPHOTOEYE
 PE_10091(
-   In_Status:= ,
+   In_Status:= Conveyors.P2140.Out_ConvCrntMtr,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
@@ -302,8 +324,28 @@ PE_11221(
    In_Sim:=
 );
 
-//P2140 FULL PEP HOTOEYE
+//P2140 FULL PHOTOEYE
 PE_11241(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2140 SORTER INDUCT PHOTOEYE
+PE_11291(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2140 DIVERT CONFIRM PHOTOEYE
+PE_11321(
    In_Status:= ,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,

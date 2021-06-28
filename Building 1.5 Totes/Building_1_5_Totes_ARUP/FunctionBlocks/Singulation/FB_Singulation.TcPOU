@@ -383,14 +383,21 @@ IF Out_Ready THEN
 				Grabber_2_Retract := TRUE;
 				Grabber_2_Extend := FALSE;
 			END_IF
-		// When the device is not clear and we are not releasing, extend both grabbers
+		// When the device is not clear and we are not releasing, extend both grabbers when the pin-stop is not extended
 		ELSE
-			// Grabber 1 - Always Extend when the singulator is not clear
-			Grabber_1_Retract := FALSE;
-			Grabber_1_Extend := TRUE;
-			// Grabber 2 - Always Extend when the singulator is not clear
-			Grabber_2_Retract := FALSE;
-			Grabber_2_Extend := TRUE;
+			IF In_PinStop_Retracted THEN
+				// Grabber 1 - Always Extend when the singulator is not clear
+				Grabber_1_Retract := FALSE;
+				Grabber_1_Extend := TRUE;
+				// Grabber 2 - Always Extend when the singulator is not clear
+				Grabber_2_Retract := FALSE;
+				Grabber_2_Extend := TRUE;
+			ELSE
+				Grabber_1_Retract := TRUE;
+				Grabber_1_Extend := FALSE;
+				Grabber_2_Retract := TRUE;
+				Grabber_2_Extend := FALSE;
+			END_IF
 		END_IF
 	END_IF
 END_IF

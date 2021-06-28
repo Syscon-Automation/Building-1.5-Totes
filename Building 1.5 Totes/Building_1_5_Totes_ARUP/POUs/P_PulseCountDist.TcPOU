@@ -28,7 +28,7 @@ VAR CONSTANT
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Uncomment to get pulse counts for a distance
-TestStart(CLK:= (* Start photo eye goes here --> *) Photoeyes.PE_10081.Out);
+TestStart(CLK:= (* Start photo eye goes here --> *) Photoeyes.PE_11291.Out);
 TestEnd(CLK:= (* End photo eye goes here --> *) Photoeyes.PE_10302.Out);
 EncoderValue := GVL_IO.ENC_9031_Raw;
 
@@ -76,49 +76,5 @@ IF TestEnd.Q THEN
 		Reading := FALSE;
 END_IF]]></ST>
     </Implementation>
-    <LineIds Name="P_PulseCountDist">
-      <LineId Id="155" Count="0" />
-      <LineId Id="6" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="80" Count="1" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="49" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="117" Count="0" />
-      <LineId Id="116" Count="0" />
-      <LineId Id="118" Count="1" />
-      <LineId Id="21" Count="2" />
-      <LineId Id="121" Count="1" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="130" Count="0" />
-      <LineId Id="124" Count="0" />
-      <LineId Id="123" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="78" Count="0" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="110" Count="0" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="108" Count="0" />
-      <LineId Id="84" Count="0" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="30" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

@@ -58,7 +58,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{18071995-0000-0000-0000-002000000004}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..3] OF BIT</Name>
+			<Name GUID="{18071995-0000-0000-0000-002000000004}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..3] OF BIT</Name>
 			<BitSize>4</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
 			<ArrayInfo>
@@ -94,7 +94,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{18071995-0000-0000-0000-002000000001}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..0] OF BIT</Name>
+			<Name GUID="{18071995-0000-0000-0000-002000000001}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..0] OF BIT</Name>
 			<BitSize>1</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
 			<ArrayInfo>
@@ -103,7 +103,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{18071995-0000-0000-0000-002000000005}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..4] OF BIT</Name>
+			<Name GUID="{18071995-0000-0000-0000-002000000005}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..4] OF BIT</Name>
 			<BitSize>5</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
 			<ArrayInfo>
@@ -1030,23 +1030,27 @@
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 13" Index="#x1a0c" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60c0" Sub="#x01">
+							<Entry Name="PE_3232" Index="#x60c0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2150 Divert 1 Full 1]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 14" Index="#x1a0d" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60d0" Sub="#x01">
+							<Entry Name="PE_3261" Index="#x60d0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2150 Divert 1 Full 2]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 15" Index="#x1a0e" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60e0" Sub="#x01">
+							<Entry Name="PE_3301" Index="#x60e0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2150 Divert 2 Full 1]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 16" Index="#x1a0f" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60f0" Sub="#x01">
+							<Entry Name="PE_3331" Index="#x60f0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2150 Divert 2 Full 2]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 17" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
@@ -1216,23 +1220,27 @@
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 13" Index="#x1a0c" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60c0" Sub="#x01">
+							<Entry Name="PE_4202" Index="#x60c0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2150 Divert 3 Full 1]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 14" Index="#x1a0d" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60d0" Sub="#x01">
+							<Entry Name="PE_4241" Index="#x60d0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2150 Divert 3 Full 2]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 15" Index="#x1a0e" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60e0" Sub="#x01">
+							<Entry Name="PE_4291" Index="#x60e0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2150 Divert 4 Full 1]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 16" Index="#x1a0f" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60f0" Sub="#x01">
+							<Entry Name="PE_4311" Index="#x60f0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2150 Divert 4 Full 2]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 17" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
@@ -1465,8 +1473,9 @@
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 11" Index="#x1a0a" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60a0" Sub="#x01">
+							<Entry Name="PE_8191" Index="#x60a0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2142 Full PE 2]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 12" Index="#x1a0b" Flags="#x0011" SyncMan="3">
@@ -2036,13 +2045,15 @@
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 15" Index="#x1a0e" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60e0" Sub="#x01">
+							<Entry Name="PE_11291" Index="#x60e0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2140 SORTER INDUCT PE]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 16" Index="#x1a0f" Flags="#x0011" SyncMan="3">
-							<Entry Name="Input" Index="#x60f0" Sub="#x01">
+							<Entry Name="PE_11321" Index="#x60f0" Sub="#x01">
 								<Type>BIT</Type>
+								<Comment><![CDATA[P2140 DIVERT CONFIRM (DISCHARGE)]]></Comment>
 							</Entry>
 						</Pdo>
 						<Pdo Name="Channel 17" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
