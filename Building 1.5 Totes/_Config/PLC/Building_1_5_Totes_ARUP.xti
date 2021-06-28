@@ -1060,21 +1060,6 @@
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
-					<Name>ProxSensors.In_PX_11161_Retracted</Name>
-					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>ProxSensors.In_PX_12151_Extended</Name>
-					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>ProxSensors.In_PX_12251_Extended</Name>
-					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
 					<Name>Photoeyes.PE_2301.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
 					<Type>BOOL</Type>
@@ -1142,6 +1127,21 @@
 				<Var>
 					<Name>Photoeyes.PE_4291.In_PE</Name>
 					<Comment><![CDATA[ Mapped IO input for PE]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>ProxSensors.In_PX_11161_Retracted</Name>
+					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>ProxSensors.In_PX_12151_Extended</Name>
+					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>ProxSensors.In_PX_12251_Extended</Name>
+					<Comment><![CDATA[ Mapped IO input for PX]]></Comment>
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
