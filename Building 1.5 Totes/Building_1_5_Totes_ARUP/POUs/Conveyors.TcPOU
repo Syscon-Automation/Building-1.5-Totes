@@ -4,7 +4,7 @@
     <Declaration><![CDATA[PROGRAM Conveyors
 VAR
 //This section sets the default values for the VFD
-	DefaultVelocity: INT := 1675;
+	DefaultVelocity: INT := 1800;
 	DefaultVelocityThreshold: INT := 500;
 	ResetAllDrives: BOOL;
 	
@@ -364,6 +364,9 @@ cfgP3095EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Power Transfer Raised', DeviceLabel := 'PX12251', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.TransferLP),
    (Description := 'Motor Faulted', DeviceLabel := 'P3095', OKState := FALSE, StopCode := E_StopCodes.MotorOL),
    9(())];
+P2141_Velocity: INT := 1800;
+P2146_Velocity: INT := 1800;
+P3080_Velocity: INT := 1800;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[ResetAllDrives := System.Cnvyr_Reset; //Reset For VFD
@@ -597,7 +600,7 @@ P2141(
 
 //Motor Control
 P2141_VFD(
-   RunVelocity := DefaultVelocity,
+   RunVelocity := P2141_Velocity,
    VelocityThreshold := DefaultVelocityThreshold,
    Reset := ResetAllDrives,
    RunRequest := (P2141.Out_ConvCrntMtr OR Test_VFD_P2141));
@@ -733,7 +736,7 @@ P2146(
 
 //Motor Control
 P2146_VFD(
-   RunVelocity := DefaultVelocity,
+   RunVelocity := P2146_Velocity,
    VelocityThreshold := DefaultVelocityThreshold,
    Reset := ResetAllDrives,
    RunRequest := (P2146.Out_ConvCrntMtr OR Test_VFD_P2146));
@@ -843,7 +846,7 @@ P3080(
 
 //Motor Control
 P3080_VFD(
-   RunVelocity := DefaultVelocity,
+   RunVelocity := P3080_Velocity,
    VelocityThreshold := DefaultVelocityThreshold,
    Reset := ResetAllDrives,
    RunRequest := (P3080.Out_ConvCrntMtr OR Test_VFD_P3080));
