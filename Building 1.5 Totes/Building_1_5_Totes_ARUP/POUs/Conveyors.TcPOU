@@ -764,7 +764,11 @@ P2150.In_EquipIntlks.5:= Solenoids.PU2150_01_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.6:= Solenoids.PU2150_02_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.7:= Solenoids.PU2150_03_Status.Sts_EquipmentState.StsAuto;
 P2150.In_EquipIntlks.8:= Solenoids.PU2150_04_Status.Sts_EquipmentState.StsAuto;
-P2150.In_EquipIntlks.2:= Singulation_Control.SortSingulation_P2150.Out_Ready;
+P2150.In_EquipIntlks.9:= Sorter.aSorterDiverts_P2150[1].Full;
+P2150.In_EquipIntlks.10:= Sorter.aSorterDiverts_P2150[2].Full;
+P2150.In_EquipIntlks.11:= Sorter.aSorterDiverts_P2150[3].Full;
+P2150.In_EquipIntlks.12:= Sorter.aSorterDiverts_P2150[4].Full;
+
 //Events
 P2150.In_EquipEvents.2:= GVL_IO.DS_P2150;
 P2150.In_EquipEvents.3:= System.SysEventsAllOk;
@@ -774,7 +778,10 @@ P2150.In_EquipEvents.6:= NOT CommStatus.RIO4141_CommFault.Out;
 P2150.In_EquipEvents.7:= NOT CommStatus.BCR_S2150_01_CommFault.Out;
 P2150.In_EquipEvents.8:= NOT GVL_IO.P2150_Faulted;
 P2150.In_EquipEvents.9:= Photoeyes.PE_2101.Out_OnOffFltrd;
-
+P2150.In_EquipEvents.10:= Sorter.aSorterDiverts_P2150[1].Jammed;
+P2150.In_EquipEvents.11:= Sorter.aSorterDiverts_P2150[2].Jammed;
+P2150.In_EquipEvents.12:= Sorter.aSorterDiverts_P2150[3].Jammed;
+P2150.In_EquipEvents.13:= Sorter.aSorterDiverts_P2150[4].Jammed;
 
 // Function Call
 P2150(

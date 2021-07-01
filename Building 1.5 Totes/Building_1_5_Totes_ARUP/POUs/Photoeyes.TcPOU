@@ -122,6 +122,26 @@ PE_2331(
 
 //P2150-02 TRANSFER COMPLETED PHOTOEYE
 PE_3111(
+   In_Status:= Conveyors.P2150.Out_ConvCrntMtr,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-02 FULL PHOTOEYE 1
+PE_3301(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-02 FULL PHOTOEYE 2
+PE_3331(
    In_Status:= ,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
@@ -132,6 +152,26 @@ PE_3111(
 
 //P2150-01 TRANSFER COMPLETED PHOTOEYE
 PE_3231(
+   In_Status:= Conveyors.P2150.Out_ConvCrntMtr,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-01 FULL PHOTOEYE 1
+PE_3232(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-01 FULL PHOTOEYE 2
+PE_3261(
    In_Status:= ,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
@@ -142,6 +182,26 @@ PE_3231(
 
 //P2150-04 TRANSFER COMPLETED PHOTOEYE
 PE_4091(
+   In_Status:= Conveyors.P2150.Out_ConvCrntMtr,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-04 FULL PHOTOEYE 1
+PE_4291(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-04 FULL PHOTOEYE 2
+PE_4311(
    In_Status:= ,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
@@ -162,6 +222,26 @@ PE_4161(
 
 //P2150-03 TRANSFER COMPLETED PHOTOEYE
 PE_4201(
+   In_Status:= Conveyors.P2150.Out_ConvCrntMtr,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-03 FULL PHOTOEYE 1
+PE_4202(
+   In_Status:= ,
+   CFG_PEOKState:= 1,
+   CFG_OnDlyTime:= DebounceOnTime,
+   CFG_OffDlyTime:= DebounceOffTime,
+   CFG_JamDetTime:= JamDetectTime,
+   In_Sim:=
+);
+
+//P2150-03 FULL PHOTOEYE 2
+PE_4241(
    In_Status:= ,
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
