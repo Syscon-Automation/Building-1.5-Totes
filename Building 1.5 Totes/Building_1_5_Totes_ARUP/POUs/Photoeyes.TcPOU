@@ -126,7 +126,7 @@ PE_3111(
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
-   CFG_JamDetTime:= JamDetectTime,
+   CFG_JamDetTime:= T#750MS,
    In_Sim:=
 );
 
@@ -156,7 +156,7 @@ PE_3231(
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
-   CFG_JamDetTime:= JamDetectTime,
+   CFG_JamDetTime:= T#750MS,
    In_Sim:=
 );
 
@@ -186,7 +186,7 @@ PE_4091(
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
-   CFG_JamDetTime:= JamDetectTime,
+   CFG_JamDetTime:= T#750MS,
    In_Sim:=
 );
 
@@ -226,7 +226,7 @@ PE_4201(
    CFG_PEOKState:= 1,
    CFG_OnDlyTime:= DebounceOnTime,
    CFG_OffDlyTime:= DebounceOffTime,
-   CFG_JamDetTime:= JamDetectTime,
+   CFG_JamDetTime:= T#750MS,
    In_Sim:=
 );
 

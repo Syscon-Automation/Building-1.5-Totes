@@ -743,9 +743,9 @@ P2146_VFD(
 P2146_Status.Sts_IsRunning := P2146_VFD.IsRunning;
 //Sorter
 //----------------------------------------P2150--------------------------------------------------------------
-P2150_StatePB.AutoPB := System.Cnvyr_Auto;
+P2150_StatePB.AutoPB := System.Cnvyr_Auto OR GVL_IO.PB_RemoteReset_3211;
 P2150_StatePB.ManPB := System.Cnvyr_Manual;
-P2150_StatePB.ResetPB := System.Cnvyr_Reset;
+P2150_StatePB.ResetPB := System.Cnvyr_Reset OR GVL_IO.PB_RemoteReset_3211;
 P2150_StatePB.OfflinePB := System.Cnvyr_Offline;
 P2150SleepWakeTrig[1] := PhotoEyes.PE_2201.Out_OffFltrd;
 P2150SleepWakeTrig[2] := PhotoEyes.PE_2231.Out_OffFltrd;
@@ -797,7 +797,7 @@ P2150(
 	Cfg_EquipDefState:= System.ConvDefaultState,
 	Cfg_EquipIntlksArry:= cfgP2150IntlksArry,
 	Cfg_EquipEvntsArry:= cfgP2150EvntsArry,
-	cfg_JamDetectTime:= T#5S,
+	cfg_JamDetectTime:= T#2S,
 	Cfg_UseSleepTmr := TRUE,
 	Cfg_SleepWaitTime:= cfgP2150SleepTime,
 	Sts_EquipState := P2150_Status,

@@ -164,7 +164,7 @@ BCR_S2141_01(
 // Set up Bar Code Readers
 	BCR_S2150_01.LogEntries := .nBarcodeLogEnable.BCR_S2150_01_LOG;
 	BCR_S2150_01(
-	In_ReadTrig:= PhotoEyes.PE_2301.Out_OnFltrd, 
+	In_ReadTrig:= PhotoEyes.PE_2301.Out, 
 	In_ResetCounts:= , 
 	In_TriggerOnTime := T#20MS ,
 	In_EquipID := '00081',
@@ -230,61 +230,5 @@ BCR_S3080_01.LogEntries := .nBarcodeLogEnable.BCR_S3080_01_LOG;
 	GoodreadCount=> );
 ]]></ST>
     </Implementation>
-    <LineIds Name="BarCodeReaders">
-      <LineId Id="950" Count="0" />
-      <LineId Id="953" Count="2" />
-      <LineId Id="952" Count="0" />
-      <LineId Id="951" Count="0" />
-      <LineId Id="384" Count="0" />
-      <LineId Id="491" Count="0" />
-      <LineId Id="686" Count="0" />
-      <LineId Id="685" Count="0" />
-      <LineId Id="522" Count="0" />
-      <LineId Id="687" Count="3" />
-      <LineId Id="509" Count="1" />
-      <LineId Id="385" Count="0" />
-      <LineId Id="542" Count="3" />
-      <LineId Id="998" Count="15" />
-      <LineId Id="997" Count="0" />
-      <LineId Id="1015" Count="0" />
-      <LineId Id="1014" Count="0" />
-      <LineId Id="742" Count="2" />
-      <LineId Id="746" Count="2" />
-      <LineId Id="751" Count="0" />
-      <LineId Id="745" Count="0" />
-      <LineId Id="386" Count="0" />
-      <LineId Id="1019" Count="0" />
-      <LineId Id="1075" Count="0" />
-      <LineId Id="1025" Count="10" />
-      <LineId Id="1024" Count="0" />
-      <LineId Id="1076" Count="0" />
-      <LineId Id="1078" Count="15" />
-      <LineId Id="1095" Count="3" />
-      <LineId Id="1190" Count="15" />
-      <LineId Id="1189" Count="0" />
-      <LineId Id="1267" Count="0" />
-      <LineId Id="1016" Count="0" />
-      <LineId Id="1021" Count="0" />
-      <LineId Id="1074" Count="0" />
-      <LineId Id="1037" Count="10" />
-      <LineId Id="1036" Count="0" />
-      <LineId Id="1017" Count="0" />
-      <LineId Id="1022" Count="0" />
-      <LineId Id="1073" Count="0" />
-      <LineId Id="1049" Count="10" />
-      <LineId Id="1048" Count="0" />
-      <LineId Id="1120" Count="0" />
-      <LineId Id="1122" Count="15" />
-      <LineId Id="1139" Count="3" />
-      <LineId Id="1207" Count="15" />
-      <LineId Id="1206" Count="0" />
-      <LineId Id="1166" Count="0" />
-      <LineId Id="1018" Count="0" />
-      <LineId Id="1023" Count="0" />
-      <LineId Id="1072" Count="0" />
-      <LineId Id="1061" Count="10" />
-      <LineId Id="1060" Count="0" />
-      <LineId Id="435" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

@@ -7,16 +7,12 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 //----------------------------------------2140--------------------------------------------------------------
 //----------------------------------------GR2140_01--------------------------------------------------------------
    cfgGR2140_01Label:	STRING(20) :=  'GR2140_01';
-   cfgGR2140_01ExtendTODetectTime:	TIME := T#5S;
-   cfgGR2140_01RetractTODetectTime:	TIME := T#5S;
    GR2140_01			: FB_Solenoid_SA;
    GR2140_01_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
    GR2140_01_Status	: ST_EquipmentStatus;		// Gripper State 
 //----------------------------------------GR2140_02--------------------------------------------------------------
    cfgGR2140_02Label:	STRING(20) :=  'GR2140_02';
-   cfgGR2140_02ExtendTODetectTime:	TIME := T#5S;
-   cfgGR2140_02RetractTODetectTime:	TIME := T#5S;
    GR2140_02			: FB_Solenoid_SA;
    GR2140_02_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -24,8 +20,6 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 
 //----------------------------------------PI2140_01--------------------------------------------------------------
    cfgPI2140_01Label:	STRING(20) :=  'PI2140_01';
-   cfgPI2140_01ExtendTODetectTime:	TIME := T#5S;
-   cfgPI2140_01RetractTODetectTime:	TIME := T#5S;
    PI2140_01			: FB_Solenoid_DA;
    PI2140_01_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -33,8 +27,6 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 
 //----------------------------------------PL2140_01--------------------------------------------------------------
    cfgPL2140_01Label:	STRING(20) :=  'PL2140_01';
-   cfgPL2140_01ExtendTODetectTime:	TIME := T#5S;
-   cfgPL2140_01RetractTODetectTime:	TIME := T#5S;
    PL2140_01			: FB_Solenoid_SA;
    PL2140_01_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -44,8 +36,6 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 //----------------------------------------2150--------------------------------------------------------------   
 //----------------------------------------GR2150_01--------------------------------------------------------------
    cfgGR2150_01Label:	STRING(20) :=  'GR2150_01';
-   cfgGR2150_01ExtendTODetectTime:	TIME := T#5S;
-   cfgGR2150_01RetractTODetectTime:	TIME := T#5S;
    GR2150_01			: FB_Solenoid_SA;
    GR2150_01_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -53,8 +43,6 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 
 //----------------------------------------PI2150_01--------------------------------------------------------------
    cfgPI2150_01Label:	STRING(20) :=  'PI2150_01';
-   cfgPI2150_01ExtendTODetectTime:	TIME := T#5S;
-   cfgPI2150_01RetractTODetectTime:	TIME := T#5S;
    PI2150_01			: FB_Solenoid_SA;
    PI2150_01_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -62,8 +50,6 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 
 //----------------------------------------PU2150_01--------------------------------------------------------------
    cfgPU2150_01Label:	STRING(20) :=  'PU2150_01';
-   cfgPU2150_01ExtendTODetectTime:	TIME := T#5S;
-   cfgPU2150_01RetractTODetectTime:	TIME := T#5S;
    PU2150_01			: FB_Solenoid_SA;
    PU2150_01_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -71,8 +57,6 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 
 //----------------------------------------PU2150_02--------------------------------------------------------------
    cfgPU2150_02Label:	STRING(20) :=  'PU2150_02';
-   cfgPU2150_02ExtendTODetectTime:	TIME := T#5S;
-   cfgPU2150_02RetractTODetectTime:	TIME := T#5S;
    PU2150_02			: FB_Solenoid_SA;
    PU2150_02_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -80,8 +64,6 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 
 //----------------------------------------PU2150_03--------------------------------------------------------------
    cfgPU2150_03Label:	STRING(20) :=  'PU2150_03';
-   cfgPU2150_03ExtendTODetectTime:	TIME := T#5S;
-   cfgPU2150_03RetractTODetectTime:	TIME := T#5S;
    PU2150_03			: FB_Solenoid_SA;
    PU2150_03_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -89,8 +71,6 @@ nEquipIndex:	DINT := 0;	// Dummy Equipment Index for Non reporting equipment
 
 //----------------------------------------PU2150_04--------------------------------------------------------------
    cfgPU2150_04Label:	STRING(20) :=  'PU2150_04';
-   cfgPU2150_04ExtendTODetectTime:	TIME := T#5S;
-   cfgPU2150_04RetractTODetectTime:	TIME := T#5S;
    PU2150_04			: FB_Solenoid_SA;
    PU2150_04_StatePB	: ST_StateCntrlPB;
 	{attribute 'OPC.UA.DA' := '0'}
@@ -218,6 +198,27 @@ cfgPU2150_04EvntsArry: ARRAY [0..15] OF ST_CfgEvents := [
    (Description := 'Low Air', DeviceLabel := 'P2150', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.LowAir, EventDelay := T#100MS),
    (Description := 'RIO4141 Comm Fault', DeviceLabel := 'RIO4141', OKState := TRUE, FaultWarn:= TRUE, StopCode := E_StopCodes.FieldIOFLT),
    10(())];	
+// Time out timers
+   cfgGR2140_01ExtendTODetectTime:	TIME := T#5S;
+   cfgGR2140_01RetractTODetectTime:	TIME := T#5S;
+   cfgGR2140_02ExtendTODetectTime:	TIME := T#5S;
+   cfgGR2140_02RetractTODetectTime:	TIME := T#5S;
+   cfgPI2140_01ExtendTODetectTime:	TIME := T#5S;
+   cfgPI2140_01RetractTODetectTime:	TIME := T#5S;
+   cfgPL2140_01ExtendTODetectTime:	TIME := T#5S;
+   cfgPL2140_01RetractTODetectTime:	TIME := T#5S;
+   cfgGR2150_01ExtendTODetectTime:	TIME := T#5S;
+   cfgGR2150_01RetractTODetectTime:	TIME := T#5S;
+   cfgPI2150_01ExtendTODetectTime:	TIME := T#5S;
+   cfgPI2150_01RetractTODetectTime:	TIME := T#5S;
+   cfgPU2150_01ExtendTODetectTime:	TIME := T#5S;
+   cfgPU2150_01RetractTODetectTime:	TIME := T#5S;
+   cfgPU2150_02ExtendTODetectTime:	TIME := T#5S;
+   cfgPU2150_02RetractTODetectTime:	TIME := T#5S;
+   cfgPU2150_03ExtendTODetectTime:	TIME := T#5S;
+   cfgPU2150_03RetractTODetectTime:	TIME := T#5S;
+   cfgPU2150_04ExtendTODetectTime:	TIME := T#5S;
+   cfgPU2150_04RetractTODetectTime:	TIME := T#5S;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -235,7 +236,7 @@ GR2140_01_StatePB.StopPB := System.Cnvyr_Manual;
 GR2140_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-GR2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//GR2140_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 //Events
 GR2140_01.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 GR2140_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -271,7 +272,7 @@ GR2140_02_StatePB.StopPB := System.Cnvyr_Manual;
 GR2140_02_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-GR2140_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//GR2140_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 //Events
 GR2140_02.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 GR2140_02.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -326,6 +327,7 @@ PI2140_01(
    In_P_SVReqRetract:= Singulation_Control.SortSingulation_P2140.Out_PinStop_Ret,
    In_EquipRtrcdFdbck := ProxSensors.PX_11201_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_11181_Extended.Out,
+   Cfg_UseExtedFdbc:=TRUE,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPI2140_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,   Cfg_EquipIntlksArry:= cfgPI2140_01IntlksArry,
@@ -363,6 +365,7 @@ PL2140_01(
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2140[1].Output1,
    In_EquipRtrcdFdbck := ProxSensors.PX_10231_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_10211_Extended.Out,
+   Cfg_UseExtedFdbc:=TRUE,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPL2140_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -383,7 +386,7 @@ GR2150_01_StatePB.StopPB := System.Cnvyr_Manual;
 GR2150_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-GR2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//GR2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 //Events
 GR2150_01.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 GR2150_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -419,7 +422,7 @@ PI2150_01_StatePB.StopPB := System.Cnvyr_Manual;
 PI2150_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-PI2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//PI2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 //Events
 PI2150_01.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 PI2150_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -434,6 +437,7 @@ PI2150_01(
    In_P_SVReqExtend:= Singulation_Control.SortSingulation_P2150.Out_PinStop_Ext,
    In_EquipRtrcdFdbck := ProxSensors.PX_2151_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_2131_Extended.Out,
+   Cfg_UseExtedFdbc:=TRUE,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPI2150_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -454,7 +458,7 @@ PU2150_01_StatePB.StopPB := System.Cnvyr_Manual;
 PU2150_01_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-PU2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//PU2150_01.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 //Events
 PU2150_01.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 PU2150_01.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -469,6 +473,7 @@ PU2150_01(
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[1].Output1,
    In_EquipRtrcdFdbck := ProxSensors.PX_3331_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_3301_Extended.Out,
+   Cfg_UseExtedFdbc:=FALSE,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPU2150_01Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -489,7 +494,7 @@ PU2150_02_StatePB.StopPB := System.Cnvyr_Manual;
 PU2150_02_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-PU2150_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//PU2150_02.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 //Events
 PU2150_02.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 PU2150_02.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -504,6 +509,7 @@ PU2150_02(
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[2].Output1,
    In_EquipRtrcdFdbck := ProxSensors.PX_3191_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_3171_Extended.Out,
+   Cfg_UseExtedFdbc:=FALSE,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPU2150_02Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -524,7 +530,7 @@ PU2150_03_StatePB.StopPB := System.Cnvyr_Manual;
 PU2150_03_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-PU2150_03.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//PU2150_03.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 //Events
 PU2150_03.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 PU2150_03.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -539,6 +545,7 @@ PU2150_03(
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[3].Output1,
    In_EquipRtrcdFdbck := ProxSensors.PX_4311_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_4291_Extended.Out,
+   Cfg_UseExtedFdbc:=FALSE,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPU2150_03Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
@@ -559,7 +566,7 @@ PU2150_04_StatePB.StopPB := System.Cnvyr_Manual;
 PU2150_04_Status.Sts_EquipmentState.EquipType := E_EquipType.Gripper_SA;
 
 // Interlocks
-PU2150_04.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
+//PU2150_04.In_EquipIntlks.0:= GVL_IO.SystemAirPressure;
 //Events
 PU2150_04.In_EquipEvents.2:= SystemSafety.Safety_SystemEstopsOK;
 PU2150_04.In_EquipEvents.3:= GVL_IO.SystemAirPressure;
@@ -574,6 +581,7 @@ PU2150_04(
    In_P_SVReqExtend:= Sorter.aSorterDiverts_P2150[4].Output1,
    In_EquipRtrcdFdbck := ProxSensors.PX_4171_Retracted.Out,
    In_EquipExtdFdbck := ProxSensors.PX_4151_Extended.Out,
+   Cfg_UseExtedFdbc:=FALSE,
    Cfg_EquipIndex := nEquipIndex,
    Cfg_EquipLabel := cfgPU2150_04Label,
    Cfg_EquipDefState:= System.ConvDefaultState,
